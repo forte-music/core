@@ -1,9 +1,9 @@
 use schema::model::*;
 use juniper;
-use db;
+use database;
 
 // This is here instead of in model because it has a resolver and requires the database
-graphql_object!(Playlist: db::Connection |&self| {
+graphql_object!(Playlist: database::Connection |&self| {
     description: "A named collection of songs."
 
     field id() -> &juniper::ID as "A globally unique id referring to this playlist." {
@@ -24,8 +24,8 @@ graphql_object!(Playlist: db::Connection |&self| {
 pub struct Query;
 
 // todo: add parameter documentation, remove stubs and use database
-graphql_object!(Query: db::Connection |&self| {
-    field album(id: juniper::ID) -> Album as "Get an album by its globally unique id." {
+graphql_object!(Query: database::Connection |&self| {
+    field album(&executor, id: juniper::ID) -> Album as "Get an album by its globally unique id." {
         album(id)
     }
 
@@ -95,7 +95,7 @@ fn generic_connection<T>(limit: i32, cursor: Option<String>) -> Connection<T> {
 
 pub struct Mutation;
 
-graphql_object!(Mutation: db::Connection |&self| {
+graphql_object!(Mutation: database::Connection |&self| {
     // todo: add documentation, remove stubs, and use database
 
     field like(id: juniper::ID) -> bool {

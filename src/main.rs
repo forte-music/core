@@ -7,7 +7,7 @@ extern crate rocket;
 extern crate redis;
 
 mod schema;
-mod db;
+mod database;
 
 use rocket::response::content;
 use rocket::State;
@@ -21,7 +21,7 @@ fn graphql() -> content::Html<String> {
 
 #[get("/graphql?<request>")]
 fn get_graphql_handler(
-    context: db::Connection,
+    context: database::Connection,
     request: juniper_rocket::GraphQLRequest,
     schema: State<Schema>
 ) -> juniper_rocket::GraphQLResponse {
@@ -30,7 +30,7 @@ fn get_graphql_handler(
 
 #[post("/graphql", data = "<request>")]
 fn post_graphql_handler(
-    context: db::Connection,
+    context: database::Connection,
     request: juniper_rocket::GraphQLRequest,
     schema: State<Schema>
 ) -> juniper_rocket::GraphQLResponse {
@@ -39,7 +39,7 @@ fn post_graphql_handler(
 
 fn main() {
     rocket::ignite()
-        .manage(db::init_pool())
+        .manage(database::init_pool())
         .manage(Schema::new(Query {}, Mutation {}))
         .mount("/", routes![graphql, get_graphql_handler, post_graphql_handler])
         .launch();
