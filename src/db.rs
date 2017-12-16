@@ -2,11 +2,8 @@ extern crate r2d2;
 extern crate r2d2_redis;
 
 use std::ops::Deref;
-
 use self::r2d2_redis::RedisConnectionManager;
-
 use redis;
-
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
@@ -14,7 +11,6 @@ use rocket::{Request, State, Outcome};
 pub type Pool = r2d2::Pool<RedisConnectionManager>;
 
 pub fn init_pool() -> Pool {
-//    let config = r2d2::Config::default();
     let manager = RedisConnectionManager::new("redis://127.0.0.1/").unwrap();
     r2d2::Pool::new(manager).unwrap()
 }
