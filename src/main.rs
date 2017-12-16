@@ -11,7 +11,8 @@ mod db;
 
 use rocket::response::content;
 use rocket::State;
-use schema::{Query, Mutation, Schema};
+use schema::resolvers::{Query, Mutation};
+use schema::Schema;
 
 #[get("/")]
 fn graphql() -> content::Html<String> {
