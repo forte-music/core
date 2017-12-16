@@ -2,6 +2,25 @@ use schema::model::*;
 use juniper;
 use db;
 
+// This is here instead of in model because it has a resolver and requires the database
+graphql_object!(Playlist: db::Connection |&self| {
+    description: "A named collection of songs."
+
+    field id() -> &juniper::ID as "A globally unique id referring to this playlist." {
+        &self.id
+    }
+
+    field name() -> &str as "Human readable name of the playlist. This is chosen by the user when \
+                             the playlist is created." {
+        &self.name
+    }
+
+    field songs(limit: i32, cursor: String) -> Connection<Song>
+            as "An ordered list of songs in the playlist." {
+        Connection { count: 0, edges: vec![] }
+    }
+});
+
 pub struct Query;
 
 // todo: add parameter documentation, remove stubs and use database

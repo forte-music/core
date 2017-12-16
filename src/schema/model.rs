@@ -128,28 +128,11 @@ pub struct SongUserStats {
     pub liked: bool
 }
 
+// GraphQL binding located in resolvers
 pub struct Playlist {
     pub id: juniper::ID,
     pub name: String,
 }
-
-graphql_object!(Playlist: () |&self| {
-    description: "A named collection of songs."
-
-    field id() -> &juniper::ID as "A globally unique id referring to this playlist." {
-        &self.id
-    }
-
-    field name() -> &str as "Human readable name of the playlist. This is chosen by the user when \
-                             the playlist is created." {
-        &self.name
-    }
-
-    field songs(limit: i32, cursor: String) -> Connection<Song>
-            as "An ordered list of songs in the playlist." {
-        Connection { count: 0, edges: vec![] }
-    }
-});
 
 pub struct Edge<T> {
     pub cursor: String,
