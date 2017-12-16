@@ -13,3 +13,4 @@ Cargo.lock
 ### Other Project Files
 /.idea/
 CMakeLists.txt
+cmake-build-debug/
