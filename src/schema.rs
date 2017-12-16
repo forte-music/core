@@ -1,4 +1,5 @@
 use juniper;
+use db;
 
 #[derive(GraphQLObject)]
 pub struct Album {
@@ -107,7 +108,7 @@ pub enum SortBy {
 
 pub struct Query;
 
-graphql_object!(Query: () |&self| {
+graphql_object!(Query: db::Connection |&self| {
     field album(id: juniper::ID) -> Album {
         // Just for testing
         Album {
@@ -125,7 +126,7 @@ graphql_object!(Query: () |&self| {
 
 pub struct Mutation;
 
-graphql_object!(Mutation: () |&self| {
+graphql_object!(Mutation: db::Connection |&self| {
     field like(id: juniper::ID) -> bool {
         true
     }
@@ -133,4 +134,4 @@ graphql_object!(Mutation: () |&self| {
     // ...
 });
 
-type Schema = juniper::RootNode<'static, Query, Mutation>;
+pub type Schema = juniper::RootNode<'static, Query, Mutation>;
