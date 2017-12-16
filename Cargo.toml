@@ -6,3 +6,5 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>
 [dependencies]
 rocket = "0.3.4"
 rocket_codegen = "0.3.4"
+juniper = "0.9.1"
+juniper_rocket = "0.1.1"
