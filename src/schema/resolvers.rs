@@ -1,13 +1,17 @@
+extern crate serde_redis;
+
 use schema::model::*;
 use juniper;
 use database;
+use redis::{self, Commands};
+use self::serde_redis::RedisDeserialize;
 
-// This is here instead of in model because it has a resolver and requires the database
+// This is here instead of in binding because it has a resolver and requires the database
 graphql_object!(Playlist: database::Connection |&self| {
     description: "A named collection of songs."
 
-    field id() -> &juniper::ID as "A globally unique id referring to this playlist." {
-        &self.id
+    field id() -> juniper::ID as "A globally unique id referring to this playlist." {
+        juniper::ID::from(self.id.clone())
     }
 
     field name() -> &str as "Human readable name of the playlist. This is chosen by the user when \
@@ -26,7 +30,7 @@ pub struct Query;
 // todo: add parameter documentation, remove stubs and use database
 graphql_object!(Query: database::Connection |&self| {
     field album(&executor, id: juniper::ID) -> Album as "Get an album by its globally unique id." {
-        album(id)
+        album(&executor.context(), id)
     }
 
     field artist(id: juniper::ID) -> Artist as "Get an artist by its globally unique id." {
@@ -48,11 +52,11 @@ graphql_object!(Query: database::Connection |&self| {
     }
 });
 
-fn album(id: juniper::ID) -> Album {
+fn album(db: &redis::Connection, id: juniper::ID) -> Album {
     Album {
-        id, artwork_url: None, name: "album_name".to_string(),
+        id: "album_id".to_string(), artwork_url: None, name: "album_name".to_string(),
         artist: Artist {
-            id: juniper::ID::from("artist_id".to_string()), name: "artist_name".to_string(),
+            id: "artist_id".to_string(), name: "artist_name".to_string(),
             albums: vec![], featured: vec![], singles: vec![]
         },
         songs: vec![]
@@ -61,18 +65,18 @@ fn album(id: juniper::ID) -> Album {
 
 fn artist(id: juniper::ID) -> Artist {
     Artist {
-        id, name: "artist_name".to_string(),
+        id: id.to_string(), name: "artist_name".to_string(),
         albums: vec![], featured: vec![], singles: vec![]
     }
 }
 
 fn song(id: juniper::ID) -> Song {
     Song {
-        id, name: "song_name".to_string(),
+        id: id.to_string(), name: "song_name".to_string(),
         album: Album {
-            id: juniper::ID::from("album_id".to_string()), artwork_url: None, name: "album_name".to_string(),
+            id: "album_id".to_string(), artwork_url: None, name: "album_name".to_string(),
             artist: Artist {
-                id: juniper::ID::from("artist_id".to_string()), name: "artist_name".to_string(),
+                id: "artist_id".to_string(), name: "artist_name".to_string(),
                 albums: vec![], featured: vec![], singles: vec![]
             },
             songs: vec![]
@@ -80,7 +84,7 @@ fn song(id: juniper::ID) -> Song {
         artists: vec![],
         stream_url: "stream_url".to_string(), track_number: 0, disk_number: 0,
         stats: SongUserStats {
-            id: juniper::ID::from("0".to_string()),
+            id: "0".to_string(),
             play_count: 0, last_played: 0, liked: false
         }
     }

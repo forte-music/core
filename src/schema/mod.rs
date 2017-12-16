@@ -1,4 +1,5 @@
 pub mod model;
+pub mod binding;
 pub mod resolvers;
 
 use juniper;

@@ -1,7 +1,9 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
+#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate juniper;
+extern crate serde;
 extern crate juniper_rocket;
 extern crate rocket;
 extern crate redis;
