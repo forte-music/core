@@ -1,7 +1,7 @@
 pub mod model;
-pub mod binding;
-pub mod resolvers;
+mod binding;
+mod resolvers;
 
 use juniper;
 
-pub type Schema = juniper::RootNode<'static, resolvers::Query, resolvers::Mutation>;
+pub type Schema = juniper::RootNode<'static, model::Query, model::Mutation>;

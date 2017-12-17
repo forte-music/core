@@ -1,9 +1,7 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate juniper;
-extern crate serde;
 extern crate juniper_rocket;
 extern crate rocket;
 extern crate redis;
@@ -13,7 +11,7 @@ mod database;
 
 use rocket::response::content;
 use rocket::State;
-use schema::resolvers::{Query, Mutation};
+use schema::model::{Query, Mutation};
 use schema::Schema;
 
 #[get("/")]

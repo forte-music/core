@@ -2,6 +2,9 @@ pub trait FromId {
     fn from_id(id: String) -> Self;
 }
 
+pub struct Query;
+pub struct Mutation;
+
 pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,

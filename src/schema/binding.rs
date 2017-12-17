@@ -1,12 +1,51 @@
+use juniper::{ID, FieldResult};
 use schema::model::*;
-use juniper;
+use database;
+
+// todo: add parameter documentation
+graphql_object!(Query: database::Connection |&self| {
+    field album(&executor, id: ID) -> FieldResult<Album>
+            as "Get an album by its globally unique id." {
+        Query::album(&executor.context(), id)
+    }
+
+    field artist(id: ID) -> Artist
+            as "Get an artist by its globally unique id." {
+        Query::artist(id)
+    }
+
+    field song(id: ID) -> Song
+            as "Get a song by its globally unique id." {
+        Query::song(id)
+    }
+
+    field albums(limit = 25: i32, cursor: Option<String>, sort_by = (SortBy::RecentlyAdded): SortBy)
+            -> Connection<Album>
+            as "Get paginated, sorted albums." {
+        Query::generic_connection(limit, cursor)
+    }
+
+    field search_albums(name: String, limit = 25: i32, cursor: Option<String>) -> Connection<Album>
+            as "Search only for albums by name." {
+        Query::generic_connection(limit, cursor)
+    }
+});
+
+graphql_object!(Mutation: database::Connection |&self| {
+    // todo: add documentation, remove stubs, and use database
+
+    field like(id: ID) -> bool {
+        true
+    }
+
+});
 
 graphql_object!(Album: () |&self| {
     description: "An album is a collection of songs which belong to an artist and has a name."
 
-    field id() -> juniper::ID
+    field id() -> ID
             as "A globally unique id referring to this album." {
-        juniper::ID::from(self.id.clone())
+        ID::from(self.id.clone())
     }
 
     field artwork_url() -> &Option<String>
@@ -37,9 +76,9 @@ graphql_object!(Album: () |&self| {
 graphql_object!(Artist: () |&self| {
     description: "An artist has a name and albums."
 
-    field id() -> juniper::ID
+    field id() -> ID
             as "A globally unique id referring to this artist." {
-        juniper::ID::from(self.id.clone())
+        ID::from(self.id.clone())
     }
 
     field name() -> &str
@@ -70,9 +109,9 @@ graphql_object!(Song: () |&self| {
     description: "A song is a piece of music written by artists. It is always part of an album. \
                   It represents a singe audio file."
 
-    field id() -> juniper::ID
+    field id() -> ID
             as "A globally unique id referring to this song." {
-        juniper::ID::from(self.id.clone())
+        ID::from(self.id.clone())
     }
 
     field name() -> &str
@@ -116,9 +155,9 @@ graphql_object!(Song: () |&self| {
 graphql_object!(SongUserStats: () |&self| {
     description: "Stats for a song tied to a specific user."
 
-    field id() -> juniper::ID
+    field id() -> ID
             as "A globally unique id referring to a song's stats." {
-        juniper::ID::from(self.id.clone())
+        ID::from(self.id.clone())
     }
 
     field play_count() -> i32
@@ -135,6 +174,26 @@ graphql_object!(SongUserStats: () |&self| {
             as "Whether or not this song is favorited. Favorited songs go into their own \
                 playlist." {
         self.liked
+    }
+});
+
+graphql_object!(Playlist: database::Connection |&self| {
+    description: "A named collection of songs."
+
+    field id() -> ID
+            as "A globally unique id referring to this playlist." {
+        ID::from(self.id.clone())
+    }
+
+    field name() -> &str
+            as "Human readable name of the playlist. This is chosen by the user when the playlist \
+                is created." {
+        &self.name
+    }
+
+    field songs(limit: i32, cursor: String) -> Connection<Song>
+            as "An ordered list of songs in the playlist." {
+        Connection { count: 0, edges: vec![] }
     }
 });
 

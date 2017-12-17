@@ -1,109 +1,63 @@
-extern crate serde_redis;
-
+use std::ops::Deref;
 use schema::model::*;
-use juniper;
-use database;
+use juniper::{ID, FieldResult, FieldError, Value};
 use redis::{self, Commands};
-use self::serde_redis::RedisDeserialize;
 
-// This is here instead of in binding because it has a resolver and requires the database
-graphql_object!(Playlist: database::Connection |&self| {
-    description: "A named collection of songs."
+impl Query {
+    pub fn album(db: &redis::Connection, id: ID) -> FieldResult<Album> {
+        let key = format!("album:{}", id.deref());
 
-    field id() -> juniper::ID as "A globally unique id referring to this playlist." {
-        juniper::ID::from(self.id.clone())
+        if !db.exists::<&str, bool>(&key)? {
+            return Err(FieldError::new("Album does not exist", Value::String(id.to_string())));
+        }
+
+        Ok(Album::from_id(id.to_string()))
     }
 
-    field name() -> &str as "Human readable name of the playlist. This is chosen by the user when \
-                             the playlist is created." {
-        &self.name
+    pub fn artist(id: ID) -> Artist {
+        Artist {
+            id: id.to_string(),
+            name: "artist_name".to_owned(),
+            albums: vec![],
+            featured: vec![],
+            singles: vec![]
+        }
     }
 
-    field songs(limit: i32, cursor: String) -> Connection<Song>
-            as "An ordered list of songs in the playlist." {
-        Connection { count: 0, edges: vec![] }
-    }
-});
-
-pub struct Query;
-
-// todo: add parameter documentation, remove stubs and use database
-graphql_object!(Query: database::Connection |&self| {
-    field album(&executor, id: juniper::ID) -> Album as "Get an album by its globally unique id." {
-        album(&executor.context(), id)
-    }
-
-    field artist(id: juniper::ID) -> Artist as "Get an artist by its globally unique id." {
-        artist(id)
-    }
-
-    field song(id: juniper::ID) -> Song as "Get a song by its globally unique id." {
-        song(id)
-    }
-
-    field albums(limit = 25: i32, cursor: Option<String>, sort_by = (SortBy::RecentlyAdded): SortBy)
-            -> Connection<Album> as "Get paginated, sorted albums." {
-        generic_connection(limit, cursor)
-    }
-
-    field search_albums(name: String, limit = 25: i32, cursor: Option<String>) -> Connection<Album>
-            as "Search only for albums by name." {
-        generic_connection(limit, cursor)
-    }
-});
-
-fn album(db: &redis::Connection, id: juniper::ID) -> Album {
-    Album {
-        id: "album_id".to_string(), artwork_url: None, name: "album_name".to_string(),
-        artist: Artist {
-            id: "artist_id".to_string(), name: "artist_name".to_string(),
-            albums: vec![], featured: vec![], singles: vec![]
-        },
-        songs: vec![]
-    }
-}
-
-fn artist(id: juniper::ID) -> Artist {
-    Artist {
-        id: id.to_string(), name: "artist_name".to_string(),
-        albums: vec![], featured: vec![], singles: vec![]
-    }
-}
-
-fn song(id: juniper::ID) -> Song {
-    Song {
-        id: id.to_string(), name: "song_name".to_string(),
-        album: Album {
-            id: "album_id".to_string(), artwork_url: None, name: "album_name".to_string(),
-            artist: Artist {
-                id: "artist_id".to_string(), name: "artist_name".to_string(),
-                albums: vec![], featured: vec![], singles: vec![]
+    pub fn song(id: ID) -> Song {
+        Song {
+            id: id.to_string(),
+            name: "song_name".to_owned(),
+            album: Album {
+                id: "album_id".to_owned(),
+                artwork_url: None,
+                name: "album_name".to_owned(),
+                artist: Artist {
+                    id: "artist_id".to_owned(),
+                    name: "artist_name".to_owned(),
+                    albums: vec![],
+                    featured: vec![],
+                    singles: vec![]
+                },
+                songs: vec![]
             },
-            songs: vec![]
-        },
-        artists: vec![],
-        stream_url: "stream_url".to_string(), track_number: 0, disk_number: 0,
-        stats: SongUserStats {
-            id: "0".to_string(),
-            play_count: 0, last_played: 0, liked: false
+            artists: vec![],
+            stream_url: "stream_url".to_owned(),
+            track_number: 0,
+            disk_number: 0,
+            stats: SongUserStats {
+                id: "0".to_string(),
+                play_count: 0,
+                last_played: 0,
+                liked: false
+            }
+        }
+    }
+
+    pub fn generic_connection<T>(limit: i32, cursor: Option<String>) -> Connection<T> {
+        Connection {
+            count: 0,
+            edges: vec![]
         }
     }
 }
-
-fn generic_connection<T>(limit: i32, cursor: Option<String>) -> Connection<T> {
-    Connection {
-        count: 0,
-        edges: vec![]
-    }
-}
-
-pub struct Mutation;
-
-graphql_object!(Mutation: database::Connection |&self| {
-    // todo: add documentation, remove stubs, and use database
-
-    field like(id: juniper::ID) -> bool {
-        true
-    }
-
-});
