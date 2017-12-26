@@ -36,8 +36,6 @@ impl FromId for Album {
         // Deserialize the album
         let result = db.hgetall::<&str, redis::Value>(&key)?;
 
-        println!("{:?}", result);
-
         if let redis::Value::Bulk(ref data) = result {
             if data.len() == 0 {
                 return Err(FieldError::from("Album does not exist"));
@@ -80,8 +78,6 @@ impl FromId for Artist {
         // Deserialize the artist
         let result = db.hgetall::<&str, redis::Value>(&key)?;
 
-        println!("{:?}", result);
-
         if let redis::Value::Bulk(ref data) = result {
             if data.len() == 0 {
                 return Err(FieldError::from("Artist does not exist"));
@@ -107,8 +103,6 @@ impl FromId for Song {
 
         // Deserialize the song
         let result = db.hgetall::<&str, redis::Value>(&key)?;
-
-        println!("{:?}", result);
 
         if let redis::Value::Bulk(ref data) = result {
             if data.len() == 0 {
