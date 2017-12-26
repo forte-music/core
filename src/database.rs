@@ -7,6 +7,7 @@ use redis;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
+use juniper;
 
 pub type Pool = r2d2::Pool<RedisConnectionManager>;
 
@@ -16,6 +17,8 @@ pub fn init_pool() -> Pool {
 }
 
 pub struct Connection(r2d2::PooledConnection<RedisConnectionManager>);
+
+impl juniper::Context for Connection {}
 
 impl Deref for Connection {
     type Target = redis::Connection;
