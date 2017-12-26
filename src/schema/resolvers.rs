@@ -14,22 +14,10 @@ impl Query {
     }
 
     pub fn artist(db: &redis::Connection, id: ID) -> FieldResult<Artist> {
-        let key = format!("artist:{}", id.deref());
-
-        if !db.exists::<&str, bool>(&key)? {
-            return Err(FieldError::from("Artist does not exist"));
-        }
-
         Artist::from_id(&id, db)
     }
 
     pub fn song(db: &redis::Connection, id: ID) -> FieldResult<Song> {
-        let key = format!("song:{}", id.deref());
-
-        if !db.exists::<&str, bool>(&key)? {
-            return Err(FieldError::from("Song does not exist"));
-        }
-
         Song::from_id(&id, db)
     }
 
@@ -56,7 +44,7 @@ impl FromId for Album {
             }
         }
         else {
-            return Err(FieldError::from("Database error"))
+            return Err(FieldError::from("Database error"));
         }
 
         Ok(result.deserialize()?)
@@ -74,9 +62,7 @@ impl Album {
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
         let key = format!("{}:songs", Album::key(&self.id));
-
         let song_ids: Vec<String> = db.smembers(key)?;
-
         let mut songs: Vec<Song> = Vec::with_capacity(song_ids.len());
 
         for id in song_ids {
@@ -102,7 +88,7 @@ impl FromId for Artist {
             }
         }
         else {
-            return Err(FieldError::from("Database error"))
+            return Err(FieldError::from("Database error"));
         }
 
         Ok(result.deserialize()?)
@@ -130,7 +116,7 @@ impl FromId for Song {
             }
         }
         else {
-            return Err(FieldError::from("Database error"))
+            return Err(FieldError::from("Database error"));
         }
 
         Ok(result.deserialize()?)
