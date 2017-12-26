@@ -123,10 +123,9 @@ graphql_object!(Song: database::Connection |&self| {
         &self.name
     }
 
-    field album() -> Album
+    field album(&executor) -> FieldResult<Album>
             as "The album this song is a part of. A song can only belong to one album." {
-        Album::default()
-//        &self.album
+        self.album(executor.context())
     }
 
     field artists() -> &[Artist]

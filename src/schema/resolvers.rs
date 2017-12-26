@@ -121,6 +121,10 @@ impl Song {
     fn key(id: &str) -> String {
         format!("song:{}", id)
     }
+
+    pub fn album(&self, db: &redis::Connection) -> FieldResult<Album> {
+        Album::from_id(&self.album_id, db)
+    }
 }
 
 impl FromId for SongUserStats {
