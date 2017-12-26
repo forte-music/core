@@ -7,8 +7,6 @@ pub struct Album {
     pub artwork_url: Option<String>,
     pub name: String,
     pub artist_id: String
-//    pub artist: Artist,
-//    pub songs: Vec<Song>
 }
 
 impl Default for Album {
@@ -18,8 +16,6 @@ impl Default for Album {
             artwork_url: None,
             name: "".to_owned(),
             artist_id: "".to_owned()
-//            artist: Artist::default(),
-//            songs: vec![]
         }
     }
 }
@@ -28,9 +24,6 @@ impl Default for Album {
 pub struct Artist {
     pub id: String,
     pub name: String,
-//    pub albums: Vec<Album>,
-//    pub featured: Vec<Album>,
-//    pub singles: Vec<Album>
 }
 
 impl Default for Artist {
@@ -38,9 +31,6 @@ impl Default for Artist {
         Artist {
             id: "0".to_owned(),
             name: "".to_owned(),
-//            albums: vec![],
-//            featured: vec![],
-//            singles: vec![]
         }
     }
 }
@@ -49,12 +39,9 @@ impl Default for Artist {
 pub struct Song {
     pub id: String,
     pub name: String,
-//    pub album: Album,
-//    pub artists: Vec<Artist>,
     pub stream_url: String,
     pub track_number: i32,
     pub disk_number: i32,
-//    pub stats: SongUserStats
 }
 
 impl Default for Song {
@@ -62,12 +49,9 @@ impl Default for Song {
         Song {
             id: "0".to_owned(),
             name: "".to_owned(),
-//            album: Album::default(),
-//            artists: vec![],
             stream_url: "".to_owned(),
             track_number: 0,
             disk_number: 0,
-//            stats: SongUserStats::default()
         }
     }
 }
