@@ -57,7 +57,7 @@ impl Album {
     }
 
     pub fn artist(&self, db: &redis::Connection) -> FieldResult<Artist> {
-        Artist::from_id(&self.id, db)
+        Artist::from_id(&self.artist_id, db)
     }
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {

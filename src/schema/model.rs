@@ -6,6 +6,7 @@ pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,
     pub name: String,
+    pub artist_id: String
 //    pub artist: Artist,
 //    pub songs: Vec<Song>
 }
@@ -16,6 +17,7 @@ impl Default for Album {
             id: "0".to_owned(),
             artwork_url: None,
             name: "".to_owned(),
+            artist_id: "".to_owned()
 //            artist: Artist::default(),
 //            songs: vec![]
         }
