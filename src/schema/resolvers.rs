@@ -1,10 +1,27 @@
 use schema::model::*;
 use juniper::{ID, FieldResult, FieldError};
 use redis::{self, Commands};
+use serde::Deserialize;
 use serde_redis::RedisDeserialize;
 
 pub trait FromId: Sized {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Self>;
+}
+
+fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldResult<T> {
+    // Deserialize the struct
+    let result: redis::Value = db.hgetall(key)?;
+
+    if let redis::Value::Bulk(ref data) = result {
+        if data.len() == 0 {
+            return Err(FieldError::from(format!("{} does not exist", key)));
+        }
+    }
+    else {
+        return Err(FieldError::from("Database error"));
+    }
+
+    Ok(result.deserialize()?)
 }
 
 impl Query {
@@ -27,21 +44,7 @@ impl Query {
 
 impl FromId for Album {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Album> {
-        let key = Album::key(id);
-
-        // Deserialize the album
-        let result = db.hgetall::<&str, redis::Value>(&key)?;
-
-        if let redis::Value::Bulk(ref data) = result {
-            if data.len() == 0 {
-                return Err(FieldError::from("Album does not exist"));
-            }
-        }
-        else {
-            return Err(FieldError::from("Database error"));
-        }
-
-        Ok(result.deserialize()?)
+        from_id(&Album::key(id), db)
     }
 }
 
@@ -69,21 +72,7 @@ impl Album {
 
 impl FromId for Artist {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Artist> {
-        let key = Artist::key(id);
-
-        // Deserialize the artist
-        let result = db.hgetall::<&str, redis::Value>(&key)?;
-
-        if let redis::Value::Bulk(ref data) = result {
-            if data.len() == 0 {
-                return Err(FieldError::from("Artist does not exist"));
-            }
-        }
-        else {
-            return Err(FieldError::from("Database error"));
-        }
-
-        Ok(result.deserialize()?)
+        from_id(&Artist::key(id), db)
     }
 }
 
@@ -95,21 +84,7 @@ impl Artist {
 
 impl FromId for Song {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Song> {
-        let key = Song::key(id);
-
-        // Deserialize the song
-        let result = db.hgetall::<&str, redis::Value>(&key)?;
-
-        if let redis::Value::Bulk(ref data) = result {
-            if data.len() == 0 {
-                return Err(FieldError::from("Song does not exist"));
-            }
-        }
-        else {
-            return Err(FieldError::from("Database error"));
-        }
-
-        Ok(result.deserialize()?)
+        from_id(&Song::key(id), db)
     }
 }
 
