@@ -1,4 +1,3 @@
-use std::ops::Deref;
 use schema::model::*;
 use juniper::{ID, FieldResult, FieldError};
 use redis::{self, Commands};
@@ -21,11 +20,8 @@ impl Query {
         Song::from_id(&id, db)
     }
 
-    pub fn generic_connection<T>(db: &redis::Connection, limit: i32, cursor: Option<String>) -> Connection<T> {
-        Connection {
-            count: 0,
-            edges: vec![]
-        }
+    pub fn playlist(db: &redis::Connection, id: ID) -> FieldResult<Playlist> {
+        Playlist::from_id(&id, db)
     }
 }
 

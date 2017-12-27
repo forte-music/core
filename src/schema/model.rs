@@ -100,6 +100,15 @@ pub struct Connection<T> {
     pub edges: Vec<Edge<T>>
 }
 
+impl<T> Default for Connection<T> {
+    fn default() -> Self {
+        Connection {
+            count: 0,
+            edges: vec![]
+        }
+    }
+}
+
 #[derive(GraphQLEnum)]
 pub enum SortBy {
     #[graphql(
@@ -118,5 +127,29 @@ pub enum SortBy {
         name = "MOST_PLAYED",
         description = "Sort from most played to least played."
     )]
-    MostPlayed
+    MostPlayed,
+
+    #[graphql(
+        description = "Sort by title in case-insensitive alphabetic order."
+    )]
+    Lexicographically
+}
+
+#[derive(GraphQLEnum)]
+pub enum Position {
+    #[graphql(
+        description = "Elements are inserted before the beginning of the list."
+    )]
+    Beginning,
+
+    #[graphql(
+        description = "Elements are inserted after the end of the list."
+    )]
+    End
+}
+
+#[derive(GraphQLEnum)]
+pub enum Offset {
+    After,
+    Before
 }

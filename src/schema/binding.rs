@@ -2,6 +2,55 @@ use juniper::{ID, FieldResult};
 use schema::model::*;
 use database;
 
+#[derive(GraphQLInputObject)]
+pub struct ConnectionQuery {
+    #[graphql(
+    description = "The maximum number of results to return.",
+    default = "25"
+    )]
+    pub limit: i32,
+
+    #[graphql(
+    description = "The order in which the results are sorted in. By default they are sorted \
+                       from most recently added to least recently added, unless otherwise \
+                       specified."
+    )]
+    pub sort_by: Option<SortBy>,
+
+    #[graphql(
+    description = "Returns the results sorted in reverse order.",
+    default = "false"
+    )]
+    pub reverse: bool,
+
+    #[graphql(
+    description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
+                       starts from the first position.",
+    default = "String::new()"
+    )]
+    pub cursor: String,
+
+    #[graphql(
+    description = "Only results with titles matching this string are returned. If this is \
+                       specified, the default sortBy will now be from best match to worst match.",
+    default = "String::new()"
+    )]
+    pub filter: String
+}
+
+#[derive(GraphQLInputObject)]
+pub struct PlaylistAppendInput {
+    #[graphql(
+    description = "The id of the playlist to add songs to."
+    )]
+    pub playlist_id: ID,
+
+    #[graphql(
+    description = "The ids (Song.id) of songs to add to the playlist in the order specified."
+    )]
+    pub songs: Vec<ID>
+}
+
 // todo: add parameter documentation
 graphql_object!(Query: database::Connection |&self| {
     field album(&executor, id: ID) -> FieldResult<Album>
@@ -9,9 +58,19 @@ graphql_object!(Query: database::Connection |&self| {
         Query::album(executor.context(), id)
     }
 
+    field albums(&executor, input: ConnectionQuery) -> Connection<Album>
+            as "Get paginated, filtered, sorted albums." {
+        Connection::default()
+    }
+
     field artist(&executor, id: ID) -> FieldResult<Artist>
             as "Get an artist by its globally unique id." {
         Query::artist(executor.context(), id)
+    }
+
+    field artists(&executor, input: ConnectionQuery) -> Connection<Artist>
+            as "Get paginated, filtered, sorted artists." {
+        Connection::default()
     }
 
     field song(&executor, id: ID) -> FieldResult<Song>
@@ -19,26 +78,109 @@ graphql_object!(Query: database::Connection |&self| {
         Query::song(executor.context(), id)
     }
 
-    field albums(&executor, limit = 25: i32, cursor: Option<String>,
-            sort_by = (SortBy::RecentlyAdded): SortBy) -> Connection<Album>
-            as "Get paginated, sorted albums." {
-        Query::generic_connection(executor.context(), limit, cursor)
+    field songs(&executor, input: ConnectionQuery) -> Connection<Song>
+            as "Get paginated, filtered, sorted songs." {
+        Connection::default()
     }
 
-    field search_albums(&executor, name: String, limit = 25: i32, cursor: Option<String>)
-            -> Connection<Album>
-            as "Search only for albums by name." {
-        Query::generic_connection(executor.context(), limit, cursor)
+    field playlist(&executor, id: ID) -> FieldResult<Playlist>
+            as "Get a playlist by its globally unique id." {
+        Query::playlist(executor.context(), id)
+    }
+
+    field playlists(&executor, input: ConnectionQuery) -> Connection<Playlist>
+            as "Get paginated, filtered, sorted playlists." {
+        Connection::default()
     }
 });
 
 graphql_object!(Mutation: database::Connection |&self| {
-    // todo: add documentation, remove stubs, and use database
-
-    field like(id: ID) -> bool {
+    field play_song(song_id: ID) -> bool
+            as "Increments the play count and updates the last played time in SongUserStats.
+                Always returns true." {
         true
     }
 
+    field toggle_like(song_id: ID) -> bool
+            as "Toggles the like state of the specified song. Returns whether or not the song is \
+                liked after the like is toggled." {
+        true
+    }
+
+    field create_playlist(
+        name: String
+            as "The name of the new playlist.",
+        songs: Option<Vec<ID>>
+            as "The ids of songs to add to the playlist in the order specified. If an invalid id \
+                is passed, the entire request fails."
+    ) -> Playlist
+            as "Creates a new playlist. Returns the newly created playlist." {
+        Playlist::default()
+    }
+
+    field update_playlist(id: ID, name: String) -> Playlist
+            as "Renames a playlist. Returns a playlist with the changes applied." {
+        Playlist::default()
+    }
+
+    field add_to_playlist_relative(input: PlaylistAppendInput, position: Position) -> Playlist
+            as "Adds songs to the end or the beginning of a playlist." {
+        Playlist::default()
+    }
+
+    field add_to_playlist_by_cursor(
+        input: PlaylistAppendInput,
+        cursor: String
+            as "The cursor relative to which to add songs (Playlist.songs.edges.cursor).",
+        offset: Offset
+            as "The direction relative to the cursor where songs will be added."
+    ) -> Playlist
+            as "Adds songs to a playlist relative to a cursor (Playlist.songs.edges.cursor). \
+                This is useful because in some cases the index isn't known and is hard to compute \
+                because of its dependence on global state while cursors are local state." {
+        Playlist::default()
+    }
+
+    field add_to_playlist_by_index(
+        input: PlaylistAppendInput,
+        position: i32
+            as "The zero indexed offset relative to which to add songs.",
+        offset: Offset
+            as "The direction relative to the offset where songs will be added."
+    ) -> Playlist
+            as "Adds songs to a playlist relative to an index." {
+        Playlist::default()
+    }
+
+    field remove_from_playlist(
+        playlist_id: ID
+            as "The playlist to remove items from.",
+        cursors: Vec<String>
+            as "A list of cursors from Playlist.songs.edges.cursor pointing to songs to \
+                remove from the playlist."
+    ) -> Playlist
+            as "Remove songs from the playlist. Returns the updated playlist." {
+        Playlist::default()
+    }
+
+    field delete_playlist(id: ID) -> bool
+            as "Permanently deletes a playlist." {
+        true
+    }
+
+    field move_song_in_playlist(
+        playlist_id: ID
+            as "The id of the playlist to modify.",
+        from_song_cursor: String
+            as "The cursor (Playlist.songs.edges.cursor) of the element to move.",
+        to_song_cursor: String
+            as "The position the song will be moved relative to.",
+        offset: Offset
+            as "The direction relative to toSongCursor the song will be moved to."
+    ) -> Playlist
+            as "Moves a song in a playlist from one position to another." {
+        Playlist::default()
+    }
 });
 
 graphql_object!(Album: database::Connection |&self| {
@@ -72,6 +214,16 @@ graphql_object!(Album: database::Connection |&self| {
             as "Songs in this album sorted by song index." {
         self.songs(executor.context())
     }
+
+    field duration() -> i32
+            as "The sum of the durations of every song in this album album in seconds." {
+        0
+    }
+
+    field release_year() -> i32
+            as "The year the album was released." {
+        0
+    }
 });
 
 graphql_object!(Artist: database::Connection |&self| {
@@ -89,23 +241,29 @@ graphql_object!(Artist: database::Connection |&self| {
 
     field albums() -> &[Album]
             as "Albums this artist has authored. These are the albums that this artist is the \
-                album artist of." {
+                album artist of. The albums are sorted by release date." {
         &[]
 //        &self.albums
     }
 
     field featured() -> &[Album]
             as "The albums which this artist has featured on. These are albums which the artist \
-                isn't an album artist of but albums which the artist is in." {
+                isn't an album artist of but albums which the artist is in. The albums are \
+                sorted by release date." {
         &[]
 //        &self.featured
     }
 
     field singles() -> &[Album]
             as "Albums with only a single song where this artist is the album artist or an artist \
-                of the song." {
+                of the song. The albums are sorted by release date." {
         &[]
 //        &self.singles
+    }
+
+    field songs(input: ConnectionQuery) -> Connection<Song>
+            as "Get all songs of an artist." {
+        Connection::default()
     }
 });
 
@@ -156,6 +314,11 @@ graphql_object!(Song: database::Connection |&self| {
         SongUserStats::default()
 //        &self.stats
     }
+
+    field duration() -> i32
+            as "The duration of the song (retrievable at streamUrl) in seconds." {
+        0
+    }
 });
 
 graphql_object!(SongUserStats: database::Connection |&self| {
@@ -178,13 +341,14 @@ graphql_object!(SongUserStats: database::Connection |&self| {
 
     field liked() -> bool
             as "Whether or not this song is favorited. Favorited songs go into their own \
-                playlist." {
+                auto-playlist." {
         self.liked
     }
 });
 
 graphql_object!(Playlist: database::Connection |&self| {
-    description: "A named collection of songs."
+    description: "A named collection of songs. The same song can appear multiple times in a \
+                  playlist."
 
     field id() -> ID
             as "A globally unique id referring to this playlist." {
@@ -197,9 +361,14 @@ graphql_object!(Playlist: database::Connection |&self| {
         &self.name
     }
 
-    field songs(limit: i32, cursor: String) -> Connection<Song>
+    field duration() -> i32
+            as "The sum of durations of every song in the playlist in seconds." {
+        0
+    }
+
+    field songs(input: ConnectionQuery) -> Connection<Song>
             as "An ordered list of songs in the playlist." {
-        Connection { count: 0, edges: vec![] }
+        Connection::default()
     }
 });
 
@@ -218,17 +387,27 @@ graphql_object!(Edge<Song>: database::Connection as "SongEdge" |&self| {
     field node() -> &Song { &self.node }
 });
 
+graphql_object!(Edge<Playlist>: database::Connection as "PlaylistEdge" |&self| {
+    field cursor() -> &str { &self.cursor }
+    field node() -> &Playlist { &self.node }
+});
+
 graphql_object!(Connection<Album>: database::Connection as "AlbumConnection" |&self| {
     field count() -> i32 { self.count }
     field edges() -> &[Edge<Album>] { &self.edges }
 });
 
-graphql_object!(Connection<Artist>: database::Connection as "AlbumConnection" |&self| {
+graphql_object!(Connection<Artist>: database::Connection as "ArtistConnection" |&self| {
     field count() -> i32 { self.count }
     field edges() -> &[Edge<Artist>] { &self.edges }
 });
 
-graphql_object!(Connection<Song>: database::Connection as "AlbumConnection" |&self| {
+graphql_object!(Connection<Song>: database::Connection as "SongConnection" |&self| {
     field count() -> i32 { self.count }
     field edges() -> &[Edge<Song>] { &self.edges }
+});
+
+graphql_object!(Connection<Playlist>: database::Connection as "PlaylistConnection" |&self| {
+    field count() -> i32 { self.count }
+    field edges() -> &[Edge<Playlist>] { &self.edges }
 });
