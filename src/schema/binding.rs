@@ -216,7 +216,7 @@ graphql_object!(Album: database::Connection |&self| {
     }
 
     field duration() -> i32
-            as "The sum of the durations of every song in this album album in seconds." {
+            as "The sum of the durations of every song in this album in seconds." {
         0
     }
 
