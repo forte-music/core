@@ -245,19 +245,17 @@ graphql_object!(Artist: database::Connection |&self| {
         self.albums(executor.context())
     }
 
-    field featured() -> &[Album]
+    field featured(&executor) -> FieldResult<Vec<Album>>
             as "The albums which this artist has featured on. These are albums which the artist \
                 isn't an album artist of but albums which the artist is in. The albums are \
                 sorted by release date." {
-        &[]
-//        &self.featured
+        self.featured(executor.context())
     }
 
-    field singles() -> &[Album]
+    field singles(&executor) -> FieldResult<Vec<Album>>
             as "Albums with only a single song where this artist is the album artist or an artist \
                 of the song. The albums are sorted by release date." {
-        &[]
-//        &self.singles
+        self.singles(executor.context())
     }
 
     field songs(input: ConnectionQuery) -> Connection<Song>
