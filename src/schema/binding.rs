@@ -222,7 +222,7 @@ graphql_object!(Album: database::Connection |&self| {
 
     field release_year() -> i32
             as "The year the album was released." {
-        0
+        self.release_year
     }
 });
 

@@ -6,7 +6,8 @@ pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,
     pub name: String,
-    pub artist_id: String
+    pub artist_id: String,
+    pub release_year: i32
 }
 
 impl Default for Album {
@@ -15,7 +16,8 @@ impl Default for Album {
             id: "0".to_owned(),
             artwork_url: None,
             name: "".to_owned(),
-            artist_id: "".to_owned()
+            artist_id: "".to_owned(),
+            release_year: 0
         }
     }
 }
