@@ -239,11 +239,10 @@ graphql_object!(Artist: database::Connection |&self| {
         &self.name
     }
 
-    field albums() -> &[Album]
+    field albums(&executor) -> FieldResult<Vec<Album>>
             as "Albums this artist has authored. These are the albums that this artist is the \
                 album artist of. The albums are sorted by release date." {
-        &[]
-//        &self.albums
+        self.albums(executor.context())
     }
 
     field featured() -> &[Album]

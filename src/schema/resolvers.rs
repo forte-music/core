@@ -24,6 +24,17 @@ fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldRe
     Ok(result.deserialize()?)
 }
 
+fn read_vec_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult<Vec<T>> {
+    let ids: Vec<String> = db.smembers(key)?;
+    let mut items: Vec<T> = Vec::with_capacity(ids.len());
+
+    for id in ids {
+        items.push(T::from_id(&id, db)?);
+    }
+
+    Ok(items)
+}
+
 impl Query {
     pub fn album(db: &redis::Connection, id: ID) -> FieldResult<Album> {
         Album::from_id(&id, db)
@@ -58,15 +69,7 @@ impl Album {
     }
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
-        let key = format!("{}:songs", Album::key(&self.id));
-        let song_ids: Vec<String> = db.smembers(key)?;
-        let mut songs: Vec<Song> = Vec::with_capacity(song_ids.len());
-
-        for id in song_ids {
-            songs.push(Song::from_id(&id, db)?);
-        }
-
-        Ok(songs)
+        read_vec_from_db(&format!("{}:songs", Album::key(&self.id)), db)
     }
 }
 
@@ -79,6 +82,10 @@ impl FromId for Artist {
 impl Artist {
     fn key(id: &str) -> String {
         format!("artist:{}", id)
+    }
+
+    pub fn albums(&self, db: &redis::Connection) -> FieldResult<Vec<Album>> {
+        read_vec_from_db(&format!("{}:albums", Artist::key(&self.id)), db)
     }
 }
 
