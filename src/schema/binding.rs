@@ -283,10 +283,9 @@ graphql_object!(Song: database::Connection |&self| {
         self.album(executor.context())
     }
 
-    field artists() -> &[Artist]
+    field artists(&executor) -> FieldResult<Vec<Artist>>
             as "The artists which composed this song." {
-        &[]
-//        &self.artists
+        self.artists(executor.context())
     }
 
     field stream_url() -> &str

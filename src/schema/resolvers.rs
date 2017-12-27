@@ -111,6 +111,10 @@ impl Song {
     pub fn album(&self, db: &redis::Connection) -> FieldResult<Album> {
         Album::from_id(&self.album_id, db)
     }
+
+    pub fn artists(&self, db: &redis::Connection) -> FieldResult<Vec<Artist>> {
+        read_vec_from_db(&format!("{}:artists", Song::key(&self.id)), db)
+    }
 }
 
 impl FromId for SongUserStats {
