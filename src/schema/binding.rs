@@ -5,35 +5,35 @@ use database;
 #[derive(GraphQLInputObject)]
 pub struct ConnectionQuery {
     #[graphql(
-    description = "The maximum number of results to return.",
-    default = "25"
+        description = "The maximum number of results to return.",
+        default = "25"
     )]
     pub limit: i32,
 
     #[graphql(
-    description = "The order in which the results are sorted in. By default they are sorted \
+        description = "The order in which the results are sorted in. By default they are sorted \
                        from most recently added to least recently added, unless otherwise \
                        specified."
     )]
     pub sort_by: Option<SortBy>,
 
     #[graphql(
-    description = "Returns the results sorted in reverse order.",
-    default = "false"
+        description = "Returns the results sorted in reverse order.",
+        default = "false"
     )]
     pub reverse: bool,
 
     #[graphql(
-    description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
+        description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
                        starts from the first position.",
-    default = "String::new()"
+        default = "String::new()"
     )]
     pub cursor: String,
 
     #[graphql(
-    description = "Only results with titles matching this string are returned. If this is \
+        description = "Only results with titles matching this string are returned. If this is \
                        specified, the default sortBy will now be from best match to worst match.",
-    default = "String::new()"
+        default = "String::new()"
     )]
     pub filter: String
 }
@@ -41,12 +41,12 @@ pub struct ConnectionQuery {
 #[derive(GraphQLInputObject)]
 pub struct PlaylistAppendInput {
     #[graphql(
-    description = "The id of the playlist to add songs to."
+        description = "The id of the playlist to add songs to."
     )]
     pub playlist_id: ID,
 
     #[graphql(
-    description = "The ids (Song.id) of songs to add to the playlist in the order specified."
+        description = "The ids (Song.id) of songs to add to the playlist in the order specified."
     )]
     pub songs: Vec<ID>
 }
