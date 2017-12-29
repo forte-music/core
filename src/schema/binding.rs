@@ -305,10 +305,9 @@ graphql_object!(Song: database::Connection |&self| {
         self.disk_number
     }
 
-    field stats() -> SongUserStats
+    field stats(&executor) -> FieldResult<SongUserStats>
             as "User stats for a song." {
-        SongUserStats::default()
-//        &self.stats
+        self.stats(executor.context())
     }
 
     field duration() -> i32

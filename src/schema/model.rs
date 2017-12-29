@@ -42,6 +42,7 @@ pub struct Song {
     pub id: String,
     pub name: String,
     pub album_id: String,
+    pub stat_id: String,
     pub stream_url: String,
     pub track_number: i32,
     pub disk_number: i32,
@@ -53,6 +54,7 @@ impl Default for Song {
             id: "0".to_owned(),
             name: "".to_owned(),
             album_id: "0".to_owned(),
+            stat_id: "0".to_owned(),
             stream_url: "".to_owned(),
             track_number: 0,
             disk_number: 0,
@@ -60,6 +62,7 @@ impl Default for Song {
     }
 }
 
+#[derive(Deserialize)]
 pub struct SongUserStats {
     pub id: String,
     pub play_count: i32,
