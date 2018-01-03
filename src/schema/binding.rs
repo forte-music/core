@@ -394,6 +394,11 @@ graphql_object!(Edge<Playlist>: database::Connection as "PlaylistEdge" |&self| {
     field node() -> &Playlist { &self.node }
 });
 
+graphql_object!(Edge<PlaylistItem>: database::Connection as "PlaylistItemEdge" |&self| {
+    field cursor() -> &str { &self.cursor }
+    field node() -> &PlaylistItem { &self.node }
+});
+
 graphql_object!(Connection<Album>: database::Connection as "AlbumConnection" |&self| {
     field count() -> i32 { self.count }
     field edges() -> &[Edge<Album>] { &self.edges }
@@ -412,4 +417,9 @@ graphql_object!(Connection<Song>: database::Connection as "SongConnection" |&sel
 graphql_object!(Connection<Playlist>: database::Connection as "PlaylistConnection" |&self| {
     field count() -> i32 { self.count }
     field edges() -> &[Edge<Playlist>] { &self.edges }
+});
+
+graphql_object!(Connection<PlaylistItem>: database::Connection as "PlaylistItemConnection" |&self| {
+    field count() -> i32 { self.count }
+    field edges() -> &[Edge<PlaylistItem>] { &self.edges }
 });
