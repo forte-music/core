@@ -78,7 +78,7 @@ impl Album {
                 .arg(self.songs_key())
                 .arg("BY").arg("song:*")
                 .arg("GET").arg("song:*->duration")
-                .iter::<String>(db).unwrap()
+                .iter::<String>(db)?
                 .map(|duration| duration.parse::<i32>().unwrap())
                 .sum::<i32>()
         )
