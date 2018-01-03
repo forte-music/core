@@ -67,6 +67,18 @@ impl Album {
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
         read_vec_from_db(&format!("{}:songs", Album::key(&self.id)), db)
     }
+
+    pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
+        Ok(
+            redis::cmd("SORT")
+                .arg(format!("{}:songs", Album::key(&self.id)))
+                .arg("BY").arg("song:*")
+                .arg("GET").arg("song:*->duration")
+                .iter::<String>(db).unwrap()
+                .map(|duration| duration.parse::<i32>().unwrap())
+                .sum::<i32>()
+        )
+    }
 }
 
 impl FromId for Artist {

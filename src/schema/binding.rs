@@ -215,9 +215,9 @@ graphql_object!(Album: database::Connection |&self| {
         self.songs(executor.context())
     }
 
-    field duration() -> i32
+    field duration(&executor) -> FieldResult<i32>
             as "The sum of the durations of every song in this album in seconds." {
-        0
+        self.duration(executor.context())
     }
 
     field release_year() -> i32
