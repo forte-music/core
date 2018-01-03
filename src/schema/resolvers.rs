@@ -8,6 +8,10 @@ pub trait FromId: Sized {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Self>;
 }
 
+pub trait Keyed {
+    fn key(id: &str) -> String;
+}
+
 fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldResult<T> {
     // Deserialize the struct
     let result: redis::Value = db.hgetall(key)?;
@@ -59,11 +63,13 @@ impl FromId for Album {
     }
 }
 
-impl Album {
+impl Keyed for Album {
     fn key(id: &str) -> String {
         format!("album:{}", id)
     }
+}
 
+impl Album {
     pub fn artist(&self, db: &redis::Connection) -> FieldResult<Artist> {
         Artist::from_id(&self.artist_id, db)
     }
@@ -79,11 +85,13 @@ impl FromId for Artist {
     }
 }
 
-impl Artist {
+impl Keyed for Artist {
     fn key(id: &str) -> String {
         format!("artist:{}", id)
     }
+}
 
+impl Artist {
     pub fn albums(&self, db: &redis::Connection) -> FieldResult<Vec<Album>> {
         read_vec_from_db(&format!("{}:albums", Artist::key(&self.id)), db)
     }
@@ -103,11 +111,13 @@ impl FromId for Song {
     }
 }
 
-impl Song {
+impl Keyed for Song {
     fn key(id: &str) -> String {
         format!("song:{}", id)
     }
+}
 
+impl Song {
     pub fn album(&self, db: &redis::Connection) -> FieldResult<Album> {
         Album::from_id(&self.album_id, db)
     }
@@ -127,7 +137,7 @@ impl FromId for SongUserStats {
     }
 }
 
-impl SongUserStats {
+impl Keyed for SongUserStats {
     fn key(id: &str) -> String {
         format!("stat:{}", id)
     }
