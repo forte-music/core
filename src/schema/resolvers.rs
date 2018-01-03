@@ -137,6 +137,12 @@ impl FromId for Playlist {
     }
 }
 
+impl Keyed for Playlist {
+    fn key(id: &str) -> String {
+        format!("playlist:{}", id)
+    }
+}
+
 impl PlaylistItem {
     pub fn song(&self, db: &redis::Connection) -> FieldResult<Song> {
         Song::from_id(&self.song_id, db)
