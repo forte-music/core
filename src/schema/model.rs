@@ -125,6 +125,11 @@ impl Default for Playlist {
     }
 }
 
+pub struct PlaylistItem {
+    pub id: String,
+    pub song_id: String
+}
+
 pub struct Edge<T> {
     pub cursor: String,
     pub node: T

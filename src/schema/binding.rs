@@ -361,9 +361,16 @@ graphql_object!(Playlist: database::Connection |&self| {
         0
     }
 
-    field songs(input: ConnectionQuery) -> Connection<Song>
-            as "An ordered list of songs in the playlist." {
+    field items(input: ConnectionQuery) -> Connection<PlaylistItem>
+            as "The items in the playlist." {
         Connection::default()
+    }
+});
+
+graphql_object!(PlaylistItem: database::Connection |&self| {
+    field song(&executor) -> FieldResult<Song>
+            as "The song." {
+        self.song(executor.context())
     }
 });
 

@@ -136,3 +136,9 @@ impl FromId for Playlist {
         Ok(Playlist { id: id.to_owned(), .. Playlist::default() })
     }
 }
+
+impl PlaylistItem {
+    pub fn song(&self, db: &redis::Connection) -> FieldResult<Song> {
+        Song::from_id(&self.song_id, db)
+    }
+}
