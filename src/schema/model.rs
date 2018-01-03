@@ -62,6 +62,7 @@ pub struct Song {
     pub stream_url: String,
     pub track_number: i32,
     pub disk_number: i32,
+    pub duration: i32
 }
 
 impl Default for Song {
@@ -74,6 +75,7 @@ impl Default for Song {
             stream_url: "".to_owned(),
             track_number: 0,
             disk_number: 0,
+            duration: 0
         }
     }
 }

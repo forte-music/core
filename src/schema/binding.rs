@@ -312,7 +312,7 @@ graphql_object!(Song: database::Connection |&self| {
 
     field duration() -> i32
             as "The duration of the song (retrievable at streamUrl) in seconds." {
-        0
+        self.duration
     }
 });
 

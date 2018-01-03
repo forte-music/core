@@ -44,7 +44,8 @@ pub fn add_song(song: Song, db: &Connection) -> RedisResult<()> {
         ("stat_id", &song.stat_id),
         ("stream_url", &song.stream_url),
         ("track_number", &song.track_number.to_string()),
-        ("disk_number", &song.disk_number.to_string())
+        ("disk_number", &song.disk_number.to_string()),
+        ("duration", &song.duration.to_string())
     ])?;
 
     Ok(())
