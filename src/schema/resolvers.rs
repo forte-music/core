@@ -60,18 +60,22 @@ impl FromId for Album {
 }
 
 impl Album {
+    fn songs_key(&self) -> String {
+        format!("{}:songs", Album::key(&self.id))
+    }
+
     pub fn artist(&self, db: &redis::Connection) -> FieldResult<Artist> {
         Artist::from_id(&self.artist_id, db)
     }
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
-        read_vec_from_db(&format!("{}:songs", Album::key(&self.id)), db)
+        read_vec_from_db(&self.songs_key(), db)
     }
 
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
         Ok(
             redis::cmd("SORT")
-                .arg(format!("{}:songs", Album::key(&self.id)))
+                .arg(self.songs_key())
                 .arg("BY").arg("song:*")
                 .arg("GET").arg("song:*->duration")
                 .iter::<String>(db).unwrap()
