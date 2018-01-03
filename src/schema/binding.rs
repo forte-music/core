@@ -368,8 +368,16 @@ graphql_object!(Playlist: database::Connection |&self| {
 });
 
 graphql_object!(PlaylistItem: database::Connection |&self| {
+    description: "An item in a playlist."
+
+    field id() -> ID
+            as "The id of the playlist item. This is position invariant and allows for \
+                addressing items in a playlist." {
+        ID::from(self.id.clone())
+    }
+
     field song(&executor) -> FieldResult<Song>
-            as "The song." {
+            as "The song this item points to." {
         self.song(executor.context())
     }
 });
