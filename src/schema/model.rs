@@ -1,6 +1,10 @@
 pub struct Query;
 pub struct Mutation;
 
+pub trait Keyed {
+    fn key(id: &str) -> String;
+}
+
 #[derive(Deserialize)]
 pub struct Album {
     pub id: String,
@@ -22,6 +26,12 @@ impl Default for Album {
     }
 }
 
+impl Keyed for Album {
+    fn key(id: &str) -> String {
+        format!("album:{}", id)
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Artist {
     pub id: String,
@@ -34,6 +44,12 @@ impl Default for Artist {
             id: "0".to_owned(),
             name: "".to_owned(),
         }
+    }
+}
+
+impl Keyed for Artist {
+    fn key(id: &str) -> String {
+        format!("artist:{}", id)
     }
 }
 
@@ -62,6 +78,12 @@ impl Default for Song {
     }
 }
 
+impl Keyed for Song {
+    fn key(id: &str) -> String {
+        format!("song:{}", id)
+    }
+}
+
 #[derive(Deserialize)]
 pub struct SongUserStats {
     pub id: String,
@@ -78,6 +100,12 @@ impl Default for SongUserStats {
             last_played: 0,
             liked: false
         }
+    }
+}
+
+impl Keyed for SongUserStats {
+    fn key(id: &str) -> String {
+        format!("stat:{}", id)
     }
 }
 
