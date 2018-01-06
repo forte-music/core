@@ -43,7 +43,7 @@ fn read_vec_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult
 }
 
 fn read_members_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult<Connection<T>> {
-    let items: Vec<Edge<T>> = redis::cmd("SMEMBERS").arg("albums")
+    let items: Vec<Edge<T>> = redis::cmd("SMEMBERS").arg(key)
         .iter::<String>(db)?
         .map(|item| {
             let node = T::from_id(&item, db).unwrap();
