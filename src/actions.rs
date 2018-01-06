@@ -16,6 +16,8 @@ pub fn add_album(album: Album, db: &Connection) -> RedisResult<()> {
         ("release_year", &album.release_year.to_string())
     ])?;
 
+    db.sadd::<_, _, ()>("albums", album.id)?;
+
     Ok(())
 }
 
@@ -28,6 +30,8 @@ pub fn add_artist(artist: Artist, db: &Connection) -> RedisResult<()> {
         ("id", &artist.id),
         ("name", &artist.name)
     ])?;
+
+    db.sadd::<_, _, ()>("artists", artist.id)?;
 
     Ok(())
 }
@@ -47,6 +51,8 @@ pub fn add_song(song: Song, db: &Connection) -> RedisResult<()> {
         ("disk_number", &song.disk_number.to_string()),
         ("duration", &song.duration.to_string())
     ])?;
+
+    db.sadd::<_, _, ()>("songs", song.id)?;
 
     Ok(())
 }

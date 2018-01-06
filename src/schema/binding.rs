@@ -58,9 +58,9 @@ graphql_object!(Query: database::Connection |&self| {
         Query::album(executor.context(), id)
     }
 
-    field albums(&executor, input: ConnectionQuery) -> Connection<Album>
+    field albums(&executor, input: ConnectionQuery) -> FieldResult<Connection<Album>>
             as "Get paginated, filtered, sorted albums." {
-        Connection::default()
+        Query::albums(executor.context())
     }
 
     field artist(&executor, id: ID) -> FieldResult<Artist>
@@ -68,9 +68,9 @@ graphql_object!(Query: database::Connection |&self| {
         Query::artist(executor.context(), id)
     }
 
-    field artists(&executor, input: ConnectionQuery) -> Connection<Artist>
+    field artists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Artist>>
             as "Get paginated, filtered, sorted artists." {
-        Connection::default()
+        Query::artists(executor.context())
     }
 
     field song(&executor, id: ID) -> FieldResult<Song>
@@ -78,9 +78,9 @@ graphql_object!(Query: database::Connection |&self| {
         Query::song(executor.context(), id)
     }
 
-    field songs(&executor, input: ConnectionQuery) -> Connection<Song>
+    field songs(&executor, input: ConnectionQuery) -> FieldResult<Connection<Song>>
             as "Get paginated, filtered, sorted songs." {
-        Connection::default()
+        Query::songs(executor.context())
     }
 
     field playlist(&executor, id: ID) -> FieldResult<Playlist>
@@ -88,9 +88,9 @@ graphql_object!(Query: database::Connection |&self| {
         Query::playlist(executor.context(), id)
     }
 
-    field playlists(&executor, input: ConnectionQuery) -> Connection<Playlist>
+    field playlists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Playlist>>
             as "Get paginated, filtered, sorted playlists." {
-        Connection::default()
+        Query::playlists(executor.context())
     }
 });
 

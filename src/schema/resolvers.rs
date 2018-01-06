@@ -42,21 +42,55 @@ fn read_vec_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult
     Ok(items)
 }
 
+fn read_members_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult<Connection<T>> {
+    let items: Vec<Edge<T>> = redis::cmd("SMEMBERS").arg("albums")
+        .iter::<String>(db)?
+        .map(|item| {
+            let node = T::from_id(&item, db).unwrap();
+            Edge {
+                cursor: item,
+                node
+            }
+        })
+        .collect();
+
+    Ok(Connection {
+        count: items.len(),
+        edges: items
+    })
+}
+
 impl Query {
     pub fn album(db: &redis::Connection, id: ID) -> FieldResult<Album> {
         Album::from_id(&id, db)
+    }
+
+    pub fn albums(db: &redis::Connection) -> FieldResult<Connection<Album>> {
+        read_members_from_db::<Album>("albums", db)
     }
 
     pub fn artist(db: &redis::Connection, id: ID) -> FieldResult<Artist> {
         Artist::from_id(&id, db)
     }
 
+    pub fn artists(db: &redis::Connection) -> FieldResult<Connection<Artist>> {
+        read_members_from_db::<Artist>("artists", db)
+    }
+
     pub fn song(db: &redis::Connection, id: ID) -> FieldResult<Song> {
         Song::from_id(&id, db)
     }
 
+    pub fn songs(db: &redis::Connection) -> FieldResult<Connection<Song>> {
+        read_members_from_db::<Song>("songs", db)
+    }
+
     pub fn playlist(db: &redis::Connection, id: ID) -> FieldResult<Playlist> {
         Playlist::from_id(&id, db)
+    }
+
+    pub fn playlists(db: &redis::Connection) -> FieldResult<Connection<Playlist>> {
+        read_members_from_db::<Playlist>("playlists", db)
     }
 }
 
