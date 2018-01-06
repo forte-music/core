@@ -8,6 +8,12 @@ pub trait FromId: Sized {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Self>;
 }
 
+impl<'a, T: Keyed + Deserialize<'a>> FromId for T {
+    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Self> {
+        from_id(&T::key(id), db)
+    }
+}
+
 fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldResult<T> {
     // Deserialize the struct
     let result: redis::Value = db.hgetall(key)?;
@@ -53,12 +59,6 @@ impl Query {
     }
 }
 
-impl FromId for Album {
-    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Album> {
-        from_id(&Album::key(id), db)
-    }
-}
-
 impl Album {
     fn songs_key(&self) -> String {
         format!("{}:songs", Album::key(&self.id))
@@ -85,12 +85,6 @@ impl Album {
     }
 }
 
-impl FromId for Artist {
-    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Artist> {
-        from_id(&Artist::key(id), db)
-    }
-}
-
 impl Artist {
     pub fn albums(&self, db: &redis::Connection) -> FieldResult<Vec<Album>> {
         read_vec_from_db(&format!("{}:albums", Artist::key(&self.id)), db)
@@ -105,12 +99,6 @@ impl Artist {
     }
 }
 
-impl FromId for Song {
-    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Song> {
-        from_id(&Song::key(id), db)
-    }
-}
-
 impl Song {
     pub fn album(&self, db: &redis::Connection) -> FieldResult<Album> {
         Album::from_id(&self.album_id, db)
@@ -122,24 +110,6 @@ impl Song {
 
     pub fn stats(&self, db: &redis::Connection) -> FieldResult<SongUserStats> {
         SongUserStats::from_id(&self.stat_id, db)
-    }
-}
-
-impl FromId for SongUserStats {
-    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<SongUserStats> {
-        from_id(&SongUserStats::key(id), db)
-    }
-}
-
-impl FromId for Playlist {
-    fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Playlist> {
-        Ok(Playlist { id: id.to_owned(), .. Playlist::default() })
-    }
-}
-
-impl Keyed for Playlist {
-    fn key(id: &str) -> String {
-        format!("playlist:{}", id)
     }
 }
 

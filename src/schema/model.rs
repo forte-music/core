@@ -125,9 +125,30 @@ impl Default for Playlist {
     }
 }
 
+impl Keyed for Playlist {
+    fn key(id: &str) -> String {
+        format!("playlist:{}", id)
+    }
+}
+
 pub struct PlaylistItem {
     pub id: String,
     pub song_id: String
+}
+
+impl Default for PlaylistItem {
+    fn default() -> Self {
+        PlaylistItem {
+            id: "0".to_owned(),
+            song_id: "0".to_owned()
+        }
+    }
+}
+
+impl Keyed for PlaylistItem {
+    fn key(id: &str) -> String {
+        format!("playlist-item:{}", id)
+    }
 }
 
 pub struct Edge<T> {
