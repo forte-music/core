@@ -111,6 +111,7 @@ impl Keyed for SongUserStats {
     }
 }
 
+#[derive(Deserialize)]
 pub struct Playlist {
     pub id: String,
     pub name: String,
