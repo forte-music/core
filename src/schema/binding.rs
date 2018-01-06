@@ -361,9 +361,9 @@ graphql_object!(Playlist: database::Connection |&self| {
         0
     }
 
-    field items(input: ConnectionQuery) -> Connection<PlaylistItem>
+    field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>>
             as "The items in the playlist." {
-        Connection::default()
+        self.items(input, executor.context())
     }
 });
 
@@ -408,26 +408,26 @@ graphql_object!(Edge<PlaylistItem>: database::Connection as "PlaylistItemEdge" |
 });
 
 graphql_object!(Connection<Album>: database::Connection as "AlbumConnection" |&self| {
-    field count() -> i32 { self.count }
+    field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Album>] { &self.edges }
 });
 
 graphql_object!(Connection<Artist>: database::Connection as "ArtistConnection" |&self| {
-    field count() -> i32 { self.count }
+    field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Artist>] { &self.edges }
 });
 
 graphql_object!(Connection<Song>: database::Connection as "SongConnection" |&self| {
-    field count() -> i32 { self.count }
+    field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Song>] { &self.edges }
 });
 
 graphql_object!(Connection<Playlist>: database::Connection as "PlaylistConnection" |&self| {
-    field count() -> i32 { self.count }
+    field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Playlist>] { &self.edges }
 });
 
 graphql_object!(Connection<PlaylistItem>: database::Connection as "PlaylistItemConnection" |&self| {
-    field count() -> i32 { self.count }
+    field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<PlaylistItem>] { &self.edges }
 });

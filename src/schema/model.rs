@@ -132,6 +132,7 @@ impl Keyed for Playlist {
     }
 }
 
+#[derive(Deserialize)]
 pub struct PlaylistItem {
     pub id: String,
     pub song_id: String
@@ -158,7 +159,7 @@ pub struct Edge<T> {
 }
 
 pub struct Connection<T> {
-    pub count: i32,
+    pub count: usize,
     pub edges: Vec<Edge<T>>
 }
 

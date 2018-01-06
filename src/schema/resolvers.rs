@@ -1,4 +1,5 @@
 use schema::model::*;
+use schema::binding::*;
 use juniper::{ID, FieldResult, FieldError};
 use redis::{self, Commands};
 use serde::Deserialize;
@@ -110,6 +111,31 @@ impl Song {
 
     pub fn stats(&self, db: &redis::Connection) -> FieldResult<SongUserStats> {
         SongUserStats::from_id(&self.stat_id, db)
+    }
+}
+
+impl Playlist {
+    fn items_key(&self) -> String {
+        format!("{}:items", Playlist::key(&self.id))
+    }
+
+    pub fn items(&self, query: ConnectionQuery, db: &redis::Connection) -> FieldResult<Connection<PlaylistItem>> {
+        let items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
+            .arg(self.items_key()).arg(0).arg(-1)
+            .iter::<String>(db)?
+            .map(|item| {
+                let node = PlaylistItem::from_id(&item, db).unwrap();
+                Edge {
+                    cursor: item,
+                    node
+                }
+            })
+            .collect();
+
+        Ok(Connection {
+            count: items.len(),
+            edges: items
+        })
     }
 }
 
