@@ -179,8 +179,13 @@ impl Playlist {
     }
 
     pub fn items(&self, query: ConnectionQuery, db: &redis::Connection) -> FieldResult<Connection<PlaylistItem>> {
-        let mut skipping = true;
-        let items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
+        let limit = if query.cursor.is_empty() {
+            query.limit as usize
+        } else {
+            (query.limit + 1) as usize
+        };
+
+        let mut items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
             .arg(self.items_key()).arg(0).arg(-1)
             .iter::<String>(db)?
             .map(|item| {
@@ -191,19 +196,15 @@ impl Playlist {
                 }
             })
             .skip_while(|edge| {
-                if query.cursor.is_empty() {
-                    return false;
-                }
-
-                if edge.cursor == query.cursor {
-                    skipping = false;
-                    return true;
-                }
-
-                skipping
+                !query.cursor.is_empty() && edge.cursor != query.cursor
             })
-            .take(query.limit as usize)
+            .take(limit)
             .collect();
+
+        // If we start with a cursor, ignore the item the cursor points to
+        if !query.cursor.is_empty() {
+            items.remove(0);
+        }
 
         Ok(Connection {
             count: items.len(),
