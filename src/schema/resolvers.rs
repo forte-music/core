@@ -109,6 +109,22 @@ impl Mutation {
 
         Ok(true)
     }
+
+    pub fn toggle_like(db: &redis::Connection, id: ID) -> FieldResult<bool> {
+        let song_key = Song::key(&id);
+
+        if !db.exists::<_, bool>(&song_key)? {
+            return Err(FieldError::from(format!("{} does not exist", song_key)));
+        }
+
+        let stat_id: String = db.hget(&song_key, "stat_id")?;
+        let stat_key = SongUserStats::key(&stat_id);
+
+        let liked = db.hget::<_, _, String>(&stat_key, "liked")? == "true";
+        db.hset::<_, _, _, ()>(&stat_key, "liked", if liked { "false" } else { "true" })?;
+
+        Ok(!liked)
+    }
 }
 
 impl Album {

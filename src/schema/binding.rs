@@ -101,10 +101,10 @@ graphql_object!(Mutation: database::Connection |&self| {
         Mutation::play_song(executor.context(), song_id)
     }
 
-    field toggle_like(song_id: ID) -> bool
+    field toggle_like(&executor, song_id: ID) -> FieldResult<bool>
             as "Toggles the like state of the specified song. Returns whether or not the song is \
                 liked after the like is toggled." {
-        true
+        Mutation::toggle_like(executor.context(), song_id)
     }
 
     field create_playlist(
