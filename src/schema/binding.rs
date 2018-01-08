@@ -244,24 +244,6 @@ graphql_object!(Artist: database::Connection |&self| {
                 album artist of. The albums are sorted by release date." {
         self.albums(executor.context())
     }
-
-    field featured(&executor) -> FieldResult<Vec<Album>>
-            as "The albums which this artist has featured on. These are albums which the artist \
-                isn't an album artist of but albums which the artist is in. The albums are \
-                sorted by release date." {
-        self.featured(executor.context())
-    }
-
-    field singles(&executor) -> FieldResult<Vec<Album>>
-            as "Albums with only a single song where this artist is the album artist or an artist \
-                of the song. The albums are sorted by release date." {
-        self.singles(executor.context())
-    }
-
-    field songs(input: ConnectionQuery) -> Connection<Song>
-            as "Get all songs of an artist." {
-        Connection::default()
-    }
 });
 
 graphql_object!(Song: database::Connection |&self| {
