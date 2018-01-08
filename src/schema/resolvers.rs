@@ -179,6 +179,7 @@ impl Playlist {
     }
 
     pub fn items(&self, query: ConnectionQuery, db: &redis::Connection) -> FieldResult<Connection<PlaylistItem>> {
+        let mut skipping = true;
         let items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
             .arg(self.items_key()).arg(0).arg(-1)
             .iter::<String>(db)?
@@ -189,6 +190,19 @@ impl Playlist {
                     node
                 }
             })
+            .skip_while(|edge| {
+                if query.cursor.is_empty() {
+                    return false;
+                }
+
+                if edge.cursor == query.cursor {
+                    skipping = false;
+                    return true;
+                }
+
+                skipping
+            })
+            .take(query.limit as usize)
             .collect();
 
         Ok(Connection {
