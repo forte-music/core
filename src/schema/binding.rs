@@ -95,10 +95,10 @@ graphql_object!(Query: database::Connection |&self| {
 });
 
 graphql_object!(Mutation: database::Connection |&self| {
-    field play_song(song_id: ID) -> bool
+    field play_song(&executor, song_id: ID) -> FieldResult<bool>
             as "Increments the play count and updates the last played time in SongUserStats.
                 Always returns true." {
-        true
+        Mutation::play_song(executor.context(), song_id)
     }
 
     field toggle_like(song_id: ID) -> bool

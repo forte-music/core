@@ -94,6 +94,23 @@ impl Query {
     }
 }
 
+impl Mutation {
+    pub fn play_song(db: &redis::Connection, id: ID) -> FieldResult<bool> {
+        let song_key = Song::key(&id);
+
+        if !db.exists::<_, bool>(&song_key)? {
+            return Err(FieldError::from(format!("{} does not exist", song_key)));
+        }
+
+        let stat_id: String = db.hget(&song_key, "stat_id")?;
+        let stat_key = SongUserStats::key(&stat_id);
+
+        db.hincr::<_, _, _, ()>(&stat_key, "play_count", 1)?;
+
+        Ok(true)
+    }
+}
+
 impl Album {
     fn songs_key(&self) -> String {
         format!("{}:songs", Album::key(&self.id))
