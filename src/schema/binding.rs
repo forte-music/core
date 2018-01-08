@@ -338,9 +338,9 @@ graphql_object!(Playlist: database::Connection |&self| {
         &self.name
     }
 
-    field duration() -> i32
+    field duration(&executor) -> FieldResult<i32>
             as "The sum of durations of every song in the playlist in seconds." {
-        0
+        self.duration(executor.context())
     }
 
     field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>>

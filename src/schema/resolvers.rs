@@ -196,6 +196,19 @@ impl Playlist {
             edges: items
         })
     }
+
+    pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
+        Ok(
+            redis::cmd("LRANGE")
+                .arg(self.items_key()).arg(0).arg(-1)
+                .iter::<String>(db)?
+                .map(|item| {
+                    let node = PlaylistItem::from_id(&item, db).unwrap();
+                    db.hget::<_, _, i32>(Song::key(&node.song_id), "duration").unwrap()
+                })
+                .sum()
+        )
+    }
 }
 
 impl PlaylistItem {
