@@ -1,6 +1,6 @@
 use schema::model::*;
 use schema::binding::*;
-use juniper::{ID, FieldResult, FieldError};
+use juniper::FieldResult;
 use redis::{self, Commands};
 use serde::Deserialize;
 use serde_redis::RedisDeserialize;
@@ -21,11 +21,11 @@ fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldRe
 
     if let redis::Value::Bulk(ref data) = result {
         if data.len() == 0 {
-            return Err(FieldError::from(format!("{} does not exist", key)));
+            return Err(format!("{} does not exist", key).into());
         }
     }
     else {
-        return Err(FieldError::from("Database error"));
+        return Err("Database error".into());
     }
 
     Ok(result.deserialize()?)
@@ -61,32 +61,32 @@ fn read_members_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldRe
 }
 
 impl Query {
-    pub fn album(db: &redis::Connection, id: ID) -> FieldResult<Album> {
-        Album::from_id(&id, db)
+    pub fn album(db: &redis::Connection, id: &str) -> FieldResult<Album> {
+        Album::from_id(id, db)
     }
 
     pub fn albums(db: &redis::Connection) -> FieldResult<Connection<Album>> {
         read_members_from_db::<Album>("albums", db)
     }
 
-    pub fn artist(db: &redis::Connection, id: ID) -> FieldResult<Artist> {
-        Artist::from_id(&id, db)
+    pub fn artist(db: &redis::Connection, id: &str) -> FieldResult<Artist> {
+        Artist::from_id(id, db)
     }
 
     pub fn artists(db: &redis::Connection) -> FieldResult<Connection<Artist>> {
         read_members_from_db::<Artist>("artists", db)
     }
 
-    pub fn song(db: &redis::Connection, id: ID) -> FieldResult<Song> {
-        Song::from_id(&id, db)
+    pub fn song(db: &redis::Connection, id: &str) -> FieldResult<Song> {
+        Song::from_id(id, db)
     }
 
     pub fn songs(db: &redis::Connection) -> FieldResult<Connection<Song>> {
         read_members_from_db::<Song>("songs", db)
     }
 
-    pub fn playlist(db: &redis::Connection, id: ID) -> FieldResult<Playlist> {
-        Playlist::from_id(&id, db)
+    pub fn playlist(db: &redis::Connection, id: &str) -> FieldResult<Playlist> {
+        Playlist::from_id(id, db)
     }
 
     pub fn playlists(db: &redis::Connection) -> FieldResult<Connection<Playlist>> {
@@ -95,11 +95,11 @@ impl Query {
 }
 
 impl Mutation {
-    pub fn play_song(db: &redis::Connection, id: ID) -> FieldResult<bool> {
-        let song_key = Song::key(&id);
+    pub fn play_song(db: &redis::Connection, id: &str) -> FieldResult<bool> {
+        let song_key = Song::key(id);
 
         if !db.exists::<_, bool>(&song_key)? {
-            return Err(FieldError::from(format!("{} does not exist", song_key)));
+            return Err(format!("{} does not exist", song_key).into());
         }
 
         let stat_id: String = db.hget(&song_key, "stat_id")?;
@@ -110,11 +110,11 @@ impl Mutation {
         Ok(true)
     }
 
-    pub fn toggle_like(db: &redis::Connection, id: ID) -> FieldResult<bool> {
-        let song_key = Song::key(&id);
+    pub fn toggle_like(db: &redis::Connection, id: &str) -> FieldResult<bool> {
+        let song_key = Song::key(id);
 
         if !db.exists::<_, bool>(&song_key)? {
-            return Err(FieldError::from(format!("{} does not exist", song_key)));
+            return Err(format!("{} does not exist", song_key).into());
         }
 
         let stat_id: String = db.hget(&song_key, "stat_id")?;

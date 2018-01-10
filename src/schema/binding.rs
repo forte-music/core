@@ -55,7 +55,7 @@ pub struct PlaylistAppendInput {
 graphql_object!(Query: database::Connection |&self| {
     field album(&executor, id: ID) -> FieldResult<Album>
             as "Get an album by its globally unique id." {
-        Query::album(executor.context(), id)
+        Query::album(executor.context(), &id)
     }
 
     field albums(&executor, input: ConnectionQuery) -> FieldResult<Connection<Album>>
@@ -65,7 +65,7 @@ graphql_object!(Query: database::Connection |&self| {
 
     field artist(&executor, id: ID) -> FieldResult<Artist>
             as "Get an artist by its globally unique id." {
-        Query::artist(executor.context(), id)
+        Query::artist(executor.context(), &id)
     }
 
     field artists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Artist>>
@@ -75,7 +75,7 @@ graphql_object!(Query: database::Connection |&self| {
 
     field song(&executor, id: ID) -> FieldResult<Song>
             as "Get a song by its globally unique id." {
-        Query::song(executor.context(), id)
+        Query::song(executor.context(), &id)
     }
 
     field songs(&executor, input: ConnectionQuery) -> FieldResult<Connection<Song>>
@@ -85,7 +85,7 @@ graphql_object!(Query: database::Connection |&self| {
 
     field playlist(&executor, id: ID) -> FieldResult<Playlist>
             as "Get a playlist by its globally unique id." {
-        Query::playlist(executor.context(), id)
+        Query::playlist(executor.context(), &id)
     }
 
     field playlists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Playlist>>
@@ -98,13 +98,13 @@ graphql_object!(Mutation: database::Connection |&self| {
     field play_song(&executor, song_id: ID) -> FieldResult<bool>
             as "Increments the play count and updates the last played time in SongUserStats. \
                 Always returns true." {
-        Mutation::play_song(executor.context(), song_id)
+        Mutation::play_song(executor.context(), &song_id)
     }
 
     field toggle_like(&executor, song_id: ID) -> FieldResult<bool>
             as "Toggles the like state of the specified song. Returns whether or not the song is \
                 liked after the like is toggled." {
-        Mutation::toggle_like(executor.context(), song_id)
+        Mutation::toggle_like(executor.context(), &song_id)
     }
 
     field create_playlist(
