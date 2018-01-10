@@ -2,6 +2,52 @@ use juniper::{ID, FieldResult};
 use schema::model::*;
 use database;
 
+#[derive(GraphQLEnum)]
+pub enum SortBy {
+    #[graphql(
+        name = "RECENTLY_ADDED",
+        description = "Sort from most recently added to least recently added."
+    )]
+    RecentlyAdded,
+
+    #[graphql(
+        name = "LEXICOGRAPHICALLY",
+        description = "Sort by title in case-insensitive alphabetic order."
+    )]
+    Lexicographically,
+
+    #[graphql(
+        name = "RELEVANCE",
+        description = "Sort by how well the filter matches the item. If this is used \
+                       SortParams.filter must be specified."
+    )]
+    Relevance
+}
+
+#[derive(GraphQLEnum)]
+pub enum Position {
+    #[graphql(
+        name = "BEGINNING",
+        description = "Elements are inserted before the beginning of the list."
+    )]
+    Beginning,
+
+    #[graphql(
+        name = "END",
+        description = "Elements are inserted after the end of the list."
+    )]
+    End
+}
+
+#[derive(GraphQLEnum)]
+pub enum Offset {
+    #[graphql(name = "AFTER")]
+    After,
+
+    #[graphql(name = "BEFORE")]
+    Before
+}
+
 #[derive(GraphQLInputObject)]
 pub struct ConnectionQuery {
     #[graphql(
@@ -11,24 +57,24 @@ pub struct ConnectionQuery {
     pub limit: i32,
 
     #[graphql(
-        description = "The order in which the results are sorted in. By default they are sorted \
-                       from most recently added to least recently added, unless otherwise \
-                       specified."
+        description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
+                       starts from the first position."
     )]
-    pub sort_by: Option<SortBy>,
+    pub cursor: String
+}
+
+#[derive(GraphQLInputObject)]
+pub struct SortParams {
+    #[graphql(
+        description = "The order in which the results are sorted."
+    )]
+    pub sort_by: SortBy,
 
     #[graphql(
         description = "Returns the results sorted in reverse order.",
         default = "false"
     )]
     pub reverse: bool,
-
-    #[graphql(
-        description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
-                       starts from the first position.",
-        default = "String::new()"
-    )]
-    pub cursor: String,
 
     #[graphql(
         description = "Only results with titles matching this string are returned. If this is \
@@ -58,7 +104,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::album(executor.context(), &id)
     }
 
-    field albums(&executor, input: ConnectionQuery) -> FieldResult<Connection<Album>>
+    field albums(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Album>>
             as "Get paginated, filtered, sorted albums." {
         Query::albums(executor.context())
     }
@@ -68,7 +114,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::artist(executor.context(), &id)
     }
 
-    field artists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Artist>>
+    field artists(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Artist>>
             as "Get paginated, filtered, sorted artists." {
         Query::artists(executor.context())
     }
@@ -78,7 +124,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::song(executor.context(), &id)
     }
 
-    field songs(&executor, input: ConnectionQuery) -> FieldResult<Connection<Song>>
+    field songs(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Song>>
             as "Get paginated, filtered, sorted songs." {
         Query::songs(executor.context())
     }
@@ -88,20 +134,20 @@ graphql_object!(Query: database::Connection |&self| {
         Query::playlist(executor.context(), &id)
     }
 
-    field playlists(&executor, input: ConnectionQuery) -> FieldResult<Connection<Playlist>>
+    field playlists(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Playlist>>
             as "Get paginated, filtered, sorted playlists." {
         Query::playlists(executor.context())
     }
 });
 
 graphql_object!(Mutation: database::Connection |&self| {
-    field play_song(&executor, song_id: ID) -> FieldResult<bool>
+    field play_song(&executor, song_id: ID) -> FieldResult<SongUserStats>
             as "Increments the play count and updates the last played time in SongUserStats. \
                 Always returns true." {
         Mutation::play_song(executor.context(), &song_id)
     }
 
-    field toggle_like(&executor, song_id: ID) -> FieldResult<bool>
+    field toggle_like(&executor, song_id: ID) -> FieldResult<SongUserStats>
             as "Toggles the like state of the specified song. Returns whether or not the song is \
                 liked after the like is toggled." {
         Mutation::toggle_like(executor.context(), &song_id)
@@ -118,7 +164,7 @@ graphql_object!(Mutation: database::Connection |&self| {
         Playlist::default()
     }
 
-    field update_playlist(id: ID, name: String) -> Playlist
+    field update_playlist(playlist_id: ID, name: String) -> Playlist
             as "Renames a playlist. Returns a playlist with the changes applied." {
         Playlist::default()
     }
@@ -130,8 +176,8 @@ graphql_object!(Mutation: database::Connection |&self| {
 
     field add_to_playlist_by_cursor(
         input: PlaylistAppendInput,
-        cursor: String
-            as "The cursor relative to which to add songs (Playlist.songs.edges.cursor).",
+        relative_to: ID
+            as "The id relative to which to add songs (PlaylistItem.id).",
         offset: Offset
             as "The direction relative to the cursor where songs will be added."
     ) -> Playlist
@@ -155,15 +201,14 @@ graphql_object!(Mutation: database::Connection |&self| {
     field remove_from_playlist(
         playlist_id: ID
             as "The playlist to remove items from.",
-        cursors: Vec<String>
-            as "A list of cursors from Playlist.songs.edges.cursor pointing to songs to \
-                remove from the playlist."
+        items: Vec<ID>
+            as "A list of ids from PlaylistItem.id for items to remove from the playlist."
     ) -> Playlist
             as "Remove songs from the playlist. Returns the updated playlist." {
         Playlist::default()
     }
 
-    field delete_playlist(id: ID) -> bool
+    field delete_playlist(playlist_id: ID) -> bool
             as "Permanently deletes a playlist." {
         true
     }
@@ -171,12 +216,12 @@ graphql_object!(Mutation: database::Connection |&self| {
     field move_song_in_playlist(
         playlist_id: ID
             as "The id of the playlist to modify.",
-        from_song_cursor: String
-            as "The cursor (Playlist.songs.edges.cursor) of the element to move.",
-        to_song_cursor: String
-            as "The position the song will be moved relative to.",
+        from_item: ID
+            as "The id (PlaylistItem.id) of the element to move.",
+        relative_to_item: ID
+            as "The id of the item fromItem will be moved relative to.",
         offset: Offset
-            as "The direction relative to toSongCursor the song will be moved to."
+            as "The direction relative to relativeToItem fromItem will be moved to."
     ) -> Playlist
             as "Moves a song in a playlist from one position to another." {
         Playlist::default()
@@ -224,6 +269,11 @@ graphql_object!(Album: database::Connection |&self| {
             as "The year the album was released." {
         self.release_year
     }
+
+    field time_added() -> i32
+            as "The epoch time (seconds) when this was created." {
+        self.time_added
+    }
 });
 
 graphql_object!(Artist: database::Connection |&self| {
@@ -243,6 +293,11 @@ graphql_object!(Artist: database::Connection |&self| {
             as "Albums this artist has authored. These are the albums that this artist is the \
                 album artist of. The albums are sorted by release date." {
         self.albums(executor.context())
+    }
+
+    field time_added() -> i32
+            as "The epoch time (seconds) when this was created." {
+        self.time_added
     }
 });
 
@@ -296,6 +351,11 @@ graphql_object!(Song: database::Connection |&self| {
             as "The duration of the song (retrievable at streamUrl) in seconds." {
         self.duration
     }
+
+    field time_added() -> i32
+            as "The epoch time (seconds) when this was created." {
+        self.time_added
+    }
 });
 
 graphql_object!(SongUserStats: database::Connection |&self| {
@@ -341,6 +401,11 @@ graphql_object!(Playlist: database::Connection |&self| {
     field duration(&executor) -> FieldResult<i32>
             as "The sum of durations of every song in the playlist in seconds." {
         self.duration(executor.context())
+    }
+
+    field time_added() -> i32
+            as "The epoch time (seconds) when this was created." {
+        self.time_added
     }
 
     field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>>

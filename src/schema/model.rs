@@ -11,7 +11,8 @@ pub struct Album {
     pub artwork_url: Option<String>,
     pub name: String,
     pub artist_id: String,
-    pub release_year: i32
+    pub release_year: i32,
+    pub time_added: i32
 }
 
 impl Default for Album {
@@ -21,7 +22,8 @@ impl Default for Album {
             artwork_url: None,
             name: "".to_owned(),
             artist_id: "".to_owned(),
-            release_year: 0
+            release_year: 0,
+            time_added: 0
         }
     }
 }
@@ -36,6 +38,7 @@ impl Keyed for Album {
 pub struct Artist {
     pub id: String,
     pub name: String,
+    pub time_added: i32
 }
 
 impl Default for Artist {
@@ -43,6 +46,7 @@ impl Default for Artist {
         Artist {
             id: "0".to_owned(),
             name: "".to_owned(),
+            time_added: 0
         }
     }
 }
@@ -62,7 +66,8 @@ pub struct Song {
     pub stream_url: String,
     pub track_number: i32,
     pub disk_number: i32,
-    pub duration: i32
+    pub duration: i32,
+    pub time_added: i32
 }
 
 impl Default for Song {
@@ -75,7 +80,8 @@ impl Default for Song {
             stream_url: "".to_owned(),
             track_number: 0,
             disk_number: 0,
-            duration: 0
+            duration: 0,
+            time_added: 0
         }
     }
 }
@@ -115,13 +121,15 @@ impl Keyed for SongUserStats {
 pub struct Playlist {
     pub id: String,
     pub name: String,
+    pub time_added: i32
 }
 
 impl Default for Playlist {
     fn default() -> Self {
         Playlist {
             id: "0".to_owned(),
-            name: "".to_owned()
+            name: "".to_owned(),
+            time_added: 0
         }
     }
 }
@@ -170,49 +178,4 @@ impl<T> Default for Connection<T> {
             edges: vec![]
         }
     }
-}
-
-#[derive(GraphQLEnum)]
-pub enum SortBy {
-    #[graphql(
-        name = "RECENTLY_ADDED",
-        description = "Sort from most recently added to least recently added."
-    )]
-    RecentlyAdded,
-
-    #[graphql(
-        name = "RECENTLY_PLAYED",
-        description = "Sort from most recently played to least recently played."
-    )]
-    RecentlyPlayed,
-
-    #[graphql(
-        name = "MOST_PLAYED",
-        description = "Sort from most played to least played."
-    )]
-    MostPlayed,
-
-    #[graphql(
-        description = "Sort by title in case-insensitive alphabetic order."
-    )]
-    Lexicographically
-}
-
-#[derive(GraphQLEnum)]
-pub enum Position {
-    #[graphql(
-        description = "Elements are inserted before the beginning of the list."
-    )]
-    Beginning,
-
-    #[graphql(
-        description = "Elements are inserted after the end of the list."
-    )]
-    End
-}
-
-#[derive(GraphQLEnum)]
-pub enum Offset {
-    After,
-    Before
 }

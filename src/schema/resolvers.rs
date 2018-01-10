@@ -95,7 +95,7 @@ impl Query {
 }
 
 impl Mutation {
-    pub fn play_song(db: &redis::Connection, id: &str) -> FieldResult<bool> {
+    pub fn play_song(db: &redis::Connection, id: &str) -> FieldResult<SongUserStats> {
         let song_key = Song::key(id);
 
         if !db.exists::<_, bool>(&song_key)? {
@@ -107,10 +107,10 @@ impl Mutation {
 
         db.hincr::<_, _, _, ()>(&stat_key, "play_count", 1)?;
 
-        Ok(true)
+        SongUserStats::from_id(&stat_id, db)
     }
 
-    pub fn toggle_like(db: &redis::Connection, id: &str) -> FieldResult<bool> {
+    pub fn toggle_like(db: &redis::Connection, id: &str) -> FieldResult<SongUserStats> {
         let song_key = Song::key(id);
 
         if !db.exists::<_, bool>(&song_key)? {
@@ -123,7 +123,7 @@ impl Mutation {
         let liked = db.hget::<_, _, String>(&stat_key, "liked")? == "true";
         db.hset::<_, _, _, ()>(&stat_key, "liked", if liked { "false" } else { "true" })?;
 
-        Ok(!liked)
+        SongUserStats::from_id(&stat_id, db)
     }
 }
 
