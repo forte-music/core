@@ -371,7 +371,7 @@ graphql_object!(SongUserStats: database::Connection |&self| {
         self.play_count
     }
 
-    field last_played() -> i32
+    field last_played() -> Option<i32>
             as "The epoch time (seconds) at which this song was last played." {
         self.last_played
     }

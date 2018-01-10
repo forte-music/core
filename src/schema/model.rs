@@ -96,7 +96,7 @@ impl Keyed for Song {
 pub struct SongUserStats {
     pub id: String,
     pub play_count: i32,
-    pub last_played: i32,
+    pub last_played: Option<i32>,
     pub liked: bool
 }
 
@@ -105,7 +105,7 @@ impl Default for SongUserStats {
         SongUserStats {
             id: "0".to_owned(),
             play_count: 0,
-            last_played: 0,
+            last_played: None,
             liked: false
         }
     }

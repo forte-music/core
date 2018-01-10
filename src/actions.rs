@@ -65,9 +65,10 @@ pub fn add_song_stats(song_stats: SongUserStats, db: &Connection) -> RedisResult
     db.hset_multiple::<_, _, _, ()>(SongUserStats::key(&song_stats.id), &[
         ("id", &song_stats.id),
         ("play_count", &song_stats.play_count.to_string()),
-        ("last_played", &song_stats.last_played.to_string()),
         ("liked", &song_stats.liked.to_string())
     ])?;
+
+    db.hset::<_, _, _, ()>(SongUserStats::key(&song_stats.id), "last_played", song_stats.last_played)?;
 
     Ok(())
 }
