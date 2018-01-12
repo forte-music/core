@@ -1,8 +1,8 @@
 use schema::model::*;
 use redis::{Connection, Commands, RedisResult};
 
-fn add_list_to_set<T: Keyed>(set_id: &str, list: &[String], db: &Connection) -> RedisResult<()> {
-    db.sadd::<_, _, ()>(T::key(set_id), list)?;
+fn add_list_to_set<T: Keyed>(set_key: &str, list: &[String], db: &Connection) -> RedisResult<()> {
+    db.sadd::<_, _, ()>(set_key, list)?;
 
     Ok(())
 }
@@ -22,7 +22,7 @@ pub fn add_album(album: &Album, db: &Connection) -> RedisResult<()> {
 }
 
 pub fn add_songs_to_album(album_id: &str, songs_ids: &[String], db: &Connection) -> RedisResult<()> {
-    add_list_to_set::<Album>(album_id, songs_ids, db)
+    add_list_to_set::<Album>(&Album::songs_key(album_id), songs_ids, db)
 }
 
 pub fn add_artist(artist: &Artist, db: &Connection) -> RedisResult<()> {
@@ -37,7 +37,7 @@ pub fn add_artist(artist: &Artist, db: &Connection) -> RedisResult<()> {
 }
 
 pub fn add_albums_to_artist(artist_id: &str, album_ids: &[String], db: &Connection) -> RedisResult<()> {
-    add_list_to_set::<Artist>(artist_id, album_ids, db)
+    add_list_to_set::<Artist>(&Artist::albums_key(artist_id), album_ids, db)
 }
 
 pub fn add_song(song: &Song, db: &Connection) -> RedisResult<()> {
@@ -58,7 +58,7 @@ pub fn add_song(song: &Song, db: &Connection) -> RedisResult<()> {
 }
 
 pub fn add_artists_to_song(song_id: &str, artist_ids: &[String], db: &Connection) -> RedisResult<()> {
-    add_list_to_set::<Song>(song_id, artist_ids, db)
+    add_list_to_set::<Song>(&Song::artists_key(song_id), artist_ids, db)
 }
 
 pub fn add_song_stats(song_stats: &SongUserStats, db: &Connection) -> RedisResult<()> {

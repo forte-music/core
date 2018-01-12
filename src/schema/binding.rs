@@ -58,9 +58,10 @@ pub struct ConnectionQuery {
 
     #[graphql(
         description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
-                       starts from the first position."
+                       starts from the first position.",
+        default = "None"
     )]
-    pub cursor: String
+    pub cursor: Option<String>
 }
 
 #[derive(GraphQLInputObject)]
@@ -104,7 +105,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::album(executor.context(), &id)
     }
 
-    field albums(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Album>>
+    field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Album>>
             as "Get paginated, filtered, sorted albums." {
         Query::albums(executor.context())
     }
@@ -114,7 +115,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::artist(executor.context(), &id)
     }
 
-    field artists(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Artist>>
+    field artists(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Artist>>
             as "Get paginated, filtered, sorted artists." {
         Query::artists(executor.context())
     }
@@ -124,7 +125,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::song(executor.context(), &id)
     }
 
-    field songs(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Song>>
+    field songs(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Song>>
             as "Get paginated, filtered, sorted songs." {
         Query::songs(executor.context())
     }
@@ -134,7 +135,7 @@ graphql_object!(Query: database::Connection |&self| {
         Query::playlist(executor.context(), &id)
     }
 
-    field playlists(&executor, input: ConnectionQuery, sort: SortParams) -> FieldResult<Connection<Playlist>>
+    field playlists(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Playlist>>
             as "Get paginated, filtered, sorted playlists." {
         Query::playlists(executor.context())
     }

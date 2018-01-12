@@ -128,8 +128,8 @@ impl Mutation {
 }
 
 impl Album {
-    fn songs_key(&self) -> String {
-        format!("{}:songs", Album::key(&self.id))
+    pub fn songs_key(id: &str) -> String {
+        format!("{}:songs", Album::key(id))
     }
 
     pub fn artist(&self, db: &redis::Connection) -> FieldResult<Artist> {
@@ -137,13 +137,13 @@ impl Album {
     }
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
-        read_vec_from_db(&self.songs_key(), db)
+        read_vec_from_db(&Album::songs_key(&self.id), db)
     }
 
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
         Ok(
             redis::cmd("SORT")
-                .arg(self.songs_key())
+                .arg(Album::songs_key(&self.id))
                 .arg("BY").arg("song:*")
                 .arg("GET").arg("song:*->duration")
                 .iter::<String>(db)?
@@ -154,18 +154,26 @@ impl Album {
 }
 
 impl Artist {
+    pub fn albums_key(id: &str) -> String {
+        format!("{}:albums", Artist::key(id))
+    }
+
     pub fn albums(&self, db: &redis::Connection) -> FieldResult<Vec<Album>> {
-        read_vec_from_db(&format!("{}:albums", Artist::key(&self.id)), db)
+        read_vec_from_db(&Artist::albums_key(&self.id), db)
     }
 }
 
 impl Song {
+    pub fn artists_key(id: &str) -> String {
+        format!("{}:artists", Song::key(id))
+    }
+
     pub fn album(&self, db: &redis::Connection) -> FieldResult<Album> {
         Album::from_id(&self.album_id, db)
     }
 
     pub fn artists(&self, db: &redis::Connection) -> FieldResult<Vec<Artist>> {
-        read_vec_from_db(&format!("{}:artists", Song::key(&self.id)), db)
+        read_vec_from_db(&Song::artists_key(&self.id), db)
     }
 
     pub fn stats(&self, db: &redis::Connection) -> FieldResult<SongUserStats> {
@@ -174,19 +182,19 @@ impl Song {
 }
 
 impl Playlist {
-    fn items_key(&self) -> String {
-        format!("{}:items", Playlist::key(&self.id))
+    fn items_key(id: &str) -> String {
+        format!("{}:items", Playlist::key(id))
     }
 
     pub fn items(&self, query: ConnectionQuery, db: &redis::Connection) -> FieldResult<Connection<PlaylistItem>> {
-        let limit = if query.cursor.is_empty() {
+        let limit = if query.cursor.is_none() {
             query.limit as usize
         } else {
             (query.limit + 1) as usize
         };
 
         let mut items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
-            .arg(self.items_key()).arg(0).arg(-1)
+            .arg(Playlist::items_key(&self.id)).arg(0).arg(-1)
             .iter::<String>(db)?
             .map(|item| {
                 let node = PlaylistItem::from_id(&item, db).unwrap();
@@ -196,13 +204,13 @@ impl Playlist {
                 }
             })
             .skip_while(|edge| {
-                !query.cursor.is_empty() && edge.cursor != query.cursor
+                query.cursor.as_ref().map(|item| *item != edge.cursor).unwrap_or(false)
             })
             .take(limit)
             .collect();
 
         // If we start with a cursor, ignore the item the cursor points to
-        if !query.cursor.is_empty() {
+        if !query.cursor.is_none() {
             items.remove(0);
         }
 
@@ -215,7 +223,7 @@ impl Playlist {
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
         Ok(
             redis::cmd("LRANGE")
-                .arg(self.items_key()).arg(0).arg(-1)
+                .arg(Playlist::items_key(&self.id)).arg(0).arg(-1)
                 .iter::<String>(db)?
                 .map(|item| {
                     let node = PlaylistItem::from_id(&item, db).unwrap();
