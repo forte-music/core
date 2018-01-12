@@ -17,7 +17,8 @@ pub fn add_album(album: &Album, db: &Connection) -> RedisResult<()> {
         ("artwork_url", &album.artwork_url.clone().unwrap_or(String::new())),
         ("name", &album.name),
         ("artist_id", &album.artist_id),
-        ("release_year", &album.release_year.to_string())
+        ("release_year", &album.release_year.to_string()),
+        ("time_added", &album.time_added.to_string())
     ])?;
 
     db.sadd::<_, _, ()>("albums", &album.id)?;
@@ -32,7 +33,8 @@ pub fn add_songs_to_album(album_id: &str, songs_ids: &[String], db: &Connection)
 pub fn add_artist(artist: &Artist, db: &Connection) -> RedisResult<()> {
     db.hset_multiple::<_, _, _, ()>(Artist::key(&artist.id), &[
         ("id", &artist.id),
-        ("name", &artist.name)
+        ("name", &artist.name),
+        ("time_added", &artist.time_added.to_string())
     ])?;
 
     db.sadd::<_, _, ()>("artists", &artist.id)?;
@@ -53,7 +55,8 @@ pub fn add_song(song: &Song, db: &Connection) -> RedisResult<()> {
         ("stream_url", &song.stream_url),
         ("track_number", &song.track_number.to_string()),
         ("disk_number", &song.disk_number.to_string()),
-        ("duration", &song.duration.to_string())
+        ("duration", &song.duration.to_string()),
+        ("time_added", &song.time_added.to_string())
     ])?;
 
     db.sadd::<_, _, ()>("songs", &song.id)?;
@@ -69,7 +72,7 @@ pub fn add_song_stats(song_stats: &SongUserStats, db: &Connection) -> RedisResul
     db.hset_multiple::<_, _, _, ()>(SongUserStats::key(&song_stats.id), &[
         ("id", &song_stats.id),
         ("play_count", &song_stats.play_count.to_string()),
-        ("liked", &song_stats.liked.to_string())
+        ("liked", &song_stats.liked.to_string()),
     ])?;
 
     db.hset::<_, _, _, ()>(SongUserStats::key(&song_stats.id), "last_played", song_stats.last_played)?;
