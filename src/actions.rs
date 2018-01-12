@@ -2,6 +2,10 @@ use schema::model::*;
 use redis::{Connection, Commands, RedisResult};
 
 fn add_list_to_set<T: Keyed>(set_key: &str, list: &[String], db: &Connection) -> RedisResult<()> {
+    if list.len() == 0 {
+        return Ok(());
+    }
+
     db.sadd::<_, _, ()>(set_key, list)?;
 
     Ok(())
