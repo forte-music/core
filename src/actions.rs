@@ -79,3 +79,35 @@ pub fn add_song_stats(song_stats: &SongUserStats, db: &Connection) -> RedisResul
 
     Ok(())
 }
+
+pub fn add_playlist(playlist: &Playlist, db: &Connection) -> RedisResult<()> {
+    db.hset_multiple::<_, _, _, ()>(Playlist::key(&playlist.id), &[
+        ("id", &playlist.id),
+        ("name", &playlist.name),
+        ("time_added", &playlist.time_added.to_string())
+    ])?;
+
+    db.sadd::<_, _, ()>("playlists", &playlist.id)?;
+
+    Ok(())
+}
+
+pub fn add_playlist_items_to_playlist(playlist_id: &str, playlist_item_ids: &[String], db: &Connection)
+        -> RedisResult<()> {
+    if playlist_item_ids.len() == 0 {
+        return Ok(());
+    }
+
+    db.lpush(Playlist::key(playlist_id), playlist_item_ids)
+}
+
+pub fn add_playlist_item(playlist_item: &PlaylistItem, db: &Connection) -> RedisResult<()> {
+    db.hset_multiple::<_, _, _, ()>(PlaylistItem::key(&playlist_item.id), &[
+        ("id", &playlist_item.id),
+        ("song_id", &playlist_item.song_id)
+    ])?;
+
+    db.sadd::<_, _, ()>("playlist-items", &playlist_item.id)?;
+
+    Ok(())
+}
