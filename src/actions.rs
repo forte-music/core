@@ -6,9 +6,7 @@ fn add_list_to_set<T: Keyed>(set_key: &str, list: &[String], db: &Connection) ->
         return Ok(());
     }
 
-    db.sadd::<_, _, ()>(set_key, list)?;
-
-    Ok(())
+    db.sadd(set_key, list)
 }
 
 pub fn add_album(album: &Album, db: &Connection) -> RedisResult<()> {
@@ -21,9 +19,7 @@ pub fn add_album(album: &Album, db: &Connection) -> RedisResult<()> {
         ("time_added", &album.time_added.to_string())
     ])?;
 
-    db.sadd::<_, _, ()>("albums", &album.id)?;
-
-    Ok(())
+    db.sadd("albums", &album.id)
 }
 
 pub fn add_songs_to_album(album_id: &str, songs_ids: &[String], db: &Connection) -> RedisResult<()> {
@@ -37,9 +33,7 @@ pub fn add_artist(artist: &Artist, db: &Connection) -> RedisResult<()> {
         ("time_added", &artist.time_added.to_string())
     ])?;
 
-    db.sadd::<_, _, ()>("artists", &artist.id)?;
-
-    Ok(())
+    db.sadd("artists", &artist.id)
 }
 
 pub fn add_albums_to_artist(artist_id: &str, album_ids: &[String], db: &Connection) -> RedisResult<()> {
@@ -59,9 +53,7 @@ pub fn add_song(song: &Song, db: &Connection) -> RedisResult<()> {
         ("time_added", &song.time_added.to_string())
     ])?;
 
-    db.sadd::<_, _, ()>("songs", &song.id)?;
-
-    Ok(())
+    db.sadd("songs", &song.id)
 }
 
 pub fn add_artists_to_song(song_id: &str, artist_ids: &[String], db: &Connection) -> RedisResult<()> {
@@ -75,9 +67,7 @@ pub fn add_song_stats(song_stats: &SongUserStats, db: &Connection) -> RedisResul
         ("liked", &song_stats.liked.to_string()),
     ])?;
 
-    db.hset::<_, _, _, ()>(SongUserStats::key(&song_stats.id), "last_played", song_stats.last_played)?;
-
-    Ok(())
+    db.hset(SongUserStats::key(&song_stats.id), "last_played", song_stats.last_played)
 }
 
 pub fn add_playlist(playlist: &Playlist, db: &Connection) -> RedisResult<()> {
@@ -87,9 +77,7 @@ pub fn add_playlist(playlist: &Playlist, db: &Connection) -> RedisResult<()> {
         ("time_added", &playlist.time_added.to_string())
     ])?;
 
-    db.sadd::<_, _, ()>("playlists", &playlist.id)?;
-
-    Ok(())
+    db.sadd("playlists", &playlist.id)
 }
 
 pub fn add_playlist_items_to_playlist(playlist_id: &str, playlist_item_ids: &[String], db: &Connection)
@@ -107,7 +95,5 @@ pub fn add_playlist_item(playlist_item: &PlaylistItem, db: &Connection) -> Redis
         ("song_id", &playlist_item.song_id)
     ])?;
 
-    db.sadd::<_, _, ()>("playlist-items", &playlist_item.id)?;
-
-    Ok(())
+    db.sadd("playlist-items", &playlist_item.id)
 }
