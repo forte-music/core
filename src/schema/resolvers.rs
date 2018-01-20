@@ -182,7 +182,7 @@ impl Song {
 }
 
 impl Playlist {
-    fn items_key(id: &str) -> String {
+    pub fn items_key(id: &str) -> String {
         format!("{}:items", Playlist::key(id))
     }
 

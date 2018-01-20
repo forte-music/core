@@ -86,7 +86,7 @@ pub fn add_playlist_items_to_playlist(playlist_id: &str, playlist_item_ids: &[St
         return Ok(());
     }
 
-    db.rpush(Playlist::key(playlist_id), playlist_item_ids)
+    db.rpush(Playlist::items_key(playlist_id), playlist_item_ids)
 }
 
 pub fn add_playlist_item(playlist_item: &PlaylistItem, db: &Connection) -> RedisResult<()> {
