@@ -1,3 +1,5 @@
+#![allow(unused_parens)]
+
 use juniper::{ID, FieldResult};
 use schema::model::*;
 use database;
