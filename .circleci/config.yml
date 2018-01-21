@@ -34,7 +34,7 @@ jobs:
 
       - run:
           name: Lint
-          command: cargo clippy
+          command: cargo clippy -- -D warnings
 
 workflows:
   version: 2

@@ -2,7 +2,7 @@ use schema::model::*;
 use redis::{Commands, Connection, RedisResult};
 
 fn add_list_to_set<T: Keyed>(set_key: &str, list: &[String], db: &Connection) -> RedisResult<()> {
-    if list.len() == 0 {
+    if list.is_empty() {
         return Ok(());
     }
 
@@ -16,7 +16,7 @@ pub fn add_album(album: &Album, db: &Connection) -> RedisResult<()> {
             ("id", &album.id),
             (
                 "artwork_url",
-                &album.artwork_url.clone().unwrap_or(String::new()),
+                &album.artwork_url.clone().unwrap_or_default(),
             ),
             ("name", &album.name),
             ("artist_id", &album.artist_id),
@@ -119,7 +119,7 @@ pub fn add_playlist_items_to_playlist(
     playlist_item_ids: &[String],
     db: &Connection,
 ) -> RedisResult<()> {
-    if playlist_item_ids.len() == 0 {
+    if playlist_item_ids.is_empty() {
         return Ok(());
     }
 

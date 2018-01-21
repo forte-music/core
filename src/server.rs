@@ -22,6 +22,7 @@ fn graphql() -> content::Html<String> {
 }
 
 #[get("/graphql?<request>")]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 fn get_graphql_handler(
     context: database::Connection,
     request: juniper_rocket::GraphQLRequest,
@@ -31,6 +32,7 @@ fn get_graphql_handler(
 }
 
 #[post("/graphql", data = "<request>")]
+#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
 fn post_graphql_handler(
     context: database::Connection,
     request: juniper_rocket::GraphQLRequest,

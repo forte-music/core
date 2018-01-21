@@ -21,7 +21,7 @@ fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldRe
     let result: redis::Value = db.hgetall(key)?;
 
     if let redis::Value::Bulk(ref data) = result {
-        if data.len() == 0 {
+        if data.is_empty() {
             return Err(format!("{} does not exist", key).into());
         }
     } else {
@@ -191,7 +191,7 @@ impl Playlist {
 
     pub fn items(
         &self,
-        query: ConnectionQuery,
+        query: &ConnectionQuery,
         db: &redis::Connection,
     ) -> FieldResult<Connection<PlaylistItem>> {
         let limit = if query.cursor.is_none() {
