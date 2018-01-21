@@ -1,4 +1,6 @@
+// The GraphQL macros like their lint warnings
 #![allow(unused_parens)]
+#![cfg_attr(feature = "cargo-clippy", allow(double_parens, op_ref))]
 
 use juniper::{FieldResult, ID};
 use schema::model::*;
@@ -403,7 +405,7 @@ graphql_object!(Playlist: database::Connection |&self| {
 
     field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>>
             as "The items in the playlist." {
-        self.items(input, executor.context())
+        self.items(&input, executor.context())
     }
 });
 
