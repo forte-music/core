@@ -1,9 +1,9 @@
 extern crate forte_core;
-extern crate toml;
+extern crate redis;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate redis;
+extern crate toml;
 
 mod structs;
 
@@ -25,7 +25,7 @@ fn main() {
     if !path.is_dir() {
         println!(
             "The fixtures can't be found. This command must be run from the fixture_setup \
-            directory of the source after running `yarn install`."
+             directory of the source after running `yarn install`."
         );
 
         return;
@@ -38,17 +38,17 @@ fn main() {
 }
 
 fn load_everything(path: &str, db: &Connection) -> Result<(), Box<Error>> {
-    load_artists(&path, &db)?;
-    load_albums(&path, &db)?;
-    load_playlists(&path, &db)?;
-    load_songs(&path, &db)?;
-    load_stats(&path, &db)?;
+    load_artists(path, db)?;
+    load_albums(path, db)?;
+    load_playlists(path, db)?;
+    load_songs(path, db)?;
+    load_stats(path, db)?;
 
     Ok(())
 }
 
 fn load_artists(path: &str, db: &Connection) -> Result<(), Box<Error>> {
-    let artists = read_artists(&path)?;
+    let artists = read_artists(path)?;
 
     for artist_source in artists.artists {
         let album_ids = artist_source.album_ids.clone();
@@ -56,8 +56,8 @@ fn load_artists(path: &str, db: &Connection) -> Result<(), Box<Error>> {
 
         let artist = artist_source.into();
 
-        actions::add_artist(&artist, &db)?;
-        actions::add_albums_to_artist(&id, &album_ids, &db)?;
+        actions::add_artist(&artist, db)?;
+        actions::add_albums_to_artist(&id, &album_ids, db)?;
     }
 
     Ok(())
@@ -72,15 +72,15 @@ fn load_albums(path: &str, db: &Connection) -> Result<(), Box<Error>> {
         let id = album_source.id.clone();
         let album = album_source.into();
 
-        actions::add_album(&album, &db)?;
-        actions::add_songs_to_album(&id, &song_ids, &db)?;
+        actions::add_album(&album, db)?;
+        actions::add_songs_to_album(&id, &song_ids, db)?;
     }
 
     Ok(())
 }
 
 fn load_playlists(path: &str, db: &Connection) -> Result<(), Box<Error>> {
-    let playlists = read_playlists(&path)?;
+    let playlists = read_playlists(path)?;
 
     for playlist_source in playlists.playlists {
         let song_ids = playlist_source.song_ids.clone();
@@ -88,20 +88,19 @@ fn load_playlists(path: &str, db: &Connection) -> Result<(), Box<Error>> {
         let id = playlist_source.id.clone();
         let playlist: Playlist = playlist_source.into();
 
-        actions::add_playlist(&playlist, &db)?;
+        actions::add_playlist(&playlist, db)?;
 
         let playlist_items: Vec<PlaylistItem> = song_ids
             .into_iter()
             .enumerate()
-            .map(|(index, song_id)|
-                PlaylistItem {
-                    id: format!("{}:{}", id, index),
-                    song_id,
-                })
+            .map(|(index, song_id)| PlaylistItem {
+                id: format!("{}:{}", id, index),
+                song_id,
+            })
             .collect();
 
         for playlist_item in &playlist_items {
-            actions::add_playlist_item(&playlist_item, &db)?;
+            actions::add_playlist_item(playlist_item, db)?;
         }
 
         let playlist_item_ids: Vec<String> = playlist_items
@@ -109,34 +108,34 @@ fn load_playlists(path: &str, db: &Connection) -> Result<(), Box<Error>> {
             .map(|playlist_item| playlist_item.id)
             .collect();
 
-        actions::add_playlist_items_to_playlist(&id, &playlist_item_ids, &db)?;
+        actions::add_playlist_items_to_playlist(&id, &playlist_item_ids, db)?;
     }
 
     Ok(())
 }
 
 fn load_songs(path: &str, db: &Connection) -> Result<(), Box<Error>> {
-    let import = read_songs(&path)?;
+    let import = read_songs(path)?;
 
     for song_source in import.songs {
         let id = song_source.id.clone();
-        let artist_ids = song_source.artist_ids.clone().unwrap_or(Vec::new());
+        let artist_ids = song_source.artist_ids.clone().unwrap_or_default();
 
         let song = song_source.into();
 
-        actions::add_song(&song, &db)?;
-        actions::add_artists_to_song(&id, &artist_ids, &db)?;
+        actions::add_song(&song, db)?;
+        actions::add_artists_to_song(&id, &artist_ids, db)?;
     }
 
     Ok(())
 }
 
 fn load_stats(path: &str, db: &Connection) -> Result<(), Box<Error>> {
-    let import = read_stats(&path)?;
+    let import = read_stats(path)?;
 
     for stats_source in import.stats {
         let stats = stats_source.into();
-        actions::add_song_stats(&stats, &db)?;
+        actions::add_song_stats(&stats, db)?;
     }
 
     Ok(())
@@ -144,46 +143,33 @@ fn load_stats(path: &str, db: &Connection) -> Result<(), Box<Error>> {
 
 fn read_artists(path: &str) -> Result<structs::ArtistImport, Box<Error>> {
     let mut buffer = String::new();
-    read_items(
-        &format!("{}/{}", path, "artists.toml"),
-        &mut buffer,
-    )
+    read_items(&format!("{}/{}", path, "artists.toml"), &mut buffer)
 }
 
 fn read_albums(path: &str) -> Result<structs::AlbumImport, Box<Error>> {
     let mut buffer = String::new();
-    read_items(
-        &format!("{}/{}", path, "albums.toml"),
-        &mut buffer,
-    )
+    read_items(&format!("{}/{}", path, "albums.toml"), &mut buffer)
 }
 
 fn read_playlists(path: &str) -> Result<structs::PlaylistImport, Box<Error>> {
     let mut buffer = String::new();
-    read_items(
-        &format!("{}/{}", path, "playlists.toml"),
-        &mut buffer,
-    )
+    read_items(&format!("{}/{}", path, "playlists.toml"), &mut buffer)
 }
 
 fn read_songs(path: &str) -> Result<structs::SongImport, Box<Error>> {
     let mut buffer = String::new();
-    read_items(
-        &format!("{}/{}", path, "songs.toml"),
-        &mut buffer,
-    )
+    read_items(&format!("{}/{}", path, "songs.toml"), &mut buffer)
 }
 
 fn read_stats(path: &str) -> Result<structs::StatsImport, Box<Error>> {
     let mut buffer = String::new();
-    read_items(
-        &format!("{}/{}", path, "stats.toml"),
-        &mut buffer,
-    )
+    read_items(&format!("{}/{}", path, "stats.toml"), &mut buffer)
 }
 
-fn read_items<'de, T: Deserialize<'de>>(path: &str, buffer: &'de mut String) -> Result<T,
-    Box<Error>> {
+fn read_items<'de, T: Deserialize<'de>>(
+    path: &str,
+    buffer: &'de mut String,
+) -> Result<T, Box<Error>> {
     let mut f = File::open(path)?;
     f.read_to_string(buffer)?;
 
