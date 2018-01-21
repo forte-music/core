@@ -14,3 +14,4 @@ r2d2_redis = "0.7.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde-redis = { git = "https://github.com/Mcat12/serde-redis.git", branch = "fix/bool-decode" }
+time = "0.1"
