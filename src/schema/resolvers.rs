@@ -4,7 +4,7 @@ use juniper::FieldResult;
 use redis::{self, Commands};
 use serde::Deserialize;
 use serde_redis::RedisDeserialize;
-use time;
+use chrono;
 
 pub trait FromId: Sized {
     fn from_id(id: &str, db: &redis::Connection) -> FieldResult<Self>;
@@ -107,7 +107,7 @@ impl Mutation {
         let stat_key = SongUserStats::key(&stat_id);
 
         db.hincr::<_, _, _, ()>(&stat_key, "play_count", 1)?;
-        let now = time::now_utc().to_timespec().sec;
+        let now = chrono::Utc::now().timestamp();
         db.hset::<_, _, _, ()>(&stat_key, "last_played", now)?;
 
         SongUserStats::from_id(&stat_id, db)

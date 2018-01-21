@@ -8,7 +8,7 @@ extern crate rocket;
 extern crate redis;
 extern crate serde;
 extern crate serde_redis;
-extern crate time;
+extern crate chrono;
 
 pub mod schema;
 pub mod database;
