@@ -1,0 +1,43 @@
+version: 2
+
+aliases:
+  - &restore_cache
+    keys:
+      - cargo-{{ checksum "Cargo.toml" }}
+      - cargo-
+
+  - &save_cache
+    key: cargo-{{ checksum "Cargo.toml" }}
+    paths:
+      - target
+      - ~/.cargo
+
+jobs:
+  test:
+    docker:
+      - image: 0xcaff/rust-nightly
+
+    steps:
+      - checkout
+
+      - restore_cache: *restore_cache
+
+      - run:
+          name: Install Dependencies and Build
+          command: cargo build
+
+      - save_cache: *save_cache
+
+      - run:
+          name: Check Formatting
+          command: cargo fmt -- --write-mode=diff
+
+      - run:
+          name: Lint
+          command: cargo clippy
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
