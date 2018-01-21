@@ -12,7 +12,7 @@ pub struct Album {
     pub name: String,
     pub artist_id: String,
     pub release_year: i32,
-    pub time_added: i32
+    pub time_added: i32,
 }
 
 impl Default for Album {
@@ -23,7 +23,7 @@ impl Default for Album {
             name: "".to_owned(),
             artist_id: "".to_owned(),
             release_year: 0,
-            time_added: 0
+            time_added: 0,
         }
     }
 }
@@ -38,7 +38,7 @@ impl Keyed for Album {
 pub struct Artist {
     pub id: String,
     pub name: String,
-    pub time_added: i32
+    pub time_added: i32,
 }
 
 impl Default for Artist {
@@ -46,7 +46,7 @@ impl Default for Artist {
         Artist {
             id: "0".to_owned(),
             name: "".to_owned(),
-            time_added: 0
+            time_added: 0,
         }
     }
 }
@@ -67,7 +67,7 @@ pub struct Song {
     pub track_number: i32,
     pub disk_number: i32,
     pub duration: i32,
-    pub time_added: i32
+    pub time_added: i32,
 }
 
 impl Default for Song {
@@ -81,7 +81,7 @@ impl Default for Song {
             track_number: 0,
             disk_number: 0,
             duration: 0,
-            time_added: 0
+            time_added: 0,
         }
     }
 }
@@ -97,7 +97,7 @@ pub struct SongUserStats {
     pub id: String,
     pub play_count: i32,
     pub last_played: Option<i32>,
-    pub liked: bool
+    pub liked: bool,
 }
 
 impl Default for SongUserStats {
@@ -106,7 +106,7 @@ impl Default for SongUserStats {
             id: "0".to_owned(),
             play_count: 0,
             last_played: None,
-            liked: false
+            liked: false,
         }
     }
 }
@@ -121,7 +121,7 @@ impl Keyed for SongUserStats {
 pub struct Playlist {
     pub id: String,
     pub name: String,
-    pub time_added: i32
+    pub time_added: i32,
 }
 
 impl Default for Playlist {
@@ -129,7 +129,7 @@ impl Default for Playlist {
         Playlist {
             id: "0".to_owned(),
             name: "".to_owned(),
-            time_added: 0
+            time_added: 0,
         }
     }
 }
@@ -143,14 +143,14 @@ impl Keyed for Playlist {
 #[derive(Deserialize)]
 pub struct PlaylistItem {
     pub id: String,
-    pub song_id: String
+    pub song_id: String,
 }
 
 impl Default for PlaylistItem {
     fn default() -> Self {
         PlaylistItem {
             id: "0".to_owned(),
-            song_id: "0".to_owned()
+            song_id: "0".to_owned(),
         }
     }
 }
@@ -163,19 +163,19 @@ impl Keyed for PlaylistItem {
 
 pub struct Edge<T> {
     pub cursor: String,
-    pub node: T
+    pub node: T,
 }
 
 pub struct Connection<T> {
     pub count: usize,
-    pub edges: Vec<Edge<T>>
+    pub edges: Vec<Edge<T>>,
 }
 
 impl<T> Default for Connection<T> {
     fn default() -> Self {
         Connection {
             count: 0,
-            edges: vec![]
+            edges: vec![],
         }
     }
 }

@@ -6,7 +6,7 @@ use self::r2d2_redis::RedisConnectionManager;
 use redis;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
+use rocket::{Outcome, Request, State};
 use juniper;
 
 pub type Pool = r2d2::Pool<RedisConnectionManager>;
@@ -40,7 +40,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
 
         match pool.get() {
             Ok(conn) => Outcome::Success(Connection(conn)),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }
 }

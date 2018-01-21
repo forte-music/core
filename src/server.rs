@@ -1,7 +1,7 @@
 use rocket::{self, State};
 use rocket::response::content;
 use juniper_rocket;
-use schema::model::{Query, Mutation};
+use schema::model::{Mutation, Query};
 use schema::Schema;
 use database;
 
@@ -9,7 +9,10 @@ pub fn start() {
     rocket::ignite()
         .manage(database::init_pool())
         .manage(Schema::new(Query {}, Mutation {}))
-        .mount("/", routes![graphql, get_graphql_handler, post_graphql_handler])
+        .mount(
+            "/",
+            routes![graphql, get_graphql_handler, post_graphql_handler],
+        )
         .launch();
 }
 
@@ -22,7 +25,7 @@ fn graphql() -> content::Html<String> {
 fn get_graphql_handler(
     context: database::Connection,
     request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>
+    schema: State<Schema>,
 ) -> juniper_rocket::GraphQLResponse {
     request.execute(&schema, &context)
 }
@@ -31,7 +34,7 @@ fn get_graphql_handler(
 fn post_graphql_handler(
     context: database::Connection,
     request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>
+    schema: State<Schema>,
 ) -> juniper_rocket::GraphQLResponse {
     request.execute(&schema, &context)
 }

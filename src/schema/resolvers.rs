@@ -24,8 +24,7 @@ fn from_id<'a, T: Deserialize<'a>>(key: &str, db: &redis::Connection) -> FieldRe
         if data.len() == 0 {
             return Err(format!("{} does not exist", key).into());
         }
-    }
-    else {
+    } else {
         return Err("Database error".into());
     }
 
@@ -43,21 +42,22 @@ fn read_vec_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult
     Ok(items)
 }
 
-fn read_members_from_db<T: FromId>(key: &str, db: &redis::Connection) -> FieldResult<Connection<T>> {
-    let items: Vec<Edge<T>> = redis::cmd("SMEMBERS").arg(key)
+fn read_members_from_db<T: FromId>(
+    key: &str,
+    db: &redis::Connection,
+) -> FieldResult<Connection<T>> {
+    let items: Vec<Edge<T>> = redis::cmd("SMEMBERS")
+        .arg(key)
         .iter::<String>(db)?
         .map(|item| {
             let node = T::from_id(&item, db).unwrap();
-            Edge {
-                cursor: item,
-                node
-            }
+            Edge { cursor: item, node }
         })
         .collect();
 
     Ok(Connection {
         count: items.len(),
-        edges: items
+        edges: items,
     })
 }
 
@@ -144,15 +144,15 @@ impl Album {
     }
 
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
-        Ok(
-            redis::cmd("SORT")
-                .arg(Album::songs_key(&self.id))
-                .arg("BY").arg("song:*")
-                .arg("GET").arg("song:*->duration")
-                .iter::<String>(db)?
-                .map(|duration| duration.parse::<i32>().unwrap())
-                .sum::<i32>()
-        )
+        Ok(redis::cmd("SORT")
+            .arg(Album::songs_key(&self.id))
+            .arg("BY")
+            .arg("song:*")
+            .arg("GET")
+            .arg("song:*->duration")
+            .iter::<String>(db)?
+            .map(|duration| duration.parse::<i32>().unwrap())
+            .sum::<i32>())
     }
 }
 
@@ -189,7 +189,11 @@ impl Playlist {
         format!("{}:items", Playlist::key(id))
     }
 
-    pub fn items(&self, query: ConnectionQuery, db: &redis::Connection) -> FieldResult<Connection<PlaylistItem>> {
+    pub fn items(
+        &self,
+        query: ConnectionQuery,
+        db: &redis::Connection,
+    ) -> FieldResult<Connection<PlaylistItem>> {
         let limit = if query.cursor.is_none() {
             query.limit as usize
         } else {
@@ -197,17 +201,20 @@ impl Playlist {
         };
 
         let mut items: Vec<Edge<PlaylistItem>> = redis::cmd("LRANGE")
-            .arg(Playlist::items_key(&self.id)).arg(0).arg(-1)
+            .arg(Playlist::items_key(&self.id))
+            .arg(0)
+            .arg(-1)
             .iter::<String>(db)?
             .map(|item| {
                 let node = PlaylistItem::from_id(&item, db).unwrap();
-                Edge {
-                    cursor: item,
-                    node
-                }
+                Edge { cursor: item, node }
             })
             .skip_while(|edge| {
-                query.cursor.as_ref().map(|item| *item != edge.cursor).unwrap_or(false)
+                query
+                    .cursor
+                    .as_ref()
+                    .map(|item| *item != edge.cursor)
+                    .unwrap_or(false)
             })
             .take(limit)
             .collect();
@@ -219,21 +226,22 @@ impl Playlist {
 
         Ok(Connection {
             count: items.len(),
-            edges: items
+            edges: items,
         })
     }
 
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
-        Ok(
-            redis::cmd("LRANGE")
-                .arg(Playlist::items_key(&self.id)).arg(0).arg(-1)
-                .iter::<String>(db)?
-                .map(|item| {
-                    let node = PlaylistItem::from_id(&item, db).unwrap();
-                    db.hget::<_, _, i32>(Song::key(&node.song_id), "duration").unwrap()
-                })
-                .sum()
-        )
+        Ok(redis::cmd("LRANGE")
+            .arg(Playlist::items_key(&self.id))
+            .arg(0)
+            .arg(-1)
+            .iter::<String>(db)?
+            .map(|item| {
+                let node = PlaylistItem::from_id(&item, db).unwrap();
+                db.hget::<_, _, i32>(Song::key(&node.song_id), "duration")
+                    .unwrap()
+            })
+            .sum())
     }
 }
 

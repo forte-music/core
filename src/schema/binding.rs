@@ -1,53 +1,39 @@
 #![allow(unused_parens)]
 
-use juniper::{ID, FieldResult};
+use juniper::{FieldResult, ID};
 use schema::model::*;
 use database;
 
 #[derive(GraphQLEnum)]
 pub enum SortBy {
-    #[graphql(
-        name = "RECENTLY_ADDED",
-        description = "Sort from most recently added to least recently added."
-    )]
+    #[graphql(name = "RECENTLY_ADDED",
+              description = "Sort from most recently added to least recently added.")]
     RecentlyAdded,
 
-    #[graphql(
-        name = "LEXICOGRAPHICALLY",
-        description = "Sort by title in case-insensitive alphabetic order."
-    )]
+    #[graphql(name = "LEXICOGRAPHICALLY",
+              description = "Sort by title in case-insensitive alphabetic order.")]
     Lexicographically,
 
-    #[graphql(
-        name = "RELEVANCE",
-        description = "Sort by how well the filter matches the item. If this is used \
-                       SortParams.filter must be specified."
-    )]
-    Relevance
+    #[graphql(name = "RELEVANCE",
+              description = "Sort by how well the filter matches the item. If this is used \
+                             SortParams.filter must be specified.")]
+    Relevance,
 }
 
 #[derive(GraphQLEnum)]
 pub enum Position {
-    #[graphql(
-        name = "BEGINNING",
-        description = "Elements are inserted before the beginning of the list."
-    )]
+    #[graphql(name = "BEGINNING",
+              description = "Elements are inserted before the beginning of the list.")]
     Beginning,
 
-    #[graphql(
-        name = "END",
-        description = "Elements are inserted after the end of the list."
-    )]
-    End
+    #[graphql(name = "END", description = "Elements are inserted after the end of the list.")] End,
 }
 
 #[derive(GraphQLEnum)]
 pub enum Offset {
-    #[graphql(name = "AFTER")]
-    After,
+    #[graphql(name = "AFTER")] After,
 
-    #[graphql(name = "BEFORE")]
-    Before
+    #[graphql(name = "BEFORE")] Before,
 }
 
 #[derive(GraphQLInputObject)]
@@ -107,7 +93,8 @@ graphql_object!(Query: database::Connection |&self| {
         Query::album(executor.context(), &id)
     }
 
-    field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Album>>
+    field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>)
+            -> FieldResult<Connection<Album>>
             as "Get paginated, filtered, sorted albums." {
         Query::albums(executor.context())
     }
@@ -117,7 +104,8 @@ graphql_object!(Query: database::Connection |&self| {
         Query::artist(executor.context(), &id)
     }
 
-    field artists(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Artist>>
+    field artists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
+            -> FieldResult<Connection<Artist>>
             as "Get paginated, filtered, sorted artists." {
         Query::artists(executor.context())
     }
@@ -127,7 +115,8 @@ graphql_object!(Query: database::Connection |&self| {
         Query::song(executor.context(), &id)
     }
 
-    field songs(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Song>>
+    field songs(&executor, input: ConnectionQuery, sort: Option<SortParams>)
+            -> FieldResult<Connection<Song>>
             as "Get paginated, filtered, sorted songs." {
         Query::songs(executor.context())
     }
@@ -137,7 +126,8 @@ graphql_object!(Query: database::Connection |&self| {
         Query::playlist(executor.context(), &id)
     }
 
-    field playlists(&executor, input: ConnectionQuery, sort: Option<SortParams>) -> FieldResult<Connection<Playlist>>
+    field playlists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
+            -> FieldResult<Connection<Playlist>>
             as "Get paginated, filtered, sorted playlists." {
         Query::playlists(executor.context())
     }
