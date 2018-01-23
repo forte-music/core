@@ -10,6 +10,7 @@ aliases:
     key: cargo-{{ checksum "Cargo.toml" }}
     paths:
       - target
+      - fixture_setup/target
       - ~/.cargo
 
 jobs:
@@ -23,18 +24,29 @@ jobs:
       - restore_cache: *restore_cache
 
       - run:
-          name: Install Dependencies and Build
-          command: cargo build
+          name: Check for Errors
+          command: |
+            cargo check
+            cd fixture_setup
+            cargo check
 
       - save_cache: *save_cache
 
       - run:
           name: Check Formatting
-          command: cargo fmt -- --write-mode=diff
+          command: |
+            cargo fmt -- --write-mode=diff
+            cd fixture_setup
+            cargo fmt -- --write-mode=diff
 
       - run:
-          name: Lint
-          command: cargo clippy -- -D warnings
+          name: Check Linting
+          command: |
+            cargo clippy -- -D warnings
+            cd fixture_setup
+            cargo clippy -- -D warnings
+
+      - save_cache: *save_cache
 
   test:
     docker:
