@@ -8,418 +8,288 @@ use database;
 
 #[derive(GraphQLEnum)]
 pub enum SortBy {
-    #[graphql(name = "RECENTLY_ADDED",
-              description = "Sort from most recently added to least recently added.")]
-    RecentlyAdded,
-
-    #[graphql(name = "LEXICOGRAPHICALLY",
-              description = "Sort by title in case-insensitive alphabetic order.")]
-    Lexicographically,
-
-    #[graphql(name = "RELEVANCE",
-              description = "Sort by how well the filter matches the item. If this is used \
-                             SortParams.filter must be specified.")]
-    Relevance,
+    #[graphql(name = "RECENTLY_ADDED")] RecentlyAdded,
+    #[graphql(name = "LEXICOGRAPHICALLY")] Lexicographically,
+    #[graphql(name = "RELEVANCE")] Relevance,
 }
 
 #[derive(GraphQLEnum)]
 pub enum Position {
-    #[graphql(name = "BEGINNING",
-              description = "Elements are inserted before the beginning of the list.")]
-    Beginning,
-
-    #[graphql(name = "END", description = "Elements are inserted after the end of the list.")] End,
+    #[graphql(name = "BEGINNING")] Beginning,
+    #[graphql(name = "END")] End,
 }
 
 #[derive(GraphQLEnum)]
 pub enum Offset {
     #[graphql(name = "AFTER")] After,
-
     #[graphql(name = "BEFORE")] Before,
 }
 
 #[derive(GraphQLInputObject)]
 pub struct ConnectionQuery {
-    #[graphql(
-        description = "The maximum number of results to return.",
-        default = "25"
-    )]
+    #[graphql(default = "25")]
     pub limit: i32,
 
-    #[graphql(
-        description = "Results after this cursor (Edge.cursor) will be returned. If not specified, \
-                       starts from the first position.",
-        default = "None"
-    )]
-    pub cursor: Option<String>
+    #[graphql(default = "None")]
+    pub cursor: Option<String>,
 }
 
 #[derive(GraphQLInputObject)]
 pub struct SortParams {
-    #[graphql(
-        description = "The order in which the results are sorted."
-    )]
     pub sort_by: SortBy,
 
-    #[graphql(
-        description = "Returns the results sorted in reverse order.",
-        default = "false"
-    )]
+    #[graphql(default = "false")]
     pub reverse: bool,
 
-    #[graphql(
-        description = "Only results with titles matching this string are returned. If this is \
-                       specified, the default sortBy will now be from best match to worst match.",
-        default = "String::new()"
-    )]
-    pub filter: String
+    #[graphql(default = "String::new()")]
+    pub filter: String,
 }
 
 #[derive(GraphQLInputObject)]
 pub struct PlaylistAppendInput {
-    #[graphql(
-        description = "The id of the playlist to add songs to."
-    )]
     pub playlist_id: ID,
-
-    #[graphql(
-        description = "The ids (Song.id) of songs to add to the playlist in the order specified."
-    )]
-    pub songs: Vec<ID>
+    pub songs: Vec<ID>,
 }
 
-// todo: add parameter documentation
 graphql_object!(Query: database::Connection |&self| {
-    field album(&executor, id: ID) -> FieldResult<Album>
-            as "Get an album by its globally unique id." {
+    field album(&executor, id: ID) -> FieldResult<Album> {
         Query::album(executor.context(), &id)
     }
 
     field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Album>>
-            as "Get paginated, filtered, sorted albums." {
+            -> FieldResult<Connection<Album>> {
         Query::albums(executor.context())
     }
 
-    field artist(&executor, id: ID) -> FieldResult<Artist>
-            as "Get an artist by its globally unique id." {
+    field artist(&executor, id: ID) -> FieldResult<Artist> {
         Query::artist(executor.context(), &id)
     }
 
     field artists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Artist>>
-            as "Get paginated, filtered, sorted artists." {
+            -> FieldResult<Connection<Artist>> {
         Query::artists(executor.context())
     }
 
-    field song(&executor, id: ID) -> FieldResult<Song>
-            as "Get a song by its globally unique id." {
+    field song(&executor, id: ID) -> FieldResult<Song> {
         Query::song(executor.context(), &id)
     }
 
     field songs(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Song>>
-            as "Get paginated, filtered, sorted songs." {
+            -> FieldResult<Connection<Song>> {
         Query::songs(executor.context())
     }
 
-    field playlist(&executor, id: ID) -> FieldResult<Playlist>
-            as "Get a playlist by its globally unique id." {
+    field playlist(&executor, id: ID) -> FieldResult<Playlist> {
         Query::playlist(executor.context(), &id)
     }
 
     field playlists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Playlist>>
-            as "Get paginated, filtered, sorted playlists." {
+            -> FieldResult<Connection<Playlist>> {
         Query::playlists(executor.context())
     }
 });
 
 graphql_object!(Mutation: database::Connection |&self| {
-    field play_song(&executor, song_id: ID) -> FieldResult<SongUserStats>
-            as "Increments the play count and updates the last played time in SongUserStats. \
-                Always returns true." {
+    field play_song(&executor, song_id: ID) -> FieldResult<SongUserStats> {
         Mutation::play_song(executor.context(), &song_id)
     }
 
-    field toggle_like(&executor, song_id: ID) -> FieldResult<SongUserStats>
-            as "Toggles the like state of the specified song. Returns whether or not the song is \
-                liked after the like is toggled." {
+    field toggle_like(&executor, song_id: ID) -> FieldResult<SongUserStats> {
         Mutation::toggle_like(executor.context(), &song_id)
     }
 
     field create_playlist(
-        name: String
-            as "The name of the new playlist.",
+        name: String,
         songs: Option<Vec<ID>>
-            as "The ids of songs to add to the playlist in the order specified. If an invalid id \
-                is passed, the entire request fails."
-    ) -> Playlist
-            as "Creates a new playlist. Returns the newly created playlist." {
+    ) -> Playlist {
         Playlist::default()
     }
 
-    field update_playlist(playlist_id: ID, name: String) -> Playlist
-            as "Renames a playlist. Returns a playlist with the changes applied." {
+    field update_playlist(playlist_id: ID, name: String) -> Playlist {
         Playlist::default()
     }
 
-    field add_to_playlist_relative(input: PlaylistAppendInput, position: Position) -> Playlist
-            as "Adds songs to the end or the beginning of a playlist." {
+    field add_to_playlist_relative(input: PlaylistAppendInput, position: Position) -> Playlist {
         Playlist::default()
     }
 
     field add_to_playlist_by_cursor(
         input: PlaylistAppendInput,
-        relative_to: ID
-            as "The id relative to which to add songs (PlaylistItem.id).",
+        relative_to: ID,
         offset: Offset
-            as "The direction relative to the cursor where songs will be added."
-    ) -> Playlist
-            as "Adds songs to a playlist relative to a cursor (Playlist.songs.edges.cursor). \
-                This is useful because in some cases the index isn't known and is hard to compute \
-                because of its dependence on global state while cursors are local state." {
+    ) -> Playlist {
         Playlist::default()
     }
 
     field add_to_playlist_by_index(
         input: PlaylistAppendInput,
-        position: i32
-            as "The zero indexed offset relative to which to add songs.",
+        position: i32,
         offset: Offset
-            as "The direction relative to the offset where songs will be added."
-    ) -> Playlist
-            as "Adds songs to a playlist relative to an index." {
+    ) -> Playlist {
         Playlist::default()
     }
 
     field remove_from_playlist(
-        playlist_id: ID
-            as "The playlist to remove items from.",
+        playlist_id: ID,
         items: Vec<ID>
-            as "A list of ids from PlaylistItem.id for items to remove from the playlist."
-    ) -> Playlist
-            as "Remove songs from the playlist. Returns the updated playlist." {
+    ) -> Playlist {
         Playlist::default()
     }
 
-    field delete_playlist(playlist_id: ID) -> bool
-            as "Permanently deletes a playlist." {
+    field delete_playlist(playlist_id: ID) -> bool {
         true
     }
 
     field move_song_in_playlist(
-        playlist_id: ID
-            as "The id of the playlist to modify.",
-        from_item: ID
-            as "The id (PlaylistItem.id) of the element to move.",
-        relative_to_item: ID
-            as "The id of the item fromItem will be moved relative to.",
+        playlist_id: ID,
+        from_item: ID,
+        relative_to_item: ID,
         offset: Offset
-            as "The direction relative to relativeToItem fromItem will be moved to."
-    ) -> Playlist
-            as "Moves a song in a playlist from one position to another." {
+    ) -> Playlist {
         Playlist::default()
     }
 });
 
 graphql_object!(Album: database::Connection |&self| {
-    description: "An album is a collection of songs which belong to an artist and has a name."
-
-    field id() -> ID
-            as "A globally unique id referring to this album." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field artwork_url() -> &Option<String>
-            as "The http/https url at which a square PNG of the album artwork can be found. \
-                Clients should request artwork with the same authentication as used with the \
-                API server." {
+    field artwork_url() -> &Option<String> {
         &self.artwork_url
     }
 
-    field name() -> &str
-            as "The human readable name of the album." {
+    field name() -> &str {
         &self.name
     }
 
-    field artist(&executor) -> FieldResult<Artist>
-            as "The artist who released the album. If there are multiple artists on the \
-                album this is usually various artists (a designated id). This is usually the \
-                album artists tag of files." {
+    field artist(&executor) -> FieldResult<Artist> {
         self.artist(executor.context())
     }
 
-    field songs(&executor) -> FieldResult<Vec<Song>>
-            as "Songs in this album sorted by song index." {
+    field songs(&executor) -> FieldResult<Vec<Song>> {
         self.songs(executor.context())
     }
 
-    field duration(&executor) -> FieldResult<i32>
-            as "The sum of the durations of every song in this album in seconds." {
+    field duration(&executor) -> FieldResult<i32> {
         self.duration(executor.context())
     }
 
-    field release_year() -> i32
-            as "The year the album was released." {
+    field release_year() -> i32 {
         self.release_year
     }
 
-    field time_added() -> i32
-            as "The epoch time (seconds) when this was created." {
+    field time_added() -> i32 {
         self.time_added
     }
 });
 
 graphql_object!(Artist: database::Connection |&self| {
-    description: "An artist has a name and albums."
-
-    field id() -> ID
-            as "A globally unique id referring to this artist." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field name() -> &str
-            as "The human readable name of this artist." {
+    field name() -> &str {
         &self.name
     }
 
-    field albums(&executor) -> FieldResult<Vec<Album>>
-            as "Albums this artist has authored. These are the albums that this artist is the \
-                album artist of. The albums are sorted by release date." {
+    field albums(&executor) -> FieldResult<Vec<Album>> {
         self.albums(executor.context())
     }
 
-    field time_added() -> i32
-            as "The epoch time (seconds) when this was created." {
+    field time_added() -> i32 {
         self.time_added
     }
 });
 
 graphql_object!(Song: database::Connection |&self| {
-    description: "A song is a piece of music written by artists. It is always part of an album. \
-                  It represents a singe audio file."
-
-    field id() -> ID
-            as "A globally unique id referring to this song." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field name() -> &str
-            as "The human readable name of this song." {
+    field name() -> &str {
         &self.name
     }
 
-    field album(&executor) -> FieldResult<Album>
-            as "The album this song is a part of. A song can only belong to one album." {
+    field album(&executor) -> FieldResult<Album> {
         self.album(executor.context())
     }
 
-    field artists(&executor) -> FieldResult<Vec<Artist>>
-            as "The artists which composed this song." {
+    field artists(&executor) -> FieldResult<Vec<Artist>> {
         self.artists(executor.context())
     }
 
-    field stream_url() -> &str
-            as "The url at which the song can be streamed from. See \
-                github.com/forte-music/schema for details about this field." {
+    field stream_url() -> &str {
         &self.stream_url
     }
 
-    field track_number() -> i32
-            as "The track number of this song. This may be one or zero indexed and is provided by \
-                the file's metadata." {
+    field track_number() -> i32 {
         self.track_number
     }
 
-    field disk_number() -> i32
-            as "The disk this track is on. The disk number is assumed to be one if not provided." {
+    field disk_number() -> i32 {
         self.disk_number
     }
 
-    field stats(&executor) -> FieldResult<SongUserStats>
-            as "User stats for a song." {
+    field stats(&executor) -> FieldResult<SongUserStats> {
         self.stats(executor.context())
     }
 
-    field duration() -> i32
-            as "The duration of the song (retrievable at streamUrl) in seconds." {
+    field duration() -> i32 {
         self.duration
     }
 
-    field time_added() -> i32
-            as "The epoch time (seconds) when this was created." {
+    field time_added() -> i32 {
         self.time_added
     }
 });
 
 graphql_object!(SongUserStats: database::Connection |&self| {
-    description: "Stats for a song tied to a specific user."
-
-    field id() -> ID
-            as "A globally unique id referring to a song's stats." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field play_count() -> i32
-            as "The number of times this song has been played." {
+    field play_count() -> i32 {
         self.play_count
     }
 
-    field last_played() -> Option<i32>
-            as "The epoch time (seconds) at which this song was last played." {
+    field last_played() -> Option<i32> {
         self.last_played
     }
 
-    field liked() -> bool
-            as "Whether or not this song is favorited. Favorited songs go into their own \
-                auto-playlist." {
+    field liked() -> bool {
         self.liked
     }
 });
 
 graphql_object!(Playlist: database::Connection |&self| {
-    description: "A named collection of songs. The same song can appear multiple times in a \
-                  playlist."
-
-    field id() -> ID
-            as "A globally unique id referring to this playlist." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field name() -> &str
-            as "Human readable name of the playlist. This is chosen by the user when the playlist \
-                is created." {
+    field name() -> &str {
         &self.name
     }
 
-    field duration(&executor) -> FieldResult<i32>
-            as "The sum of durations of every song in the playlist in seconds." {
+    field duration(&executor) -> FieldResult<i32> {
         self.duration(executor.context())
     }
 
-    field time_added() -> i32
-            as "The epoch time (seconds) when this was created." {
+    field time_added() -> i32 {
         self.time_added
     }
 
-    field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>>
-            as "The items in the playlist." {
+    field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>> {
         self.items(&input, executor.context())
     }
 });
 
 graphql_object!(PlaylistItem: database::Connection |&self| {
-    description: "An item in a playlist."
-
-    field id() -> ID
-            as "The id of the playlist item. This is position invariant and allows for \
-                addressing items in a playlist." {
+    field id() -> ID {
         ID::from(self.id.clone())
     }
 
-    field song(&executor) -> FieldResult<Song>
-            as "The song this item points to." {
+    field song(&executor) -> FieldResult<Song> {
         self.song(executor.context())
     }
 });
