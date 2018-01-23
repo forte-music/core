@@ -3,6 +3,8 @@ version: 2
 aliases:
   - &restore_cache
     keys:
+      - cargo-{{ checksum "Cargo.toml" }}-{{ checksum "fixture_setup/Cargo.toml" }}-{{ checksum "fixture_setup/package.json" }}
+      - cargo-{{ checksum "Cargo.toml" }}-{{ checksum "fixture_setup/Cargo.toml" }}
       - cargo-{{ checksum "Cargo.toml" }}
       - cargo-
 
@@ -10,8 +12,9 @@ aliases:
     key: cargo-{{ checksum "Cargo.toml" }}
     paths:
       - target
-      - fixture_setup/target
       - ~/.cargo
+      - fixture_setup/target
+      - fixture_setup/node_modules
 
 jobs:
   lint:
