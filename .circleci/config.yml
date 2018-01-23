@@ -65,6 +65,12 @@ jobs:
       - restore_cache: *restore_cache
 
       - run:
+          name: Install Schema
+          command: |
+            cd fixture_setup
+            yarn install
+
+      - run:
           name: Install Fixtures
           command: |
             cd fixture_setup
