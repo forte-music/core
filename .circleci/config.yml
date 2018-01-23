@@ -19,7 +19,7 @@ aliases:
 jobs:
   lint:
     docker:
-      - image: 0xcaff/rust-nightly
+      - image: fortemusic/core-build
 
     steps:
       - checkout
@@ -54,7 +54,7 @@ jobs:
   test:
     docker:
       # Primary container
-      - image: 0xcaff/rust-nightly
+      - image: fortemusic/core-build
 
       # Secondary container (available on localhost)
       - image: redis:4.0.6
