@@ -434,9 +434,9 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@forte-music/schema@^0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@forte-music/schema/-/schema-0.0.12.tgz#81c61c084d7aeded7809f0483b7916497431b5d4"
+"@forte-music/schema@^0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@forte-music/schema/-/schema-0.0.13.tgz#b6f0d950bfe6ac9f205f2db67531aae060f96d97"
   dependencies:
     "@babel/core" "^7.0.0-beta.38"
     "@babel/preset-env" "^7.0.0-beta.38"
