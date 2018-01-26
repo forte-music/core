@@ -77,6 +77,10 @@ jobs:
             cargo run
 
       - run:
+          name: Build Core
+          command: cargo build
+
+      - run:
           name: Start Core
           # Start core as a daemon logging to server.log
           command: cargo run >server.log 2>&1 &
