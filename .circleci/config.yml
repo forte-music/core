@@ -115,7 +115,7 @@ jobs:
           name: Run Tests
           command: |
             cd fixture_setup
-            #wait-for localhost:8000 -- echo "Core started"
+            wait-for localhost:8000 -- echo "Core started"
             yarn run forte-test-api http://localhost:8000/graphql
 
 workflows:
