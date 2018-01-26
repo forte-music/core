@@ -140,7 +140,19 @@ impl Album {
     }
 
     pub fn songs(&self, db: &redis::Connection) -> FieldResult<Vec<Song>> {
-        read_vec_from_db(&Album::songs_key(&self.id), db)
+        let key = Album::songs_key(&self.id);
+        let ids: Vec<String> = redis::cmd("SORT")
+            .arg(&key)
+            .arg("BY").arg("song:*->track_number")
+            .arg("GET").arg("song:*->id")
+            .query(db)?;
+        let mut items: Vec<Song> = Vec::with_capacity(ids.len());
+
+        for id in ids {
+            items.push(Song::from_id(&id, db)?);
+        }
+
+        Ok(items)
     }
 
     pub fn duration(&self, db: &redis::Connection) -> FieldResult<i32> {
