@@ -96,6 +96,10 @@ jobs:
             cd fixture_setup
             cargo run
 
+      - save_cache: *save_fixture_cache
+
+      - save_cache: *save_yarn_cache
+
       - run:
           name: Build Core
           command: cargo build
@@ -113,10 +117,6 @@ jobs:
             cd fixture_setup
             #wait-for localhost:8000 -- echo "Core started"
             yarn run forte-test-api http://localhost:8000/graphql
-
-      - save_cache: *save_fixture_cache
-
-      - save_cache: *save_yarn_cache
 
 workflows:
   version: 2
