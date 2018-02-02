@@ -86,15 +86,13 @@ jobs:
 
       - run:
           name: Install Schema
-          command: |
-            cd fixture_setup
-            yarn install
+          working_directory: fixture_setup
+          command: yarn install
 
       - run:
           name: Install Fixtures
-          command: |
-            cd fixture_setup
-            cargo run
+          working_directory: fixture_setup
+          command: cargo run
 
       - save_cache: *save_fixture_cache
 
@@ -113,8 +111,8 @@ jobs:
 
       - run:
           name: Run Tests
+          working_directory: fixture_setup
           command: |
-            cd fixture_setup
             wait-for localhost:8000 -- echo "Core started"
             yarn run forte-test-api http://localhost:8000/graphql
 
