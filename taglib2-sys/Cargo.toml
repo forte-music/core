@@ -5,3 +5,4 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>"]
 
 [build-dependencies]
 bindgen = "^0.32.3"
+cmake = "0.1"
