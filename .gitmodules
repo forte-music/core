@@ -1,0 +1,4 @@
+[submodule "taglib2-sys/taglib"]
+	path = taglib2-sys/taglib
+	url = https://github.com/taglib/taglib
+	branch = taglib2
