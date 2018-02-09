@@ -1,2 +1,3 @@
-#include "../taglib/taglib/tag.h"
-#include "../taglib/taglib/fileref.h"
+extern "C" {
+    const char *hello(const char *fileName);
+}

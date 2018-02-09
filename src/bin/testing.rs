@@ -1,18 +1,17 @@
 extern crate taglib2_sys;
 
-use taglib2_sys::AudioProperties_ReadStyle;
-use taglib2_sys::read_file;
-use taglib2_sys::Tag_properties;
+//use taglib2_sys::AudioProperties_ReadStyle;
+//use taglib2_sys::read_file;
+//use taglib2_sys::Tag_properties;
 
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::env;
 
 fn main() {
-    let filename = env::args().nth(1).unwrap();
-    let file = read_file(&filename, false, AudioProperties_ReadStyle::Average);
-    let tag = unsafe { file.tag() };
-    let properties = unsafe { Tag_properties(tag as *mut std::os::raw::c_void) };
-    let properties_string = unsafe { CStr::from_ptr(properties.toString().toCString(false)) };
+    let filename = env::args().nth(1).unwrap_or("<unknown-file>".to_owned());
 
-    println!("{}", properties_string.to_str().unwrap());
+    let filename_c = CString::new(filename).unwrap();
+    let hello_string = unsafe { CStr::from_ptr(taglib2_sys::hello(filename_c.as_ptr())) };
+
+    println!("{}", hello_string.to_str().unwrap());
 }
