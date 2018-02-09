@@ -1,9 +1,5 @@
 extern crate taglib2_sys;
 
-//use taglib2_sys::AudioProperties_ReadStyle;
-//use taglib2_sys::read_file;
-//use taglib2_sys::Tag_properties;
-
 use std::ffi::{CStr, CString};
 use std::env;
 

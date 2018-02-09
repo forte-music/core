@@ -5,9 +5,14 @@
 
 extern "C" {
     const char *hello(const char *fileName) {
-        std::string helloStr("hello world, ");
-        std::string fileNameStr(fileName);
-        std::string *out = new std::string(helloStr + fileNameStr);
-        return out->c_str();
+        TagLib::FileRef file((TagLib::FileName) fileName);
+        if(file.isNull() || !file.tag()) {
+            return "failed";
+        }
+
+        TagLib::Tag *tag = file.tag();
+        TagLib::PropertyMap properties = tag->properties();
+
+        return properties.toString().toCString();
     }
 }
