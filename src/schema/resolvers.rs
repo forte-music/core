@@ -143,8 +143,10 @@ impl Album {
         let key = Album::songs_key(&self.id);
         let ids: Vec<String> = redis::cmd("SORT")
             .arg(&key)
-            .arg("BY").arg("song:*->track_number")
-            .arg("GET").arg("song:*->id")
+            .arg("BY")
+            .arg("song:*->track_number")
+            .arg("GET")
+            .arg("song:*->id")
             .query(db)?;
         let mut items: Vec<Song> = Vec::with_capacity(ids.len());
 
