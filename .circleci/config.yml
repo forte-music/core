@@ -40,6 +40,10 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Checkout Git Submodules
+          command: git submodule update --init
+
       - restore_cache: *restore_cargo_cache
 
       - run:
@@ -77,6 +81,10 @@ jobs:
 
     steps:
       - checkout
+
+      - run:
+          name: Checkout Git Submodules
+          command: git submodule update --init
 
       - restore_cache: *restore_cargo_cache
 
