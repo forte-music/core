@@ -3,6 +3,10 @@
 #include "../taglib/taglib/fileref.h"
 #include "../taglib/taglib/toolkit/tpicturemap.h"
 
+char *to_cstr(TagLib::String str) {
+    return strdup(str.toCString(true));
+}
+
 extern "C" {
     typedef struct {
         char *title;
@@ -19,38 +23,47 @@ extern "C" {
 
     SongProperties *song_properties(const char *fileName) {
         TagLib::FileRef file((TagLib::FileName) fileName);
-        SongProperties *songProperties = new SongProperties();
 
+        // Check if the file was opened
         if(file.isNull() || !file.tag()) {
-            delete songProperties;
             return NULL;
         }
+
+        // Read off song properties
+        SongProperties *songProperties = new SongProperties();
 
         TagLib::Tag *tag = file.tag();
         TagLib::AudioProperties *audioProperties = file.audioProperties();
         TagLib::PropertyMap properties = tag->properties();
 
-        songProperties->title = strdup(tag->title().toCString(true));
-        songProperties->album = strdup(tag->album().toCString(true));
-        songProperties->artist = strdup(tag->artist().toCString(true));
+        songProperties->title = to_cstr(tag->title());
+        songProperties->album = to_cstr(tag->album());
+        songProperties->artist = to_cstr(tag->artist());
 
-        if(properties.contains("ALBUMARTIST"))
-            songProperties->album_artist = strdup(properties["ALBUMARTIST"].toString().toCString(true));
-        else if(properties.contains("ALBUM_ARTIST"))
-            songProperties->album_artist = strdup(properties["ALBUM_ARTIST"].toString().toCString(true));
-        else if(properties.contains("ALBUM ARTIST"))
-            songProperties->album_artist = strdup(properties["ALBUM ARTIST"].toString().toCString(true));
+        // There are multiple ways the album artist can be stored.
+        if(properties.contains("ALBUMARTIST")) {
+            songProperties->album_artist = to_cstr(properties["ALBUMARTIST"].toString());
+        } else if(properties.contains("ALBUM_ARTIST")) {
+            songProperties->album_artist = to_cstr(properties["ALBUM_ARTIST"].toString());
+        } else if(properties.contains("ALBUM ARTIST")) {
+            songProperties->album_artist = to_cstr(properties["ALBUM ARTIST"].toString());
+        }
 
         songProperties->year = tag->year();
         songProperties->track_number = tag->track();
         songProperties->duration = audioProperties->length();
 
-        TagLib::Picture picture = tag->pictures()[TagLib::Picture::Type::FrontCover].front();
+        TagLib::Picture picture = tag->pictures()[
+                TagLib::Picture::Type::FrontCover
+        ].front();
+        songProperties->picture_mime = to_cstr(picture.mime());
+
+        // We need to copy the picture data manually because it's not a string
         TagLib::ByteVector pictureData = picture.data();
-        songProperties->picture_data = (char*) malloc(pictureData.size());
-        memcpy(songProperties->picture_data, pictureData.data(), pictureData.size());
-        songProperties->picture_data_len = pictureData.size();
-        songProperties->picture_mime = strdup(picture.mime().toCString(true));
+        size_t pictureSize = pictureData.size();
+        songProperties->picture_data = (char*) malloc(pictureSize);
+        memcpy(songProperties->picture_data, pictureData.data(), pictureSize);
+        songProperties->picture_data_len = pictureSize;
 
         return songProperties;
     }

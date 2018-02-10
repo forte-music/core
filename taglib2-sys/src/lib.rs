@@ -43,10 +43,10 @@ pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
 
     let song_properties = unsafe {
         SongProperties {
-            title: CStr::from_ptr((*song_properties_c).title).to_string_lossy().into_owned(),
-            album: CStr::from_ptr((*song_properties_c).album).to_string_lossy().into_owned(),
-            artist: CStr::from_ptr((*song_properties_c).artist).to_string_lossy().into_owned(),
-            album_artist: CStr::from_ptr((*song_properties_c).album_artist).to_string_lossy().into_owned(),
+            title: from_cstr((*song_properties_c).title),
+            album: from_cstr((*song_properties_c).album),
+            artist: from_cstr((*song_properties_c).artist),
+            album_artist: from_cstr((*song_properties_c).album_artist),
             year: (*song_properties_c).year,
             track_number: (*song_properties_c).track_number,
             duration: (*song_properties_c).duration,
@@ -54,11 +54,15 @@ pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
                 (*song_properties_c).picture_data as *const u8,
                 (*song_properties_c).picture_data_len as usize
             ).to_vec(),
-            picture_mime: CStr::from_ptr((*song_properties_c).picture_mime).to_string_lossy().into_owned()
+            picture_mime: from_cstr((*song_properties_c).picture_mime)
         }
     };
 
     unsafe { destroy_properties(song_properties_c) };
 
     Some(song_properties)
+}
+
+unsafe fn from_cstr(cstr: *const std::os::raw::c_char) -> String {
+    CStr::from_ptr(cstr).to_string_lossy().into_owned()
 }
