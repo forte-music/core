@@ -22,7 +22,8 @@ extern "C" {
         SongProperties *songProperties = new SongProperties();
 
         if(file.isNull() || !file.tag()) {
-            return songProperties;
+            delete songProperties;
+            return NULL;
         }
 
         TagLib::Tag *tag = file.tag();
