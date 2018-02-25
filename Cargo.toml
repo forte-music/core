@@ -7,10 +7,12 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>
 lto = true
 
 [dependencies]
-rocket = "0.3.6"
-rocket_codegen = "0.3.6"
+iron = "0.6.0"
+mount = "0.4.0"
+logger = "0.4.0"
+persistent = "0.4.0"
 juniper = "0.9.2"
-juniper_rocket = "0.1.2"
+juniper_iron = "0.1.2"
 redis = "0.8.0"
 r2d2 = "0.8.0"
 r2d2_redis = "0.7.0"

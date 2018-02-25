@@ -1,42 +1,35 @@
-use rocket::{self, State};
-use rocket::response::content;
-use juniper_rocket;
+use std::env;
+use juniper_iron::{GraphQLHandler, GraphiQLHandler};
+use iron::{Iron, Chain};
+use mount::Mount;
+use logger::Logger;
+use persistent::Read;
 use schema::model::{Mutation, Query};
-use schema::Schema;
 use database;
 
 pub fn start() {
-    rocket::ignite()
-        .manage(database::init_pool())
-        .manage(Schema::new(Query {}, Mutation {}))
-        .mount(
-            "/",
-            routes![graphql, get_graphql_handler, post_graphql_handler],
-        )
-        .launch();
-}
+    let mut mount = Mount::new();
+    let (logger_before, logger_after) = Logger::new(None);
+    let db_pool = database::init_pool()
+        .expect("Could not connect to the database");
 
-#[get("/")]
-fn graphql() -> content::Html<String> {
-    juniper_rocket::graphiql_source("/graphql")
-}
+    let graphql_handler = GraphQLHandler::new(
+        database::from_request,
+        Query,
+        Mutation
+    );
 
-#[get("/graphql?<request>")]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
-fn get_graphql_handler(
-    context: database::Connection,
-    request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>,
-) -> juniper_rocket::GraphQLResponse {
-    request.execute(&schema, &context)
-}
+    let graphiql_handler = GraphiQLHandler::new("/graphql");
 
-#[post("/graphql", data = "<request>")]
-#[cfg_attr(feature = "cargo-clippy", allow(needless_pass_by_value))]
-fn post_graphql_handler(
-    context: database::Connection,
-    request: juniper_rocket::GraphQLRequest,
-    schema: State<Schema>,
-) -> juniper_rocket::GraphQLResponse {
-    request.execute(&schema, &context)
+    mount.mount("/", graphiql_handler);
+    mount.mount("/graphql", graphql_handler);
+
+    let mut chain = Chain::new(mount);
+    chain.link(Read::<database::ConnectionKey>::both(db_pool));
+    chain.link_before(logger_before);
+    chain.link_after(logger_after);
+
+    let host = env::var("LISTEN").unwrap_or("0.0.0.0:8000".to_owned());
+    println!("Forte started on {}", host);
+    Iron::new(chain).http(host.as_str()).unwrap();
 }

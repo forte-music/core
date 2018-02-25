@@ -1,12 +1,12 @@
-#![feature(plugin)]
-#![plugin(rocket_codegen)]
-
 extern crate chrono;
 #[macro_use]
 extern crate juniper;
-extern crate juniper_rocket;
+extern crate juniper_iron;
 extern crate redis;
-extern crate rocket;
+extern crate iron;
+extern crate mount;
+extern crate logger;
+extern crate persistent;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
