@@ -1,5 +1,5 @@
-extern crate cmake;
 extern crate cc;
+extern crate cmake;
 
 fn main() {
     let dst = cmake::build("taglib");

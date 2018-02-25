@@ -1,6 +1,6 @@
 use std::env;
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
-use iron::{Iron, Chain};
+use iron::{Chain, Iron};
 use mount::Mount;
 use logger::Logger;
 use persistent::Read;
@@ -10,14 +10,9 @@ use database;
 pub fn start() {
     let mut mount = Mount::new();
     let (logger_before, logger_after) = Logger::new(None);
-    let db_pool = database::init_pool()
-        .expect("Could not connect to the database");
+    let db_pool = database::init_pool().expect("Could not connect to the database");
 
-    let graphql_handler = GraphQLHandler::new(
-        database::from_request,
-        Query,
-        Mutation
-    );
+    let graphql_handler = GraphQLHandler::new(database::from_request, Query, Mutation);
 
     let graphiql_handler = GraphiQLHandler::new("/graphql");
 

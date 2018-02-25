@@ -1,4 +1,4 @@
-use std::ffi::{CString, CStr};
+use std::ffi::{CStr, CString};
 
 extern "C" {
     fn song_properties(file_name: *const std::os::raw::c_char) -> *const SongPropertiesC;
@@ -16,7 +16,7 @@ struct SongPropertiesC {
     duration: i32,
     picture_data: *const std::os::raw::c_char,
     picture_data_len: u32,
-    picture_mime: *const std::os::raw::c_char
+    picture_mime: *const std::os::raw::c_char,
 }
 
 #[derive(Debug)]
@@ -29,7 +29,7 @@ pub struct SongProperties {
     track_number: u32,
     duration: i32,
     picture_data: Vec<u8>,
-    picture_mime: String
+    picture_mime: String,
 }
 
 pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
@@ -37,7 +37,7 @@ pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
     let song_properties_c = unsafe {
         match song_properties(file_name_c.as_ptr()).as_ref() {
             Some(p) => p,
-            None => return None
+            None => return None,
         }
     };
 
@@ -52,9 +52,9 @@ pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
             duration: (*song_properties_c).duration,
             picture_data: std::slice::from_raw_parts(
                 (*song_properties_c).picture_data as *const u8,
-                (*song_properties_c).picture_data_len as usize
+                (*song_properties_c).picture_data_len as usize,
             ).to_vec(),
-            picture_mime: from_cstr((*song_properties_c).picture_mime)
+            picture_mime: from_cstr((*song_properties_c).picture_mime),
         }
     };
 

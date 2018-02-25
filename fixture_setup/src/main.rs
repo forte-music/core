@@ -31,8 +31,7 @@ fn main() {
         return;
     }
 
-    let pool = database::init_pool()
-        .expect("Could not connect to the database");
+    let pool = database::init_pool().expect("Could not connect to the database");
     let db = pool.get().unwrap();
 
     load_everything(path.to_str().unwrap(), &db).unwrap();

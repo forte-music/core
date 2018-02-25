@@ -1,12 +1,12 @@
 extern crate chrono;
+extern crate iron;
 #[macro_use]
 extern crate juniper;
 extern crate juniper_iron;
-extern crate redis;
-extern crate iron;
-extern crate mount;
 extern crate logger;
+extern crate mount;
 extern crate persistent;
+extern crate redis;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
