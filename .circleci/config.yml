@@ -49,6 +49,7 @@ jobs:
       - run:
           name: Check for Errors
           command: |
+            cargo clean
             cargo check
             cd fixture_setup
             cargo check
