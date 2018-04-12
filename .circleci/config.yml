@@ -3,7 +3,7 @@ version: 2
 aliases:
   - &restore_cargo_cache
     keys:
-      - cargo-{{ checksum "Cargo.lock" }}
+      - v2-cargo-{{ checksum "Cargo.lock" }}
       - cargo-
 
   - &restore_fixture_cache
@@ -17,7 +17,7 @@ aliases:
       - yarn-
 
   - &save_cargo_cache
-    key: cargo-{{ checksum "Cargo.lock" }}
+    key: v2-cargo-{{ checksum "Cargo.lock" }}
     paths:
       - target
       - ~/.cargo
