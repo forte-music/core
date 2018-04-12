@@ -109,7 +109,9 @@ jobs:
 
       - run:
           name: Build Core
-          command: cargo build
+          command: |
+            cargo clean
+            cargo build
 
       - run:
           name: Start Core
