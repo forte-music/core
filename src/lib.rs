@@ -14,5 +14,4 @@ extern crate serde_redis;
 
 pub mod schema;
 pub mod context;
-pub mod actions;
 pub mod server;
