@@ -1,30 +1,35 @@
+extern crate dotenv;
+
 use std::env;
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 use iron::{Chain, Iron};
 use mount::Mount;
 use logger::Logger;
-use persistent::Read;
 use schema::model::{Mutation, Query};
-use database;
+use context;
 
 pub fn start() {
     let mut mount = Mount::new();
-    let (logger_before, logger_after) = Logger::new(None);
-    let db_pool = database::init_pool().expect("Could not connect to the database");
+    let mut chain = Chain::new(mount);
 
-    let graphql_handler = GraphQLHandler::new(database::from_request, Query, Mutation);
-
-    let graphiql_handler = GraphiQLHandler::new("/graphql");
-
-    mount.mount("/", graphiql_handler);
+    // Register Routes
+    let graphql_handler = GraphQLHandler::new(context::IronContext::from_request, Query, Mutation);
     mount.mount("/graphql", graphql_handler);
 
-    let mut chain = Chain::new(mount);
-    chain.link(Read::<database::ConnectionKey>::both(db_pool));
+    let graphiql_handler = GraphiQLHandler::new("/graphql");
+    mount.mount("/", graphiql_handler);
+
+    // Setup Context Middleware
+    chain.link(context::init_context_middleware().expect("failed to initialize context"));
+
+    // Setup Logging Middleware
+    let (logger_before, logger_after) = Logger::new(None);
     chain.link_before(logger_before);
     chain.link_after(logger_after);
 
-    let host = env::var("LISTEN").unwrap_or_else(|_| "0.0.0.0:8000".to_owned());
-    println!("Forte started on {}", host);
-    Iron::new(chain).http(host.as_str()).unwrap();
+    // Start Server
+    let host = dotenv::var("DATABASE_URL").map(|s| { s.as_str() }).unwrap_or("0.0.0.0:8080");
+    println!("Starting Server on {}", host);
+    let iron = Iron::new(chain);
+    iron.http(host).unwrap();
 }

@@ -4,7 +4,7 @@
 
 use juniper::{FieldResult, ID};
 use schema::model::*;
-use database;
+use context;
 
 #[derive(GraphQLEnum)]
 pub enum SortBy {

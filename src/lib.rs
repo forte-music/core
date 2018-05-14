@@ -13,6 +13,6 @@ extern crate serde_derive;
 extern crate serde_redis;
 
 pub mod schema;
-pub mod database;
+pub mod context;
 pub mod actions;
 pub mod server;
