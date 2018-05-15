@@ -1,7 +1,6 @@
 use context::GraphQLContext;
 use juniper::{FieldResult, ID};
 use models::*;
-use std::error::Error;
 
 pub struct Artist {
     pub id: String,
@@ -10,10 +9,13 @@ pub struct Artist {
 }
 
 impl Artist {
-    /*
-    pub fn albums(context: GraphQLContext) -> Result<Vec<Album>, Box<Error>> {
+    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Artist> {
+        NotImplementedErr()
     }
-    */
+
+    pub fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
+        NotImplementedErr()
+    }
 }
 
 graphql_object!(Artist: GraphQLContext |&self| {
@@ -25,11 +27,9 @@ graphql_object!(Artist: GraphQLContext |&self| {
         &self.name
     }
 
-/*
     field albums(&executor) -> FieldResult<Vec<Album>> {
         self.albums(executor.context())
     }
-    */
 
     field time_added() -> i32 {
         self.time_added

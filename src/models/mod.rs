@@ -15,3 +15,10 @@ pub use self::playlist::*;
 pub use self::query::*;
 pub use self::song::*;
 pub use self::stats::*;
+
+use juniper::FieldError;
+use juniper::FieldResult;
+
+pub fn NotImplementedErr<T>() -> FieldResult<T> {
+    Err(FieldError::from("Not Implemented"))
+}

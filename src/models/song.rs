@@ -14,6 +14,20 @@ pub struct Song {
     pub time_added: i32,
 }
 
+impl Song {
+    pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
+        NotImplementedErr()
+    }
+
+    pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
+        NotImplementedErr()
+    }
+
+    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<SongUserStats> {
+        NotImplementedErr()
+    }
+}
+
 graphql_object!(Song: GraphQLContext |&self| {
     field id() -> ID {
         ID::from(self.id.clone())
@@ -23,14 +37,13 @@ graphql_object!(Song: GraphQLContext |&self| {
         &self.name
     }
 
-/*
     field album(&executor) -> FieldResult<Album> {
         self.album(executor.context())
     }
 
     field artists(&executor) -> FieldResult<Vec<Artist>> {
         self.artists(executor.context())
-    }*/
+    }
 
     field stream_url() -> &str {
         &self.stream_url
@@ -44,11 +57,9 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.disk_number
     }
 
-/*
     field stats(&executor) -> FieldResult<SongUserStats> {
         self.stats(executor.context())
     }
-    */
 
     field duration() -> i32 {
         self.duration

@@ -1,10 +1,11 @@
-use std::error::Error;
-// use database::album;
+use database::album;
+use diesel::prelude::*;
 use juniper::{FieldResult, ID};
 
 use context::GraphQLContext;
 use models::*;
 
+#[derive(Queryable)]
 pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,
@@ -15,19 +16,23 @@ pub struct Album {
 }
 
 impl Album {
-    /*
-    pub fn from_id(context: GraphQLContext, id: &str) -> Result<Self, Box<Error>> {
+    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+        let conn = &*context.connection;
+
+        Ok(album::table.filter(album::id.eq(id)).first::<Album>(conn)?)
     }
 
-    pub fn artist(context: GraphQLContext) -> Result<Artist, Box<Error>> {
+    pub fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
+        NotImplementedErr()
     }
 
-    pub fn songs(context: GraphQLContext) -> Result<Vec<Song>, Box<Error>> {
+    pub fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {
+        NotImplementedErr()
     }
 
-    pub fn duration(context: GraphQLContext) -> Result<i32, Box<Error>> {
+    pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
+        NotImplementedErr()
     }
-    */
 }
 
 graphql_object!(Album: GraphQLContext |&self| {
@@ -43,7 +48,6 @@ graphql_object!(Album: GraphQLContext |&self| {
         &self.name
     }
 
-/*
     field artist(&executor) -> FieldResult<Artist> {
         self.artist(executor.context())
     }
@@ -55,7 +59,6 @@ graphql_object!(Album: GraphQLContext |&self| {
     field duration(&executor) -> FieldResult<i32> {
         self.duration(executor.context())
     }
-    */
 
     field release_year() -> i32 {
         self.release_year

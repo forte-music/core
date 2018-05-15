@@ -1,16 +1,22 @@
 use context::GraphQLContext;
+use juniper::{FieldResult, ID};
+use models::*;
 
 pub struct Query;
 
-impl Query {}
+impl Query {
+    pub fn album(context: &GraphQLContext, id: &str) -> FieldResult<Album> {
+        Album::from_id(context, id)
+    }
+}
 
 graphql_object!(
     Query: GraphQLContext | &self | {
-        /*
     field album(&executor, id: ID) -> FieldResult<Album> {
         Query::album(executor.context(), &id)
     }
 
+        /*
     field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>)
             -> FieldResult<Connection<Album>> {
         Query::albums(executor.context())
