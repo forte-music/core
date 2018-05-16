@@ -28,6 +28,7 @@ graphql_object!(
         Query::album(executor.context(), &id)
     }
 
+// TODO: Implement Hard Stuff
 /*
     field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>)
             -> FieldResult<Connection<Album>> {
