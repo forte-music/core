@@ -46,11 +46,59 @@ impl Mutation {
     ) -> FieldResult<Playlist> {
         NotImplementedErr()
     }
+
+    pub fn add_to_playlist_relative(
+        context: &GraphQLContext,
+        input: PlaylistAppendInput,
+        position: Position,
+    ) -> FieldResult<Playlist> {
+        NotImplementedErr()
+    }
+
+    pub fn add_to_playlist_by_cursor(
+        context: &GraphQLContext,
+        input: PlaylistAppendInput,
+        relative_to: ID,
+        offset: Offset,
+    ) -> FieldResult<Playlist> {
+        NotImplementedErr()
+    }
+
+    pub fn add_to_playlist_by_index(
+        context: &GraphQLContext,
+        input: PlaylistAppendInput,
+        position: i32,
+        offset: Offset,
+    ) -> FieldResult<Playlist> {
+        NotImplementedErr()
+    }
+
+    pub fn remove_from_playlist(
+        context: &GraphQLContext,
+        playlist_id: ID,
+        items: Vec<ID>,
+    ) -> FieldResult<Playlist> {
+        NotImplementedErr()
+    }
+
+    pub fn delete_playlist(context: &GraphQLContext, playlist_id: ID) -> FieldResult<bool> {
+        NotImplementedErr()
+    }
+
+    pub fn move_song_in_playlist(
+        context: &GraphQLContext,
+        playlist_id: ID,
+        from_item: ID,
+        relative_to_item: ID,
+        offset: Offset,
+    ) -> FieldResult<Playlist> {
+        NotImplementedErr()
+    }
 }
 
-// TODO: Implement Missing Mutations
 graphql_object!(
     Mutation: GraphQLContext | &self | {
+
     field play_song(&executor, song_id: ID) -> FieldResult<SongUserStats> {
         Mutation::play_song(executor.context(), &song_id)
     }
@@ -68,49 +116,62 @@ graphql_object!(
     }
 
     field update_playlist(&executor, playlist_id: ID, name: String) -> FieldResult<Playlist> {
-    Mutation::update_playlist(executor.context(), playlist_id, name)
+        Mutation::update_playlist(executor.context(), playlist_id, name)
     }
 
-/*
-    field add_to_playlist_relative(input: PlaylistAppendInput, position: Position) -> Playlist {
-        Playlist::default()
+    field add_to_playlist_relative(
+        &executor,
+        input: PlaylistAppendInput,
+        position: Position
+    ) -> FieldResult<Playlist> {
+        Mutation::add_to_playlist_relative(executor.context(), input, position)
     }
 
     field add_to_playlist_by_cursor(
+        &executor,
         input: PlaylistAppendInput,
         relative_to: ID,
         offset: Offset
-    ) -> Playlist {
-        Playlist::default()
+    ) -> FieldResult<Playlist> {
+        Mutation::add_to_playlist_by_cursor(executor.context(), input, relative_to, offset)
     }
 
     field add_to_playlist_by_index(
+        &executor,
         input: PlaylistAppendInput,
         position: i32,
         offset: Offset
-    ) -> Playlist {
-        Playlist::default()
+    ) -> FieldResult<Playlist> {
+        Mutation::add_to_playlist_by_index(executor.context(), input, position, offset)
     }
 
     field remove_from_playlist(
+        &executor,
         playlist_id: ID,
         items: Vec<ID>
-    ) -> Playlist {
-        Playlist::default()
+    ) -> FieldResult<Playlist> {
+        Mutation::remove_from_playlist(executor.context(), playlist_id, items)
     }
 
-    field delete_playlist(playlist_id: ID) -> bool {
-        true
+    field delete_playlist(&executor, playlist_id: ID) -> FieldResult<bool> {
+        Mutation::delete_playlist(executor.context(), playlist_id)
     }
 
     field move_song_in_playlist(
+        &executor,
         playlist_id: ID,
         from_item: ID,
         relative_to_item: ID,
         offset: Offset
-    ) -> Playlist {
-        Playlist::default()
+    ) -> FieldResult<Playlist> {
+        Mutation::move_song_in_playlist(
+            executor.context(),
+            playlist_id,
+            from_item,
+            relative_to_item,
+            offset
+        )
     }
-    */
+
     }
 );
