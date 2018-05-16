@@ -40,6 +40,7 @@ CREATE TABLE playlist (
 
 CREATE TABLE playlist_item (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
+  playlist_id VARCHAR(36) NOT NULL REFERENCES playlist(id),
   rank TEXT NOT NULL,
   song_id VARCHAR(36) NOT NULL REFERENCES song(id)
 );

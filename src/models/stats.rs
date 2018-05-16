@@ -1,5 +1,3 @@
-use diesel::prelude::*;
-
 use context::GraphQLContext;
 use juniper::ID;
 

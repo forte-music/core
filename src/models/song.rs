@@ -41,7 +41,7 @@ impl Song {
             .load::<Artist>(conn)?)
     }
 
-    pub fn stats(&self, context: &GraphQLContext) -> SongUserStats {
+    pub fn stats(&self, _context: &GraphQLContext) -> SongUserStats {
         SongUserStats {
             id: format!("stats:{}", self.id),
             play_count: self.play_count,

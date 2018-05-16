@@ -1,7 +1,15 @@
+use database::playlist;
+use database::song;
+use database::playlist_item;
+use diesel::prelude::*;
+
 use context::GraphQLContext;
 use juniper::{FieldResult, ID};
+use models::Connection;
 use models::*;
+use diesel::dsl;
 
+#[derive(Queryable)]
 pub struct Playlist {
     pub id: String,
     pub name: String,
@@ -9,12 +17,24 @@ pub struct Playlist {
 }
 
 impl Playlist {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Playlist> {
-        NotImplementedErr()
+    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+        let conn = &*context.connection;
+        Ok(playlist::table
+            .filter(playlist::id.eq(id))
+            .first::<Self>(conn)?)
     }
 
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
-        NotImplementedErr()
+        let conn = &*context.connection;
+        let maybe_duration: Option<i64> = playlist_item::table
+            .filter(playlist_item::playlist_id.eq(self.id.as_str()))
+            .inner_join(song::table)
+            .select(dsl::sum(song::duration))
+            .first::<Option<i64>>(conn)?;
+
+        let duration = maybe_duration.unwrap_or(0);
+
+        Ok(duration as i32)
     }
 
     pub fn items(
@@ -23,6 +43,11 @@ impl Playlist {
         input: &ConnectionQuery,
     ) -> FieldResult<Connection<PlaylistItem>> {
         NotImplementedErr()
+        // TODO: Handle Ordering
+        // let conn = &*context.connection;
+        // Ok(playlist_item::table
+        //     .filter(playlist_item::playlist_id.eq(self.id.as_ref()))
+        //     .load::<PlaylistItem>(conn)?)
     }
 }
 
@@ -34,7 +59,7 @@ pub struct PlaylistItem {
 
 impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        NotImplementedErr()
+        Song::from_id(context, self.id.as_str())
     }
 }
 

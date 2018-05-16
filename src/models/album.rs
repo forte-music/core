@@ -40,7 +40,7 @@ impl Album {
         let maybe_duration: Option<i64> = song::table
             .select(dsl::sum(song::duration))
             .first::<Option<i64>>(conn)?;
-        let duration = maybe_duration.unwrap_or_else(|| 0);
+        let duration = maybe_duration.unwrap_or(0);
 
         Ok(duration as i32)
     }

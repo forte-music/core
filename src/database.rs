@@ -28,6 +28,7 @@ table! {
 table! {
     playlist_item (id) {
         id -> Text,
+        playlist_id -> Text,
         rank -> Text,
         song_id -> Text,
     }
@@ -56,9 +57,17 @@ table! {
 }
 
 joinable!(album -> artist (artist_id));
+joinable!(playlist_item -> playlist (playlist_id));
 joinable!(playlist_item -> song (song_id));
 joinable!(song -> album (album_id));
 joinable!(song_artist -> artist (artist_id));
 joinable!(song_artist -> song (song_id));
 
-allow_tables_to_appear_in_same_query!(album, artist, playlist, playlist_item, song, song_artist,);
+allow_tables_to_appear_in_same_query!(
+    album,
+    artist,
+    playlist,
+    playlist_item,
+    song,
+    song_artist,
+);
