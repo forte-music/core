@@ -15,6 +15,10 @@ pub struct Song {
     pub disk_number: i32,
     pub duration: i32,
     pub time_added: i32,
+
+    pub play_count: i32,
+    pub last_played: Option<i32>,
+    pub liked: boolean,
 }
 
 impl Song {
@@ -31,10 +35,17 @@ impl Song {
         NotImplementedErr()
     }
 
-    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<SongUserStats> {
-        NotImplementedErr()
+    pub fn stats(&self, context: &GraphQLContext) -> SongUserStats {
+        SongUserStats {
+            id: format!("stats:{}", self.id),
+            play_count: self.play_count,
+            last_played: self.last_played,
+            liked: self.liked,
+        }
     }
 }
+
+// TODO: GraphQL Identifiers
 
 graphql_object!(Song: GraphQLContext |&self| {
     field id() -> ID {

@@ -13,15 +13,6 @@ pub struct SongUserStats {
     pub liked: bool,
 }
 
-impl SongUserStats {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
-        let conn = &*context.connection;
-        Ok(song_user_stats::table
-            .filter(song_user_stats::id.eq(id))
-            .first::<Self>(conn)?)
-    }
-}
-
 graphql_object!(SongUserStats: GraphQLContext |&self| {
     field id() -> ID {
         ID::from(self.id.clone())

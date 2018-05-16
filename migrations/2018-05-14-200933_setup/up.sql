@@ -17,15 +17,10 @@ CREATE TABLE song (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   album_id VARCHAR(36) NOT NULL REFERENCES album(id),
-  stat_id VARCHAR(36) NOT NULL REFERENCES song_user_stats(id),
   track_number INTEGER NOT NULL,
   disk_number INTEGER NOT NULL,
   duration INTEGER NOT NULL,
-  time_added INTEGER NOT NULL
-);
-
-CREATE TABLE song_user_stats (
-  id VARCHAR(36) PRIMARY KEY NOT NULL,
+  time_added INTEGER NOT NULL,
   play_count INTEGER NOT NULL,
   last_played INTEGER,
   liked BOOLEAN NOT NULL
