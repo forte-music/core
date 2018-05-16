@@ -13,6 +13,12 @@ CREATE TABLE artist (
   time_added INTEGER NOT NULL
 );
 
+CREATE TABLE song_artist (
+  song_id VARCHAR(36) NOT NULL REFERENCES song(id),
+  artist_id VARCHAR(36) NOT NULL REFERENCES artist(id),
+  PRIMARY KEY (song_id, artist_id)
+);
+
 CREATE TABLE song (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,

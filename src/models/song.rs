@@ -1,4 +1,6 @@
+use database::artist;
 use database::song;
+use database::song_artist;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
@@ -10,7 +12,6 @@ pub struct Song {
     pub id: String,
     pub name: String,
     pub album_id: String,
-    pub stat_id: String,
     pub track_number: i32,
     pub disk_number: i32,
     pub duration: i32,
@@ -18,7 +19,7 @@ pub struct Song {
 
     pub play_count: i32,
     pub last_played: Option<i32>,
-    pub liked: boolean,
+    pub liked: bool,
 }
 
 impl Song {
@@ -32,7 +33,12 @@ impl Song {
     }
 
     pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
-        NotImplementedErr()
+        let conn = &*context.connection;
+        Ok(song_artist::table
+            .filter(song_artist::song_id.eq(self.id.as_str()))
+            .inner_join(artist::table)
+            .select(artist::all_columns)
+            .load::<Artist>(conn)?)
     }
 
     pub fn stats(&self, context: &GraphQLContext) -> SongUserStats {
@@ -77,7 +83,7 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.disk_number
     }
 
-    field stats(&executor) -> FieldResult<SongUserStats> {
+    field stats(&executor) -> SongUserStats {
         self.stats(executor.context())
     }
 

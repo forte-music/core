@@ -38,33 +38,27 @@ table! {
         id -> Text,
         name -> Text,
         album_id -> Text,
-        stat_id -> Text,
         track_number -> Integer,
         disk_number -> Integer,
         duration -> Integer,
         time_added -> Integer,
-    }
-}
-
-table! {
-    song_user_stats (id) {
-        id -> Text,
         play_count -> Integer,
         last_played -> Nullable<Integer>,
         liked -> Bool,
     }
 }
 
+table! {
+    song_artist (song_id, artist_id) {
+        song_id -> Text,
+        artist_id -> Text,
+    }
+}
+
 joinable!(album -> artist (artist_id));
 joinable!(playlist_item -> song (song_id));
 joinable!(song -> album (album_id));
-joinable!(song -> song_user_stats (stat_id));
+joinable!(song_artist -> artist (artist_id));
+joinable!(song_artist -> song (song_id));
 
-allow_tables_to_appear_in_same_query!(
-    album,
-    artist,
-    playlist,
-    playlist_item,
-    song,
-    song_user_stats,
-);
+allow_tables_to_appear_in_same_query!(album, artist, playlist, playlist_item, song, song_artist,);

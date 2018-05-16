@@ -1,8 +1,6 @@
-use database::song_user_stats;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
-use juniper::FieldResult;
 use juniper::ID;
 
 #[derive(Queryable)]
