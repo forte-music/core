@@ -1,6 +1,7 @@
 extern crate dotenv;
 
-use context::{GraphQLContext, IronContext};
+use context;
+use context::GraphQLContext;
 use iron::{Chain, Iron};
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 use logger::Logger;
@@ -19,7 +20,7 @@ pub fn start() {
 
     // Setup Context Middleware
     let mut chain = Chain::new(mount);
-    chain.link(IronContext::init_middleware().expect("failed to initialize context"));
+    chain.link(context::init_middleware().expect("failed to initialize context"));
 
     // Setup Logging Middleware
     let (logger_before, logger_after) = Logger::new(None);

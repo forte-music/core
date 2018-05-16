@@ -7,37 +7,25 @@ use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
-use std;
 use std::error::Error;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
 pub type Pool = r2d2::Pool<ConnectionManager>;
 pub type PooledConnection = r2d2::PooledConnection<ConnectionManager>;
 
-pub struct IronContext {
-    pub connection_manager: Pool,
-}
-
 #[derive(Copy, Clone)]
 pub struct ContextKey;
 impl Key for ContextKey {
-    type Value = IronContext;
+    type Value = Pool;
 }
 
-impl IronContext {
-    pub fn init_middleware() -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
-        let database_url = dotenv::var("DATABASE_URL")?;
-        let manager = ConnectionManager::new(database_url);
-        let pool: Pool = r2d2::Pool::new(manager)?;
-        let context = IronContext {
-            connection_manager: pool,
-        };
+pub fn init_middleware() -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
+    let database_url = dotenv::var("DATABASE_URL")?;
+    let manager = ConnectionManager::new(database_url);
+    let pool: Pool = r2d2::Pool::new(manager)?;
 
-        Ok(Read::<ContextKey>::both(context))
-    }
+    Ok(Read::<ContextKey>::both(pool))
 }
-
-unsafe impl std::marker::Sync for IronContext {}
 
 pub struct GraphQLContext {
     pub connection: PooledConnection,
@@ -45,8 +33,8 @@ pub struct GraphQLContext {
 
 impl GraphQLContext {
     pub fn from_request(request: &mut Request) -> Self {
-        let iron_context = request.get::<Read<ContextKey>>().unwrap();
-        let connection: PooledConnection = iron_context.connection_manager.get().unwrap();
+        let pool = request.get::<Read<ContextKey>>().unwrap();
+        let connection: PooledConnection = pool.get().unwrap();
 
         GraphQLContext { connection }
     }
