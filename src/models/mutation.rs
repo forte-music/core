@@ -2,11 +2,22 @@ use context::GraphQLContext;
 use juniper::{FieldResult, ID};
 use models::*;
 
+use database::song;
+use diesel;
+use diesel::prelude::*;
+
 pub struct Mutation;
 
 impl Mutation {
     pub fn play_song(context: &GraphQLContext, song_id: &str) -> FieldResult<SongUserStats> {
-        NotImplementedErr()
+        let conn = &*context.connection;
+
+        diesel::update(song::table.filter(song::id.eq(song_id)))
+            .set(song::play_count.eq(song::play_count + 1))
+            .execute(conn)?;
+
+        let song = Song::from_id(context, song_id)?;
+        Ok(song.stats(context))
     }
 
     pub fn toggle_like(context: &GraphQLContext, song_id: &str) -> FieldResult<SongUserStats> {

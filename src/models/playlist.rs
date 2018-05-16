@@ -1,13 +1,13 @@
 use database::playlist;
-use database::song;
 use database::playlist_item;
+use database::song;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
+use diesel::dsl;
 use juniper::{FieldResult, ID};
 use models::Connection;
 use models::*;
-use diesel::dsl;
 
 #[derive(Queryable)]
 pub struct Playlist {
