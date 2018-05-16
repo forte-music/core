@@ -1,13 +1,16 @@
+use database::song;
+use diesel::prelude::*;
+
 use context::GraphQLContext;
 use juniper::{FieldResult, ID};
 use models::*;
 
+#[derive(Queryable)]
 pub struct Song {
     pub id: String,
     pub name: String,
     pub album_id: String,
     pub stat_id: String,
-    pub stream_url: String,
     pub track_number: i32,
     pub disk_number: i32,
     pub duration: i32,
@@ -15,8 +18,13 @@ pub struct Song {
 }
 
 impl Song {
+    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+        let conn = &*context.connection;
+        Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
+    }
+
     pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
-        NotImplementedErr()
+        Album::from_id(context, self.album_id.as_str())
     }
 
     pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
@@ -46,7 +54,8 @@ graphql_object!(Song: GraphQLContext |&self| {
     }
 
     field stream_url() -> &str {
-        &self.stream_url
+    // TODO: Remove Me
+        "test"
     }
 
     field track_number() -> i32 {

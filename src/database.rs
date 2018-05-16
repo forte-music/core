@@ -38,7 +38,7 @@ table! {
         id -> Text,
         name -> Text,
         album_id -> Text,
-        stat_id -> Nullable<Text>,
+        stat_id -> Text,
         track_number -> Integer,
         disk_number -> Integer,
         duration -> Integer,
