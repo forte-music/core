@@ -23,6 +23,10 @@ impl Album {
         Ok(album::table.filter(album::id.eq(id)).first::<Self>(conn)?)
     }
 
+    pub fn gql_id(&self) -> ID {
+        ID::from(self.id.to_owned())
+    }
+
     pub fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
         Artist::from_id(context, self.artist_id.as_str())
     }
@@ -48,7 +52,7 @@ impl Album {
 
 graphql_object!(Album: GraphQLContext |&self| {
     field id() -> ID {
-        ID::from(self.id.clone())
+        self.gql_id()
     }
 
     field artwork_url() -> &Option<String> {

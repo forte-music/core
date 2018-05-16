@@ -24,6 +24,10 @@ impl Playlist {
             .first::<Self>(conn)?)
     }
 
+    pub fn gql_id(&self) -> ID {
+        ID::from(self.id.to_owned())
+    }
+
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
         let conn = &*context.connection;
         let maybe_duration: Option<i64> = playlist_item::table
@@ -43,7 +47,6 @@ impl Playlist {
         input: &ConnectionQuery,
     ) -> FieldResult<Connection<PlaylistItem>> {
         NotImplementedErr()
-        // TODO: Handle Ordering
         // let conn = &*context.connection;
         // Ok(playlist_item::table
         //     .filter(playlist_item::playlist_id.eq(self.id.as_ref()))
@@ -87,7 +90,7 @@ pub enum Offset {
 
 graphql_object!(Playlist: GraphQLContext |&self| {
     field id() -> ID {
-        ID::from(self.id.clone())
+        self.gql_id()
     }
 
     field name() -> &str {

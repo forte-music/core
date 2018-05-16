@@ -28,6 +28,10 @@ impl Song {
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
     }
 
+    pub fn gql_id(&self) -> ID {
+        ID::from(self.id.to_owned())
+    }
+
     pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
         Album::from_id(context, self.album_id.as_str())
     }
@@ -51,11 +55,9 @@ impl Song {
     }
 }
 
-// TODO: GraphQL Identifiers
-
 graphql_object!(Song: GraphQLContext |&self| {
     field id() -> ID {
-        ID::from(self.id.clone())
+        self.gql_id()
     }
 
     field name() -> &str {

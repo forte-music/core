@@ -19,6 +19,10 @@ impl Artist {
         Ok(artist::table.filter(artist::id.eq(id)).first::<Self>(conn)?)
     }
 
+    pub fn gql_id(&self) -> ID {
+        ID::from(self.id.to_owned())
+    }
+
     pub fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
         let conn = &*context.connection;
         Ok(album::table
@@ -30,7 +34,7 @@ impl Artist {
 
 graphql_object!(Artist: GraphQLContext |&self| {
     field id() -> ID {
-        ID::from(self.id.clone())
+        self.gql_id()
     }
 
     field name() -> &str {

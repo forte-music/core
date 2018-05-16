@@ -9,9 +9,15 @@ pub struct SongUserStats {
     pub liked: bool,
 }
 
+impl SongUserStats {
+    pub fn gql_id(&self) -> ID {
+        ID::from(self.id.to_owned())
+    }
+}
+
 graphql_object!(SongUserStats: GraphQLContext |&self| {
     field id() -> ID {
-        ID::from(self.id.clone())
+        self.gql_id()
     }
 
     field play_count() -> i32 {
