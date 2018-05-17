@@ -15,15 +15,36 @@ impl StatsCollection {
     }
 
     pub fn album_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
-        NotImplementedErr()
+        if let Some(ref album_id) = self.album_id {
+            let album = Album::from_id(context, album_id)?;
+            let stats = album.stats();
+
+            return Ok(Some(stats));
+        }
+
+        Ok(None)
     }
 
     pub fn artist_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
-        NotImplementedErr()
+        if let Some(ref artist_id) = self.artist_id {
+            let artist = Artist::from_id(context, artist_id)?;
+            let stats = artist.stats();
+
+            return Ok(Some(stats));
+        }
+
+        Ok(None)
     }
 
     pub fn playlist_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
-        NotImplementedErr()
+        if let Some(ref playlist_id) = self.playlist_id {
+            let playlist = Playlist::from_id(context, playlist_id)?;
+            let stats = playlist.stats();
+
+            return Ok(Some(stats));
+        }
+
+        Ok(None)
     }
 }
 

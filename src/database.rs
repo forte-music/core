@@ -6,6 +6,7 @@ table! {
         artist_id -> Text,
         release_year -> Integer,
         time_added -> Integer,
+        last_played -> Nullable<Integer>,
     }
 }
 
@@ -14,6 +15,7 @@ table! {
         id -> Text,
         name -> Text,
         time_added -> Integer,
+        last_played -> Nullable<Integer>,
     }
 }
 
@@ -23,6 +25,7 @@ table! {
         name -> Text,
         description -> Text,
         time_added -> Integer,
+        last_played -> Nullable<Integer>,
     }
 }
 

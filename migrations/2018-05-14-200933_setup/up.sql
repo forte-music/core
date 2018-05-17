@@ -4,13 +4,17 @@ CREATE TABLE album (
   name TEXT NOT NULL,
   artist_id VARCHAR(36) NOT NULL REFERENCES artist(id),
   release_year INTEGER NOT NULL,
-  time_added INTEGER NOT NULL
+  time_added INTEGER NOT NULL,
+
+  last_played INTEGER
 );
 
 CREATE TABLE artist (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
-  time_added INTEGER NOT NULL
+  time_added INTEGER NOT NULL,
+
+  last_played INTEGER
 );
 
 CREATE TABLE song_artist (
@@ -36,7 +40,9 @@ CREATE TABLE playlist (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  time_added INTEGER NOT NULL
+  time_added INTEGER NOT NULL,
+
+  last_played INTEGER
 );
 
 CREATE TABLE playlist_item (

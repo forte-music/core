@@ -15,6 +15,8 @@ pub struct Album {
     pub artist_id: String,
     pub release_year: i32,
     pub time_added: i32,
+
+    pub last_played: Option<i32>,
 }
 
 impl Album {
@@ -49,8 +51,11 @@ impl Album {
         Ok(duration as i32)
     }
 
-    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
-        NotImplementedErr()
+    pub fn stats(&self) -> UserStats {
+        UserStats {
+            id: format!("stats:{}", self.id),
+            last_played: self.last_played,
+        }
     }
 }
 
@@ -83,8 +88,8 @@ graphql_object!(Album: GraphQLContext |&self| {
         self.release_year
     }
 
-    field stats(&executor) -> FieldResult<UserStats> {
-        self.stats(executor.context())
+    field stats() -> UserStats {
+        self.stats()
     }
 
     field time_added() -> i32 {

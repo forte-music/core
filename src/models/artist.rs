@@ -11,6 +11,8 @@ pub struct Artist {
     pub id: String,
     pub name: String,
     pub time_added: i32,
+
+    pub last_played: Option<i32>,
 }
 
 impl Artist {
@@ -31,8 +33,11 @@ impl Artist {
             .load::<Album>(conn)?)
     }
 
-    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
-        NotImplementedErr()
+    pub fn stats(&self) -> UserStats {
+        UserStats {
+            id: format!("stats:{}", self.id),
+            last_played: self.last_played,
+        }
     }
 }
 
@@ -49,8 +54,8 @@ graphql_object!(Artist: GraphQLContext |&self| {
         self.albums(executor.context())
     }
 
-    field stats(&executor) -> FieldResult<UserStats> {
-        self.stats(executor.context())
+    field stats() -> UserStats {
+        self.stats()
     }
 
     field time_added() -> i32 {

@@ -45,15 +45,19 @@ impl Song {
             .load::<Artist>(conn)?)
     }
 
-    pub fn stats(&self, _context: &GraphQLContext) -> UserStats {
+    pub fn stats(&self) -> UserStats {
         UserStats {
             id: format!("stats:{}", self.id),
             last_played: self.last_played,
         }
     }
 
-    pub fn song_stats(&self, _context: &GraphQLContext) -> FieldResult<SongUserStats> {
-        NotImplementedErr()
+    pub fn song_stats(&self) -> SongUserStats {
+        SongUserStats {
+            id: format!("song_stats:{}", self.id),
+            play_count: self.play_count,
+            liked: self.liked,
+        }
     }
 }
 
@@ -87,12 +91,12 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.artists(executor.context())
     }
 
-    field stats(&executor) -> UserStats {
-        self.stats(executor.context())
+    field stats() -> UserStats {
+        self.stats()
     }
 
-    field song_stats(&executor) -> FieldResult<SongUserStats> {
-        self.song_stats(executor.context())
+    field song_stats() -> SongUserStats {
+        self.song_stats()
     }
 
     field duration() -> i32 {

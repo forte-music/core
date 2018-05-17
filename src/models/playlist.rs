@@ -15,6 +15,8 @@ pub struct Playlist {
     pub name: String,
     pub description: String,
     pub time_added: i32,
+
+    pub last_played: Option<i32>,
 }
 
 impl Playlist {
@@ -52,8 +54,11 @@ impl Playlist {
         NotImplementedErr()
     }
 
-    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
-        NotImplementedErr()
+    pub fn stats(&self) -> UserStats {
+        UserStats {
+            id: format!("stats:{}", self.id),
+            last_played: self.last_played,
+        }
     }
 }
 
@@ -95,8 +100,8 @@ graphql_object!(Playlist: GraphQLContext |&self| {
         self.items(executor.context(), first, after, sort)
     }
 
-    field stats(&executor) -> FieldResult<UserStats> {
-        self.stats(executor.context())
+    field stats() -> UserStats {
+        self.stats()
     }
 
     field time_added() -> i32 {
