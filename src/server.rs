@@ -1,5 +1,3 @@
-extern crate dotenv;
-
 use context::{GraphQLContext, IronContext};
 use iron::{Chain, Iron};
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};

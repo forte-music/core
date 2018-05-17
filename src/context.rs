@@ -1,4 +1,3 @@
-extern crate dotenv;
 extern crate r2d2;
 extern crate r2d2_diesel;
 
@@ -8,6 +7,7 @@ use iron::typemap::Key;
 use juniper;
 use persistent::Read;
 use std::error::Error;
+use dotenv;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
 pub type Pool = r2d2::Pool<ConnectionManager>;

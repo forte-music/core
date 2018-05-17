@@ -1,12 +1,14 @@
 extern crate chrono;
-extern crate iron;
+extern crate dotenv;
 
-#[macro_use]
-extern crate juniper;
+extern crate iron;
 extern crate juniper_iron;
 extern crate logger;
 extern crate mount;
 extern crate persistent;
+
+#[macro_use]
+extern crate juniper;
 
 #[macro_use]
 extern crate diesel;
