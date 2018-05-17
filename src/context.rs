@@ -14,7 +14,7 @@ pub type Pool = r2d2::Pool<ConnectionManager>;
 pub type PooledConnection = r2d2::PooledConnection<ConnectionManager>;
 
 pub struct IronContext {
-    pub connection_manager: Pool,
+    pub pool: Pool,
 }
 
 #[derive(Copy, Clone)]
@@ -28,9 +28,7 @@ impl IronContext {
         let database_url = dotenv::var("DATABASE_URL")?;
         let manager = ConnectionManager::new(database_url);
         let pool: Pool = r2d2::Pool::new(manager)?;
-        let context = IronContext {
-            connection_manager: pool,
-        };
+        let context = IronContext { pool: pool };
 
         Ok(Read::<ContextKey>::both(context))
     }
@@ -43,7 +41,7 @@ pub struct GraphQLContext {
 impl GraphQLContext {
     pub fn from_request(request: &mut Request) -> Self {
         let iron_context = request.get::<Read<ContextKey>>().unwrap();
-        let connection: PooledConnection = iron_context.connection_manager.get().unwrap();
+        let connection: PooledConnection = iron_context.pool.get().unwrap();
 
         GraphQLContext { connection }
     }
