@@ -70,7 +70,7 @@ pub struct PlaylistItem {
 
 impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        Song::from_id(context, self.id.as_str())
+        Song::from_id(context, self.song_id.as_str())
     }
 }
 
