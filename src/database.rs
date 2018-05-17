@@ -21,6 +21,7 @@ table! {
     playlist (id) {
         id -> Text,
         name -> Text,
+        description -> Text,
         time_added -> Integer,
     }
 }
@@ -63,4 +64,11 @@ joinable!(song -> album (album_id));
 joinable!(song_artist -> artist (artist_id));
 joinable!(song_artist -> song (song_id));
 
-allow_tables_to_appear_in_same_query!(album, artist, playlist, playlist_item, song, song_artist,);
+allow_tables_to_appear_in_same_query!(
+    album,
+    artist,
+    playlist,
+    playlist_item,
+    song,
+    song_artist,
+);

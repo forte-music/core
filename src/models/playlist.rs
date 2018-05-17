@@ -13,6 +13,7 @@ use models::*;
 pub struct Playlist {
     pub id: String,
     pub name: String,
+    pub description: String,
     pub time_added: i32,
 }
 
@@ -78,9 +79,8 @@ graphql_object!(Playlist: GraphQLContext |&self| {
         &self.name
     }
 
-    // TODO: Implement Real Description
     field description() -> &str {
-        "Test"
+        &self.description
     }
 
     field duration(&executor) -> FieldResult<i32> {

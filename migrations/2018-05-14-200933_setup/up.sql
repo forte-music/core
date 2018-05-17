@@ -35,6 +35,7 @@ CREATE TABLE song (
 CREATE TABLE playlist (
   id VARCHAR(36) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
+  description TEXT NOT NULL,
   time_added INTEGER NOT NULL
 );
 
