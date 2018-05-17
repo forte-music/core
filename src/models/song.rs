@@ -32,6 +32,10 @@ impl Song {
         ID::from(self.id.to_owned())
     }
 
+    pub fn stream_url(&self) -> FieldResult<String> {
+        NotImplementedErr()
+    }
+
     pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
         Album::from_id(context, self.album_id.as_str())
     }
@@ -66,9 +70,8 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.gql_id()
     }
 
-    field stream_url() -> &str {
-    // TODO: Remove Me
-        "test"
+    field stream_url() -> FieldResult<String> {
+        self.stream_url()
     }
 
     field track_number() -> i32 {
