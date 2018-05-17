@@ -1,12 +1,12 @@
 use context::GraphQLContext;
-use juniper::FieldResult;
+use juniper::{FieldResult, ID};
 use models::*;
 
 pub struct StatsCollection {
-    song_id: String,
-    album_id: Option<String>,
-    artist_id: Option<String>,
-    playlist_id: Option<String>,
+    pub song_id: ID,
+    pub album_id: Option<ID>,
+    pub artist_id: Option<ID>,
+    pub playlist_id: Option<ID>,
 }
 
 impl StatsCollection {
