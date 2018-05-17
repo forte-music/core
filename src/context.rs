@@ -7,7 +7,6 @@ use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
-use std;
 use std::error::Error;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
@@ -36,8 +35,6 @@ impl IronContext {
         Ok(Read::<ContextKey>::both(context))
     }
 }
-
-unsafe impl std::marker::Sync for IronContext {}
 
 pub struct GraphQLContext {
     pub connection: PooledConnection,
