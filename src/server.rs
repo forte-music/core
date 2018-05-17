@@ -1,10 +1,10 @@
 use context::{GraphQLContext, IronContext};
+use dotenv;
 use iron::{Chain, Iron};
 use juniper_iron::{GraphQLHandler, GraphiQLHandler};
 use logger::Logger;
 use models::{Mutation, Query};
 use mount::Mount;
-use dotenv;
 
 pub fn start() {
     let mut mount = Mount::new();
