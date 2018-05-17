@@ -58,8 +58,7 @@ impl Query {
     }
 }
 
-graphql_object!(
-    Query: GraphQLContext | &self | {
+graphql_object!(Query: GraphQLContext |&self| {
     field album(&executor, id: ID) -> FieldResult<Album> {
         Query::album(executor.context(), &id)
     }

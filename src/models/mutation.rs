@@ -91,9 +91,7 @@ impl Mutation {
     }
 }
 
-graphql_object!(
-    Mutation: GraphQLContext | &self | {
-
+graphql_object!(Mutation: GraphQLContext |&self| {
     field play_song(
         &executor,
         song_id: ID,
