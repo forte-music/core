@@ -64,7 +64,12 @@ graphql_object!(
         Query::album(executor.context(), &id)
     }
 
-    field albums(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Album>> {
+    field albums(
+        &executor,
+        first = 25: i32,
+        after: Option<String>,
+        sort: Option<SortParams>
+    ) -> FieldResult<Connection<Album>> {
         Query::albums(executor.context(), first, after, sort)
     }
 
@@ -72,7 +77,12 @@ graphql_object!(
         Query::artist(executor.context(), &id)
     }
 
-    field artists(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Artist>> {
+    field artists(
+        &executor,
+        first = 25: i32,
+        after: Option<String>,
+        sort: Option<SortParams>
+    ) -> FieldResult<Connection<Artist>> {
         Query::artists(executor.context(), first, after, sort)
     }
 
@@ -80,7 +90,12 @@ graphql_object!(
         Query::song(executor.context(), &id)
     }
 
-    field songs(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Song>> {
+    field songs(
+        &executor,
+        first = 25: i32,
+        after: Option<String>,
+        sort: Option<SortParams>
+    ) -> FieldResult<Connection<Song>> {
         Query::songs(executor.context(), first, after, sort)
     }
 
@@ -88,7 +103,12 @@ graphql_object!(
         Query::playlist(executor.context(), &id)
     }
 
-    field playlists(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Playlist>> {
+    field playlists(
+        &executor,
+        first = 25: i32,
+        after: Option<String>,
+        sort: Option<SortParams>
+    ) -> FieldResult<Connection<Playlist>> {
         Query::playlists(executor.context(), first, after, sort)
     }
     }

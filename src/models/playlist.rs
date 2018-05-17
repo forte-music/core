@@ -67,7 +67,6 @@ impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
         Song::from_id(context, self.id.as_str())
     }
-
 }
 
 graphql_object!(Playlist: GraphQLContext |&self| {
@@ -87,7 +86,12 @@ graphql_object!(Playlist: GraphQLContext |&self| {
         self.duration(executor.context())
     }
 
-    field items(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<PlaylistItem>> {
+    field items(
+        &executor,
+        first = 25: i32,
+        after: Option<String>,
+        sort: Option<SortParams>
+    ) -> FieldResult<Connection<PlaylistItem>> {
         self.items(executor.context(), first, after, sort)
     }
 

@@ -1,5 +1,5 @@
-use juniper::FieldResult;
 use context::GraphQLContext;
+use juniper::FieldResult;
 use models::*;
 
 pub struct StatsCollection {

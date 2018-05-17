@@ -10,7 +10,13 @@ use diesel::prelude::*;
 pub struct Mutation;
 
 impl Mutation {
-    pub fn play_song(context: &GraphQLContext, song_id: ID, artist_id: Option<ID>, album_id: Option<ID>, playlist_id: Option<ID>) -> FieldResult<StatsCollection> {
+    pub fn play_song(
+        context: &GraphQLContext,
+        song_id: ID,
+        artist_id: Option<ID>,
+        album_id: Option<ID>,
+        playlist_id: Option<ID>,
+    ) -> FieldResult<StatsCollection> {
         NotImplementedErr()
     }
 
@@ -28,7 +34,13 @@ impl Mutation {
 graphql_object!(
     Mutation: GraphQLContext | &self | {
 
-    field play_song(&executor, song_id: ID, artist_id: Option<ID>, album_id: Option<ID>, playlist_id: Option<ID>) -> FieldResult<StatsCollection> {
+    field play_song(
+        &executor,
+        song_id: ID,
+        artist_id: Option<ID>,
+        album_id: Option<ID>,
+        playlist_id: Option<ID>
+    ) -> FieldResult<StatsCollection> {
         Mutation::play_song(executor.context(), song_id, artist_id, album_id, playlist_id)
     }
 
