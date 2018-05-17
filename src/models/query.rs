@@ -111,5 +111,4 @@ graphql_object!(
     ) -> FieldResult<Connection<Playlist>> {
         Query::playlists(executor.context(), first, after, sort)
     }
-    }
-);
+});
