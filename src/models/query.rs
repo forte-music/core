@@ -11,7 +11,8 @@ impl Query {
 
     pub fn albums(
         context: &GraphQLContext,
-        input: ConnectionQuery,
+        first: i32,
+        after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
         NotImplementedErr()
@@ -23,7 +24,8 @@ impl Query {
 
     pub fn artists(
         context: &GraphQLContext,
-        input: ConnectionQuery,
+        first: i32,
+        after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Artist>> {
         NotImplementedErr()
@@ -35,7 +37,8 @@ impl Query {
 
     pub fn songs(
         context: &GraphQLContext,
-        input: ConnectionQuery,
+        first: i32,
+        after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Song>> {
         NotImplementedErr()
@@ -47,7 +50,8 @@ impl Query {
 
     pub fn playlists(
         context: &GraphQLContext,
-        input: ConnectionQuery,
+        first: i32,
+        after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Playlist>> {
         NotImplementedErr()
@@ -60,36 +64,32 @@ graphql_object!(
         Query::album(executor.context(), &id)
     }
 
-    field albums(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Album>> {
-        Query::albums(executor.context(), input, sort)
+    field albums(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Album>> {
+        Query::albums(executor.context(), first, after, sort)
     }
 
     field artist(&executor, id: ID) -> FieldResult<Artist> {
         Query::artist(executor.context(), &id)
     }
 
-    field artists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Artist>> {
-        Query::artists(executor.context(), input, sort)
+    field artists(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Artist>> {
+        Query::artists(executor.context(), first, after, sort)
     }
 
     field song(&executor, id: ID) -> FieldResult<Song> {
         Query::song(executor.context(), &id)
     }
 
-    field songs(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Song>> {
-        Query::songs(executor.context(), input, sort)
+    field songs(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Song>> {
+        Query::songs(executor.context(), first, after, sort)
     }
 
     field playlist(&executor, id: ID) -> FieldResult<Playlist> {
         Query::playlist(executor.context(), &id)
     }
 
-    field playlists(&executor, input: ConnectionQuery, sort: Option<SortParams>)
-            -> FieldResult<Connection<Playlist>> {
-        Query::playlists(executor.context(), input, sort)
+    field playlists(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<Playlist>> {
+        Query::playlists(executor.context(), first, after, sort)
     }
     }
 );

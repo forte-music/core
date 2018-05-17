@@ -48,6 +48,10 @@ impl Album {
 
         Ok(duration as i32)
     }
+
+    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
+        NotImplementedErr()
+    }
 }
 
 graphql_object!(Album: GraphQLContext |&self| {
@@ -77,6 +81,10 @@ graphql_object!(Album: GraphQLContext |&self| {
 
     field release_year() -> i32 {
         self.release_year
+    }
+
+    field stats(&executor) -> FieldResult<UserStats> {
+        self.stats(executor.context())
     }
 
     field time_added() -> i32 {

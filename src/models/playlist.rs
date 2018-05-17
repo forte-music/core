@@ -44,13 +44,15 @@ impl Playlist {
     pub fn items(
         &self,
         context: &GraphQLContext,
-        input: &ConnectionQuery,
+        first: i32,
+        after: Option<String>,
+        sort: Option<SortParams>,
     ) -> FieldResult<Connection<PlaylistItem>> {
         NotImplementedErr()
-        // let conn = &*context.connection;
-        // Ok(playlist_item::table
-        //     .filter(playlist_item::playlist_id.eq(self.id.as_ref()))
-        //     .load::<PlaylistItem>(conn)?)
+    }
+
+    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
+        NotImplementedErr()
     }
 }
 
@@ -64,28 +66,7 @@ impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
         Song::from_id(context, self.id.as_str())
     }
-}
 
-#[derive(GraphQLInputObject)]
-pub struct PlaylistAppendInput {
-    pub playlist_id: ID,
-    pub songs: Vec<ID>,
-}
-
-#[derive(GraphQLEnum)]
-pub enum Position {
-    #[graphql(name = "BEGINNING")]
-    Beginning,
-    #[graphql(name = "END")]
-    End,
-}
-
-#[derive(GraphQLEnum)]
-pub enum Offset {
-    #[graphql(name = "AFTER")]
-    After,
-    #[graphql(name = "BEFORE")]
-    Before,
 }
 
 graphql_object!(Playlist: GraphQLContext |&self| {
@@ -97,16 +78,25 @@ graphql_object!(Playlist: GraphQLContext |&self| {
         &self.name
     }
 
+    // TODO: Implement Real Description
+    field description() -> &str {
+        "Test"
+    }
+
     field duration(&executor) -> FieldResult<i32> {
         self.duration(executor.context())
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field items(&executor, first = 25: i32, after: Option<String>, sort: Option<SortParams>) -> FieldResult<Connection<PlaylistItem>> {
+        self.items(executor.context(), first, after, sort)
     }
 
-    field items(&executor, input: ConnectionQuery) -> FieldResult<Connection<PlaylistItem>> {
-        self.items(executor.context(), &input)
+    field stats(&executor) -> FieldResult<UserStats> {
+        self.stats(executor.context())
+    }
+
+    field time_added() -> i32 {
+        self.time_added
     }
 });
 

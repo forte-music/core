@@ -30,6 +30,10 @@ impl Artist {
             .order(album::time_added.desc())
             .load::<Album>(conn)?)
     }
+
+    pub fn stats(&self, context: &GraphQLContext) -> FieldResult<UserStats> {
+        NotImplementedErr()
+    }
 }
 
 graphql_object!(Artist: GraphQLContext |&self| {
@@ -43,6 +47,10 @@ graphql_object!(Artist: GraphQLContext |&self| {
 
     field albums(&executor) -> FieldResult<Vec<Album>> {
         self.albums(executor.context())
+    }
+
+    field stats(&executor) -> FieldResult<UserStats> {
+        self.stats(executor.context())
     }
 
     field time_added() -> i32 {

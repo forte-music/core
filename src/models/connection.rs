@@ -6,6 +6,8 @@ pub struct Edge<T> {
     pub node: T,
 }
 
+// TODO: Make Count Lazy
+
 graphql_object!(Edge<Album>: GraphQLContext as "AlbumEdge" |&self| {
     field cursor() -> &str { &self.cursor }
     field node() -> &Album { &self.node }
@@ -34,40 +36,42 @@ graphql_object!(Edge<PlaylistItem>: GraphQLContext as "PlaylistItemEdge" |&self|
 pub struct Connection<T> {
     pub count: usize,
     pub edges: Vec<Edge<T>>,
+    pub has_next_page: bool,
 }
 
 graphql_object!(Connection<Album>: GraphQLContext as "AlbumConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Album>] { &self.edges }
+    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 
 graphql_object!(Connection<Artist>: GraphQLContext as "ArtistConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Artist>] { &self.edges }
+    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 
 graphql_object!(Connection<Song>: GraphQLContext as "SongConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Song>] { &self.edges }
+    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 
 graphql_object!(Connection<Playlist>: GraphQLContext as "PlaylistConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Playlist>] { &self.edges }
+    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 
 graphql_object!(Connection<PlaylistItem>: GraphQLContext as "PlaylistItemConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<PlaylistItem>] { &self.edges }
+    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 
-#[derive(GraphQLInputObject)]
-pub struct ConnectionQuery {
-    #[graphql(default = "25")]
-    pub limit: i32,
-
-    #[graphql(default = "None")]
-    pub cursor: Option<String>,
+#[derive(GraphQLObject)]
+pub struct PageInfo {
+    pub has_next_page: bool,
 }
 
 #[derive(GraphQLInputObject)]
@@ -87,6 +91,6 @@ pub enum SortBy {
     RecentlyAdded,
     #[graphql(name = "LEXICOGRAPHICALLY")]
     Lexicographically,
-    #[graphql(name = "RELEVANCE")]
-    Relevance,
+    #[graphql(name = "RECENTLY_PLAYED")]
+    RecentlyPlayed,
 }

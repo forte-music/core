@@ -45,31 +45,21 @@ impl Song {
             .load::<Artist>(conn)?)
     }
 
-    pub fn stats(&self, _context: &GraphQLContext) -> SongUserStats {
-        SongUserStats {
+    pub fn stats(&self, _context: &GraphQLContext) -> UserStats {
+        UserStats {
             id: format!("stats:{}", self.id),
-            play_count: self.play_count,
             last_played: self.last_played,
-            liked: self.liked,
         }
+    }
+
+    pub fn song_stats(&self, _context: &GraphQLContext) -> FieldResult<SongUserStats> {
+        NotImplementedErr()
     }
 }
 
 graphql_object!(Song: GraphQLContext |&self| {
     field id() -> ID {
         self.gql_id()
-    }
-
-    field name() -> &str {
-        &self.name
-    }
-
-    field album(&executor) -> FieldResult<Album> {
-        self.album(executor.context())
-    }
-
-    field artists(&executor) -> FieldResult<Vec<Artist>> {
-        self.artists(executor.context())
     }
 
     field stream_url() -> &str {
@@ -85,8 +75,24 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.disk_number
     }
 
-    field stats(&executor) -> SongUserStats {
+    field name() -> &str {
+        &self.name
+    }
+
+    field album(&executor) -> FieldResult<Album> {
+        self.album(executor.context())
+    }
+
+    field artists(&executor) -> FieldResult<Vec<Artist>> {
+        self.artists(executor.context())
+    }
+
+    field stats(&executor) -> UserStats {
         self.stats(executor.context())
+    }
+
+    field song_stats(&executor) -> FieldResult<SongUserStats> {
+        self.song_stats(executor.context())
     }
 
     field duration() -> i32 {

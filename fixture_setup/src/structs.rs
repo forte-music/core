@@ -130,8 +130,8 @@ impl Into<Song> for SongSource {
     }
 }
 
-impl Into<SongUserStats> for StatsSource {
-    fn into(self) -> SongUserStats {
+impl Into<UserStats> for StatsSource {
+    fn into(self) -> UserStats {
         SongUserStats {
             id: self.id,
             play_count: self.play_count,
