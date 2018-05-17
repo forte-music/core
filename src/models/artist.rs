@@ -17,7 +17,7 @@ pub struct Artist {
 
 impl Artist {
     pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(artist::table.filter(artist::id.eq(id)).first::<Self>(conn)?)
     }
 
@@ -26,7 +26,7 @@ impl Artist {
     }
 
     pub fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(album::table
             .filter(album::artist_id.eq(self.id.as_str()))
             .order(album::time_added.desc())

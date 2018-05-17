@@ -7,6 +7,7 @@ use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
+use std::ops::Deref;
 use std::error::Error;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
@@ -37,7 +38,7 @@ impl IronContext {
 }
 
 pub struct GraphQLContext {
-    pub connection: PooledConnection,
+    connection: PooledConnection,
 }
 
 impl GraphQLContext {
@@ -46,6 +47,10 @@ impl GraphQLContext {
         let connection: PooledConnection = iron_context.connection_manager.get().unwrap();
 
         GraphQLContext { connection }
+    }
+
+    pub fn connection(&self) -> &SqliteConnection {
+        self.connection.deref()
     }
 }
 
