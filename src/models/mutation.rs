@@ -107,6 +107,4 @@ graphql_object!(
     field toggle_like(&executor, song_id: ID) -> FieldResult<Song> {
         Mutation::toggle_like(executor.context(), &song_id)
     }
-
-    }
-);
+});
