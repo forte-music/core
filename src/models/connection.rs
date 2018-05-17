@@ -6,8 +6,6 @@ pub struct Edge<T> {
     pub node: T,
 }
 
-// TODO: Make Count Lazy
-
 graphql_object!(Edge<Album>: GraphQLContext as "AlbumEdge" |&self| {
     field cursor() -> &str { &self.cursor }
     field node() -> &Album { &self.node }
