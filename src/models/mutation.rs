@@ -81,7 +81,7 @@ impl Mutation {
     }
 
     pub fn toggle_like(context: &GraphQLContext, song_id: &str) -> FieldResult<Song> {
-        let conn = &*context.connection;
+        let conn = context.connection();
 
         diesel::update(song::table.filter(song::id.eq(song_id)))
             .set(song::liked.eq(not(song::liked)))
