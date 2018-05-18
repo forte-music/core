@@ -82,6 +82,16 @@ pub struct SortParams {
     pub filter: Option<String>,
 }
 
+impl Default for SortParams {
+    fn default() -> Self {
+        SortParams {
+            sort_by: SortBy::Lexicographically,
+            reverse: false,
+            filter: None,
+        }
+    }
+}
+
 #[derive(GraphQLEnum)]
 pub enum SortBy {
     #[graphql(name = "RECENTLY_ADDED")]

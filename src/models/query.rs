@@ -22,12 +22,7 @@ impl Query {
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
         let conn = context.connection();
-
-        let sort = sort.unwrap_or(SortParams {
-            sort_by: SortBy::Lexicographically,
-            reverse: false,
-            filter: None,
-        });
+        let sort = sort.unwrap_or_default();
 
         let filtered =
             album::table.filter(album::name.like(sort.filter.unwrap_or("%".to_string())));
