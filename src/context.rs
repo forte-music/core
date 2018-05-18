@@ -7,8 +7,8 @@ use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
-use std::ops::Deref;
 use std::error::Error;
+use std::ops::Deref;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
 pub type Pool = r2d2::Pool<ConnectionManager>;
