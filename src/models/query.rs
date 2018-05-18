@@ -21,6 +21,8 @@ impl Query {
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
+        let conn = context.connection();
+
         let sort = sort.unwrap_or(SortParams {
             sort_by: SortBy::Lexicographically,
             reverse: false,
@@ -29,32 +31,43 @@ impl Query {
 
         let filtered = album::table.filter(album::name.like(sort.filter));
 
-        let ordered = match sort.sort_by {
-            SortBy::Lexicographically if !sort.reverse => filtered.order_by(album::name.asc()),
-            SortBy::Lexicographically if sort.reverse => filtered.order_by(album::name.desc()),
-
-            SortBy::RecentlyAdded if !sort.reverse => filtered.order_by(album::time_added.desc()),
-            SortBy::RecentlyAdded if sort.reverse => filtered.order_by(album::time_added.asc()),
-
-            SortBy::RecentlyPlayed if !sort.reverse => filtered.order_by(album::last_played.desc()),
-            SortBy::RecentlyPlayed if sort.reverse => filtered.order_by(album::last_played.asc()),
-        };
-
         let lower_bound: i64 = if let Some(offset) = after {
             offset.parse()?
         } else {
             0
         };
 
-        let results: Vec<Album> = ordered
-            .limit(first)
-            .offset(lower_bound)
-            .load(context.connection())?;
+        let bounded = filtered.clone().limit(first).offset(lower_bound);
+
+        let results: Vec<Album> = match sort.sort_by {
+            SortBy::Lexicographically => {
+                if !sort.reverse {
+                    bounded.order_by(album::name.asc()).load(conn)
+                } else {
+                    bounded.order_by(album::name.desc()).load(conn)
+                }
+            }
+
+            SortBy::RecentlyAdded => {
+                if !sort.reverse {
+                    bounded.order_by(album::time_added.desc()).load(conn)
+                } else {
+                    bounded.order_by(album::time_added.asc()).load(conn)
+                }
+            }
+
+            SortBy::RecentlyPlayed => {
+                if !sort.reverse {
+                    bounded.order_by(album::last_played.desc()).load(conn)
+                } else {
+                    bounded.order_by(album::last_played.asc()).load(conn)
+                }
+            }
+        }?;
 
         let count: i64 = filtered
             .select(dsl::count_star())
-            .first(context.connection())?
-            .unwrap_or(0);
+            .first(context.connection())?;
 
         // The exclusive upper bound of the window into the data.
         let upper_bound = lower_bound + first;
