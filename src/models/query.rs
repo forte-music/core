@@ -27,11 +27,7 @@ impl Query {
         let filtered =
             album::table.filter(album::name.like(sort.filter.unwrap_or("%".to_string())));
 
-        let lower_bound: i64 = if let Some(offset) = after {
-            offset.parse()?
-        } else {
-            0
-        };
+        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
         let bounded = filtered.clone().limit(first).offset(lower_bound);
 
