@@ -79,8 +79,7 @@ pub struct SortParams {
     #[graphql(default = "false")]
     pub reverse: bool,
 
-    #[graphql(default = "String::new()")]
-    pub filter: String,
+    pub filter: Option<String>,
 }
 
 #[derive(GraphQLEnum)]

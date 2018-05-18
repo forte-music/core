@@ -26,10 +26,11 @@ impl Query {
         let sort = sort.unwrap_or(SortParams {
             sort_by: SortBy::Lexicographically,
             reverse: false,
-            filter: "".to_owned(),
+            filter: None,
         });
 
-        let filtered = album::table.filter(album::name.like(sort.filter));
+        let filtered =
+            album::table.filter(album::name.like(sort.filter.unwrap_or("%".to_string())));
 
         let lower_bound: i64 = if let Some(offset) = after {
             offset.parse()?
