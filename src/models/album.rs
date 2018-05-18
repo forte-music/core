@@ -21,7 +21,7 @@ pub struct Album {
 
 impl Album {
     pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(album::table.filter(album::id.eq(id)).first::<Self>(conn)?)
     }
 
@@ -34,7 +34,7 @@ impl Album {
     }
 
     pub fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(song::table
             .filter(song::album_id.eq(self.id.as_str()))
             .order(song::time_added.desc())
@@ -42,7 +42,7 @@ impl Album {
     }
 
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         let maybe_duration: Option<i64> = song::table
             .select(dsl::sum(song::duration))
             .first::<Option<i64>>(conn)?;

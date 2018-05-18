@@ -26,7 +26,7 @@ impl Mutation {
         album_id: Option<ID>,
         playlist_id: Option<ID>,
     ) -> FieldResult<StatsCollection> {
-        let conn = &*context.connection;
+        let conn = context.connection();
 
         let valid_descriptors = (vec![&artist_id, &album_id, &playlist_id])
             .iter()
@@ -81,7 +81,7 @@ impl Mutation {
     }
 
     pub fn toggle_like(context: &GraphQLContext, song_id: &str) -> FieldResult<Song> {
-        let conn = &*context.connection;
+        let conn = context.connection();
 
         diesel::update(song::table.filter(song::id.eq(song_id)))
             .set(song::liked.eq(not(song::liked)))

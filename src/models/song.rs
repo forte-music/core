@@ -24,7 +24,7 @@ pub struct Song {
 
 impl Song {
     pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
     }
 
@@ -41,7 +41,7 @@ impl Song {
     }
 
     pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(song_artist::table
             .filter(song_artist::song_id.eq(self.id.as_str()))
             .inner_join(artist::table)

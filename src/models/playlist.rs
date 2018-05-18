@@ -21,7 +21,7 @@ pub struct Playlist {
 
 impl Playlist {
     pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         Ok(playlist::table
             .filter(playlist::id.eq(id))
             .first::<Self>(conn)?)
@@ -32,7 +32,7 @@ impl Playlist {
     }
 
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
-        let conn = &*context.connection;
+        let conn = context.connection();
         let maybe_duration: Option<i64> = playlist_item::table
             .filter(playlist_item::playlist_id.eq(self.id.as_str()))
             .inner_join(song::table)
