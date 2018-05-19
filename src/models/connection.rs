@@ -2,16 +2,17 @@ use context::GraphQLContext;
 use juniper::FieldResult;
 use models::*;
 
-use diesel;
+use std;
+
+use diesel::associations::HasTable;
 use diesel::dsl;
 use diesel::prelude::*;
-use diesel::query_builder::BoxedSelectStatement;
+use diesel::query_builder::AsQuery;
 use diesel::sql_types::Integer;
 use diesel::sql_types::Nullable;
 use diesel::sql_types::Text;
 
 use database::album;
-use diesel::backend::Backend;
 
 // TODO: Use Table Associations
 // TODO: Rename Tables and Remove Table Name
@@ -117,9 +118,11 @@ pub enum SortBy {
     RecentlyPlayed,
 }
 
-pub trait GetConnection<Table, ST, DB: Backend>: diesel::Queryable<ST, DB> + Sized {
-    fn table() -> BoxedSelectStatement<'static, ST, Table, DB>;
-
+pub trait GetConnection
+where
+    Self: std::marker::Sized + HasTable,
+    Self::Table: Clone,
+{
     fn name() -> Box<Expression<SqlType = Text>>;
 
     fn time_added() -> Box<Expression<SqlType = Integer>>;
@@ -135,22 +138,16 @@ pub trait GetConnection<Table, ST, DB: Backend>: diesel::Queryable<ST, DB> + Siz
         let conn = context.connection();
         let sort = sort.unwrap_or_default();
 
-        let results_select_statement = GetConnection::table();
-        let count_select_statement = GetConnection::table();
+        let table = Self::table();
+        let name = Self::name();
+        let time_added = Self::time_added();
+        let last_played = Self::last_played();
 
-        let name = album::name; //GetConnection::name();
-        let time_added = album::time_added; //GetConnection::time_added();
-        let last_played = album::last_played; // GetConnection::last_played();
-
-        let results_filtered =
-            results_select_statement.filter(name.like(sort.filter.unwrap_or("%".to_string())));
-
-        let count_filtered =
-            count_select_statement.filter(name.like(sort.filter.unwrap_or("%".to_string())));
+        let filtered = table.filter(name.like(sort.filter.unwrap_or("%".to_string())));
 
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let bounded = results_filtered.limit(first).offset(lower_bound);
+        let bounded = filtered.clone().limit(first).offset(lower_bound);
 
         let results: Vec<Self> = match sort.sort_by {
             SortBy::Lexicographically => {
@@ -178,7 +175,7 @@ pub trait GetConnection<Table, ST, DB: Backend>: diesel::Queryable<ST, DB> + Siz
             }
         }?;
 
-        let count: i64 = count_filtered
+        let count: i64 = filtered
             .select(dsl::count_star())
             .first(context.connection())?;
 

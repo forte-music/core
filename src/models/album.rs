@@ -4,9 +4,8 @@ use diesel::prelude::*;
 use juniper::{FieldResult, ID};
 
 use context::GraphQLContext;
-use diesel::Connection;
 use diesel::dsl;
-use diesel::query_builder::BoxedSelectStatement;
+use diesel::query_builder::AsQuery;
 use diesel::sql_types::Integer;
 use diesel::sql_types::Nullable;
 use diesel::sql_types::Text;
@@ -65,18 +64,7 @@ impl Album {
     }
 }
 
-impl GetConnection<album::table, album::SqlType, <SqliteConnection as Connection>::Backend>
-    for Album
-{
-    fn table() -> BoxedSelectStatement<
-        'static,
-        album::SqlType,
-        album::table,
-        <SqliteConnection as Connection>::Backend,
-    > {
-        album::table.into_boxed()
-    }
-
+impl GetConnection for Album {
     fn name() -> Box<Expression<SqlType = Text>> {
         Box::new(album::name)
     }
