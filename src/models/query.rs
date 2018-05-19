@@ -23,41 +23,47 @@ impl Query {
     ) -> FieldResult<Connection<Album>> {
         let conn = context.connection();
         let sort = sort.unwrap_or_default();
-
-        let filtered =
-            album::table.filter(album::name.like(sort.filter.unwrap_or("%".to_string())));
-
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let bounded = filtered.clone().limit(first).offset(lower_bound);
+        let mut query = album::table.into_boxed();
+        if let Some(ref filter) = sort.filter {
+            query = query.filter(album::name.like(filter));
+        }
 
-        let results: Vec<Album> = match sort.sort_by {
+        query = match sort.sort_by {
             SortBy::Lexicographically => {
                 if !sort.reverse {
-                    bounded.order_by(album::name.asc()).load(conn)
+                    query.order_by(album::name.asc())
                 } else {
-                    bounded.order_by(album::name.desc()).load(conn)
+                    query.order_by(album::name.desc())
                 }
             }
 
             SortBy::RecentlyAdded => {
                 if !sort.reverse {
-                    bounded.order_by(album::time_added.desc()).load(conn)
+                    query.order_by(album::time_added.desc())
                 } else {
-                    bounded.order_by(album::time_added.asc()).load(conn)
+                    query.order_by(album::time_added.asc())
                 }
             }
 
             SortBy::RecentlyPlayed => {
                 if !sort.reverse {
-                    bounded.order_by(album::last_played.desc()).load(conn)
+                    query.order_by(album::last_played.desc())
                 } else {
-                    bounded.order_by(album::last_played.asc()).load(conn)
+                    query.order_by(album::last_played.asc())
                 }
             }
-        }?;
+        };
 
-        let count: i64 = filtered
+        let results: Vec<Album> = query.limit(first).offset(lower_bound).load(conn)?;
+
+        let mut count_query = album::table.into_boxed();
+        if let Some(ref filter) = sort.filter {
+            count_query = count_query.filter(album::name.like(filter));
+        }
+
+        let count: i64 = count_query
             .select(dsl::count_star())
             .first(context.connection())?;
 
