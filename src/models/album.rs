@@ -5,14 +5,9 @@ use juniper::{FieldResult, ID};
 
 use context::GraphQLContext;
 use diesel::dsl;
-use diesel::query_builder::AsQuery;
-use diesel::sql_types::Integer;
-use diesel::sql_types::Nullable;
-use diesel::sql_types::Text;
 use models::*;
 
-#[derive(Queryable, Identifiable)]
-#[table_name = "album"]
+#[derive(Queryable)]
 pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,
@@ -61,20 +56,6 @@ impl Album {
             id: format!("stats:{}", self.id),
             last_played: self.last_played,
         }
-    }
-}
-
-impl GetConnection for Album {
-    fn name() -> Box<Expression<SqlType = Text>> {
-        Box::new(album::name)
-    }
-
-    fn time_added() -> Box<Expression<SqlType = Integer>> {
-        Box::new(album::time_added)
-    }
-
-    fn last_played() -> Box<Expression<SqlType = Nullable<Integer>>> {
-        Box::new(album::last_played)
     }
 }
 

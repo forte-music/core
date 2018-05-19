@@ -1,21 +1,5 @@
 use context::GraphQLContext;
-use juniper::FieldResult;
 use models::*;
-
-use std;
-
-use diesel::associations::HasTable;
-use diesel::dsl;
-use diesel::prelude::*;
-use diesel::query_builder::AsQuery;
-use diesel::sql_types::Integer;
-use diesel::sql_types::Nullable;
-use diesel::sql_types::Text;
-
-use database::album;
-
-// TODO: Use Table Associations
-// TODO: Rename Tables and Remove Table Name
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -116,85 +100,4 @@ pub enum SortBy {
     Lexicographically,
     #[graphql(name = "RECENTLY_PLAYED")]
     RecentlyPlayed,
-}
-
-pub trait GetConnection
-where
-    Self: std::marker::Sized + HasTable,
-    Self::Table: Clone,
-{
-    fn name() -> Box<Expression<SqlType = Text>>;
-
-    fn time_added() -> Box<Expression<SqlType = Integer>>;
-
-    fn last_played() -> Box<Expression<SqlType = Nullable<Integer>>>;
-
-    fn get_connection(
-        context: &GraphQLContext,
-        first: i64,
-        after: Option<String>,
-        sort: Option<SortParams>,
-    ) -> FieldResult<Connection<Self>> {
-        let conn = context.connection();
-        let sort = sort.unwrap_or_default();
-
-        let table = Self::table();
-        let name = Self::name();
-        let time_added = Self::time_added();
-        let last_played = Self::last_played();
-
-        let filtered = table.filter(name.like(sort.filter.unwrap_or("%".to_string())));
-
-        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
-
-        let bounded = filtered.clone().limit(first).offset(lower_bound);
-
-        let results: Vec<Self> = match sort.sort_by {
-            SortBy::Lexicographically => {
-                if !sort.reverse {
-                    bounded.order_by(name.asc()).load(conn)
-                } else {
-                    bounded.order_by(name.desc()).load(conn)
-                }
-            }
-
-            SortBy::RecentlyAdded => {
-                if !sort.reverse {
-                    bounded.order_by(time_added.desc()).load(conn)
-                } else {
-                    bounded.order_by(time_added.asc()).load(conn)
-                }
-            }
-
-            SortBy::RecentlyPlayed => {
-                if !sort.reverse {
-                    bounded.order_by(last_played.desc()).load(conn)
-                } else {
-                    bounded.order_by(last_played.asc()).load(conn)
-                }
-            }
-        }?;
-
-        let count: i64 = filtered
-            .select(dsl::count_star())
-            .first(context.connection())?;
-
-        // The exclusive upper bound of the window into the data.
-        let upper_bound = lower_bound + first;
-
-        let edges: Vec<Edge<Self>> = results
-            .into_iter()
-            .enumerate()
-            .map(|(idx, node)| Edge {
-                cursor: (lower_bound + idx as i64 + 1).to_string(),
-                node,
-            })
-            .collect();
-
-        Ok(Connection {
-            count: count as usize,
-            edges,
-            has_next_page: upper_bound < count,
-        })
-    }
 }

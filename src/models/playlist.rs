@@ -9,8 +9,7 @@ use juniper::{FieldResult, ID};
 use models::Connection;
 use models::*;
 
-#[derive(Queryable, Identifiable)]
-#[table_name = "playlist"]
+#[derive(Queryable)]
 pub struct Playlist {
     pub id: String,
     pub name: String,
