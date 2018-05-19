@@ -21,63 +21,7 @@ impl Query {
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
-        let conn = context.connection();
-        let sort = sort.unwrap_or_default();
-
-        let filtered =
-            album::table.filter(album::name.like(sort.filter.unwrap_or("%".to_string())));
-
-        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
-
-        let bounded = filtered.clone().limit(first).offset(lower_bound);
-
-        let results: Vec<Album> = match sort.sort_by {
-            SortBy::Lexicographically => {
-                if !sort.reverse {
-                    bounded.order_by(album::name.asc()).load(conn)
-                } else {
-                    bounded.order_by(album::name.desc()).load(conn)
-                }
-            }
-
-            SortBy::RecentlyAdded => {
-                if !sort.reverse {
-                    bounded.order_by(album::time_added.desc()).load(conn)
-                } else {
-                    bounded.order_by(album::time_added.asc()).load(conn)
-                }
-            }
-
-            SortBy::RecentlyPlayed => {
-                if !sort.reverse {
-                    bounded.order_by(album::last_played.desc()).load(conn)
-                } else {
-                    bounded.order_by(album::last_played.asc()).load(conn)
-                }
-            }
-        }?;
-
-        let count: i64 = filtered
-            .select(dsl::count_star())
-            .first(context.connection())?;
-
-        // The exclusive upper bound of the window into the data.
-        let upper_bound = lower_bound + first;
-
-        let edges: Vec<Edge<Album>> = results
-            .into_iter()
-            .enumerate()
-            .map(|(idx, album)| Edge {
-                cursor: (lower_bound + idx as i64 + 1).to_string(),
-                node: album,
-            })
-            .collect();
-
-        Ok(Connection {
-            count: count as usize,
-            edges,
-            has_next_page: upper_bound < count,
-        })
+        Album::get_connection(context, first, after, sort)
     }
 
     pub fn artist(context: &GraphQLContext, id: &str) -> FieldResult<Artist> {
