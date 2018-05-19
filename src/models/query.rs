@@ -2,10 +2,6 @@ use context::GraphQLContext;
 use juniper::{FieldResult, ID};
 use models::*;
 
-use database::album;
-use diesel::dsl;
-use diesel::prelude::*;
-
 use models::Connection;
 
 pub struct Query;
