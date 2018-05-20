@@ -1,5 +1,13 @@
 use context::GraphQLContext;
+use juniper::FieldResult;
 use models::*;
+
+use diesel::associations::HasTable;
+use diesel::dsl;
+use diesel::prelude::*;
+use diesel::query_builder::AsQuery;
+
+use database::album;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -89,6 +97,88 @@ impl Default for SortParams {
             reverse: false,
             filter: None,
         }
+    }
+}
+
+trait GetConnection<T>
+where
+    Self: Sized + HasTable<Table = T>,
+    T: Table + AsQuery + QueryDsl,
+{
+    fn get_connection(
+        context: &GraphQLContext,
+        first: i64,
+        after: Option<String>,
+        sort: Option<SortParams>,
+    ) -> FieldResult<Connection<Self>> {
+        let conn = context.connection();
+        let sort = sort.unwrap_or_default();
+        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
+
+        let name = album::name;
+        let time_added = album::time_added;
+        let last_played = album::last_played;
+
+        let table: T = <Self as HasTable>::table();
+        let mut query = table.into_boxed();
+        if let Some(ref filter) = sort.filter {
+            query = query.filter(name.like(filter));
+        }
+
+        query = match sort.sort_by {
+            SortBy::Lexicographically => {
+                if !sort.reverse {
+                    query.order_by(name.asc())
+                } else {
+                    query.order_by(name.desc())
+                }
+            }
+
+            SortBy::RecentlyAdded => {
+                if !sort.reverse {
+                    query.order_by(time_added.desc())
+                } else {
+                    query.order_by(time_added.asc())
+                }
+            }
+
+            SortBy::RecentlyPlayed => {
+                if !sort.reverse {
+                    query.order_by(last_played.desc())
+                } else {
+                    query.order_by(last_played.asc())
+                }
+            }
+        };
+
+        let results: Vec<Self> = query.limit(first).offset(lower_bound).load(conn)?;
+
+        let mut count_query = HasTable::table().into_boxed();
+        if let Some(ref filter) = sort.filter {
+            count_query = count_query.filter(name.like(filter));
+        }
+
+        let count: i64 = count_query
+            .select(dsl::count_star())
+            .first(context.connection())?;
+
+        // The exclusive upper bound of the window into the data.
+        let upper_bound = lower_bound + first;
+
+        let edges: Vec<Edge<Self>> = results
+            .into_iter()
+            .enumerate()
+            .map(|(idx, node)| Edge {
+                cursor: (lower_bound + idx as i64 + 1).to_string(),
+                node,
+            })
+            .collect();
+
+        Ok(Connection {
+            count: count as usize,
+            edges,
+            has_next_page: upper_bound < count,
+        })
     }
 }
 

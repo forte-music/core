@@ -2,10 +2,6 @@ use context::GraphQLContext;
 use juniper::{FieldResult, ID};
 use models::*;
 
-use database::album;
-use diesel::dsl;
-use diesel::prelude::*;
-
 use models::Connection;
 
 pub struct Query;
@@ -21,69 +17,6 @@ impl Query {
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
-        let conn = context.connection();
-        let sort = sort.unwrap_or_default();
-        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
-
-        let mut query = album::table.into_boxed();
-        if let Some(ref filter) = sort.filter {
-            query = query.filter(album::name.like(filter));
-        }
-
-        query = match sort.sort_by {
-            SortBy::Lexicographically => {
-                if !sort.reverse {
-                    query.order_by(album::name.asc())
-                } else {
-                    query.order_by(album::name.desc())
-                }
-            }
-
-            SortBy::RecentlyAdded => {
-                if !sort.reverse {
-                    query.order_by(album::time_added.desc())
-                } else {
-                    query.order_by(album::time_added.asc())
-                }
-            }
-
-            SortBy::RecentlyPlayed => {
-                if !sort.reverse {
-                    query.order_by(album::last_played.desc())
-                } else {
-                    query.order_by(album::last_played.asc())
-                }
-            }
-        };
-
-        let results: Vec<Album> = query.limit(first).offset(lower_bound).load(conn)?;
-
-        let mut count_query = album::table.into_boxed();
-        if let Some(ref filter) = sort.filter {
-            count_query = count_query.filter(album::name.like(filter));
-        }
-
-        let count: i64 = count_query
-            .select(dsl::count_star())
-            .first(context.connection())?;
-
-        // The exclusive upper bound of the window into the data.
-        let upper_bound = lower_bound + first;
-
-        let edges: Vec<Edge<Album>> = results
-            .into_iter()
-            .enumerate()
-            .map(|(idx, album)| Edge {
-                cursor: (lower_bound + idx as i64 + 1).to_string(),
-                node: album,
-            })
-            .collect();
-
-        Ok(Connection {
-            count: count as usize,
-            edges,
-            has_next_page: upper_bound < count,
-        })
     }
 
     pub fn artist(context: &GraphQLContext, id: &str) -> FieldResult<Artist> {
