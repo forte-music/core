@@ -20,7 +20,29 @@ extern "C" {
         unsigned int picture_data_len;
         char *picture_mime;
     } SongProperties;
+}
 
+void read_artwork(SongProperties *song, TagLib::PictureMap &map) {
+    TagLib::Picture::Type options[] = {TagLib::Picture::Type::FrontCover, TagLib::Picture::Type::Other};
+
+    for (TagLib::Picture::Type option : options) {
+        if (map.contains(option)) {
+            TagLib::Picture picture = map[option].front();
+            song->picture_mime = to_cstr(picture.mime());
+
+            // We need to copy the picture data manually because it's not a string
+            TagLib::ByteVector pictureData = picture.data();
+            size_t pictureSize = pictureData.size();
+            song->picture_data = (char*) malloc(pictureSize);
+            memcpy(song->picture_data, pictureData.data(), pictureSize);
+            song->picture_data_len = pictureSize;
+
+            return;
+        }
+    }
+}
+
+extern "C" {
     SongProperties *song_properties(const char *fileName) {
         TagLib::FileRef file((TagLib::FileName) fileName);
 
@@ -30,42 +52,33 @@ extern "C" {
         }
 
         // Read off song properties
-        SongProperties *songProperties = new SongProperties();
+        SongProperties *song_properties = new SongProperties();
 
         TagLib::Tag *tag = file.tag();
         TagLib::AudioProperties *audioProperties = file.audioProperties();
         TagLib::PropertyMap properties = tag->properties();
 
-        songProperties->title = to_cstr(tag->title());
-        songProperties->album = to_cstr(tag->album());
-        songProperties->artist = to_cstr(tag->artist());
+        song_properties->title = to_cstr(tag->title());
+        song_properties->album = to_cstr(tag->album());
+        song_properties->artist = to_cstr(tag->artist());
 
         // There are multiple ways the album artist can be stored.
         if(properties.contains("ALBUMARTIST")) {
-            songProperties->album_artist = to_cstr(properties["ALBUMARTIST"].toString());
+            song_properties->album_artist = to_cstr(properties["ALBUMARTIST"].toString());
         } else if(properties.contains("ALBUM_ARTIST")) {
-            songProperties->album_artist = to_cstr(properties["ALBUM_ARTIST"].toString());
+            song_properties->album_artist = to_cstr(properties["ALBUM_ARTIST"].toString());
         } else if(properties.contains("ALBUM ARTIST")) {
-            songProperties->album_artist = to_cstr(properties["ALBUM ARTIST"].toString());
+            song_properties->album_artist = to_cstr(properties["ALBUM ARTIST"].toString());
         }
 
-        songProperties->year = tag->year();
-        songProperties->track_number = tag->track();
-        songProperties->duration = audioProperties->length();
+        song_properties->year = tag->year();
+        song_properties->track_number = tag->track();
+        song_properties->duration = audioProperties->length();
 
-        TagLib::Picture picture = tag->pictures()[
-                TagLib::Picture::Type::FrontCover
-        ].front();
-        songProperties->picture_mime = to_cstr(picture.mime());
+        TagLib::PictureMap map = tag->pictures();
+        read_artwork(song_properties, map);
 
-        // We need to copy the picture data manually because it's not a string
-        TagLib::ByteVector pictureData = picture.data();
-        size_t pictureSize = pictureData.size();
-        songProperties->picture_data = (char*) malloc(pictureSize);
-        memcpy(songProperties->picture_data, pictureData.data(), pictureSize);
-        songProperties->picture_data_len = pictureSize;
-
-        return songProperties;
+        return song_properties;
     }
 
     void destroy_properties(SongProperties *songProperties) {
