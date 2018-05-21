@@ -25,12 +25,7 @@ pub fn load() -> Result<()> {
         );
     }
 
-    let pool = context::init_pool().map_err(|err| {
-        let description = err.description();
-        let converted: Error = description.into();
-
-        converted
-    })?;
+    let pool = context::init_pool().map_err(|err| Error::from(err.description()))?;
     let db = pool.get()?;
 
     load_from_folder(&path, &db)?;
@@ -41,8 +36,7 @@ pub fn load() -> Result<()> {
 fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<()> {
     let files = path.read_dir()?;
     for file in files {
-        let file = file?;
-        let path = file.path();
+        let path = file?.path();
 
         if path.is_dir() || !path.extension().map_or(false, |ext| ext == "toml") {
             continue;
