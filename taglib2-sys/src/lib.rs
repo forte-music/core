@@ -1,8 +1,31 @@
+#[macro_use]
+extern crate error_chain;
+
 use std::ffi::{CStr, CString};
-use std::os::raw::c_char;
 use std::fmt::Debug;
 use std::fmt::Formatter;
-use std::fmt;
+use std::os::raw::c_char;
+
+error_chain! {
+    foreign_links {
+        NulError(::std::ffi::NulError);
+    }
+
+    errors {
+        NoTagError(name: String) {
+            description("the file doesn't contain a tag")
+            display("the file '{}' doesn't contain a tag", name)
+        }
+    }
+}
+
+unsafe fn from_cstr(cstr: *const std::os::raw::c_char) -> Option<String> {
+    if cstr.is_null() {
+        return None;
+    }
+
+    Some(CStr::from_ptr(cstr).to_string_lossy().into_owned())
+}
 
 extern "C" {
     fn song_properties(file_name: *const std::os::raw::c_char) -> *const SongPropertiesC;
@@ -45,7 +68,7 @@ impl Picture {
 }
 
 impl Debug for Picture {
-    fn fmt(&self, _f: &mut Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, _f: &mut Formatter) -> std::result::Result<(), std::fmt::Error> {
         Ok(())
     }
 }
@@ -62,16 +85,20 @@ pub struct SongProperties {
     cover: Option<Picture>,
 }
 
-pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
-    let file_name_c = CString::new(file_name).unwrap();
-    let song_properties_c = unsafe {
-        match song_properties(file_name_c.as_ptr()).as_ref() {
-            Some(p) => p,
-            None => return None,
-        }
-    };
+impl SongProperties {
+    pub fn read(file_name: &str) -> Result<SongProperties> {
+        let file_name_c = CString::new(file_name)?;
+        let props_c = unsafe { song_properties(file_name_c.as_ptr()).as_ref() }
+            .ok_or(ErrorKind::NoTagError(file_name.to_string()))?;
 
-    let song_properties = unsafe {
+        let props = unsafe { SongProperties::from(props_c) };
+
+        unsafe { destroy_properties(props_c) };
+
+        Ok(props)
+    }
+
+    unsafe fn from(song_properties_c: &SongPropertiesC) -> Self {
         SongProperties {
             title: from_cstr((*song_properties_c).title),
             album: from_cstr((*song_properties_c).album),
@@ -80,19 +107,11 @@ pub fn read_song_properties(file_name: &str) -> Option<SongProperties> {
             year: (*song_properties_c).year,
             track_number: (*song_properties_c).track_number,
             duration: (*song_properties_c).duration,
-            cover: Picture::from_raw(song_properties_c.picture_data, song_properties_c.picture_data_len, song_properties_c.picture_mime),
+            cover: Picture::from_raw(
+                song_properties_c.picture_data,
+                song_properties_c.picture_data_len,
+                song_properties_c.picture_mime,
+            ),
         }
-    };
-
-    unsafe { destroy_properties(song_properties_c) };
-
-    Some(song_properties)
-}
-
-unsafe fn from_cstr(cstr: *const std::os::raw::c_char) -> Option<String> {
-    if cstr.is_null() {
-        return None;
     }
-
-    Some(CStr::from_ptr(cstr).to_string_lossy().into_owned())
 }
