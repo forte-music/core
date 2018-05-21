@@ -90,7 +90,7 @@ jobs:
           name: Check src/database.rs
           command: |
             diesel print-schema > src/database.expected.rs
-            diff src/database{,.expected}.rs || exit 1
+            diff database{,.expected}.rs || exit 1
 
       - run:
           name: Checkout Git Submodules
