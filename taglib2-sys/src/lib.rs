@@ -20,7 +20,7 @@ error_chain! {
     }
 }
 
-unsafe fn from_cstr(cstr: *const std::os::raw::c_char) -> Option<String> {
+unsafe fn from_cstr(cstr: *const c_char) -> Option<String> {
     if cstr.is_null() {
         return None;
     }
@@ -29,7 +29,7 @@ unsafe fn from_cstr(cstr: *const std::os::raw::c_char) -> Option<String> {
 }
 
 extern "C" {
-    fn song_properties(file_name: *const std::os::raw::c_char) -> *const SongPropertiesC;
+    fn song_properties(file_name: *const c_char) -> *const SongPropertiesC;
     fn destroy_properties(song_properties: *const SongPropertiesC);
 }
 
