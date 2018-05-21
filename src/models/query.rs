@@ -17,6 +17,7 @@ impl Query {
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
+        Album::get_connection(context, first, after, sort)
     }
 
     pub fn artist(context: &GraphQLContext, id: &str) -> FieldResult<Artist> {

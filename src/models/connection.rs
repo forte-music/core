@@ -1,13 +1,19 @@
 use context::GraphQLContext;
-use juniper::FieldResult;
-use models::*;
-
 use diesel::associations::HasTable;
 use diesel::dsl;
+use diesel::expression::NonAggregate;
 use diesel::prelude::*;
+use diesel::query_builder::QueryFragment;
+use diesel::sql_types::HasSqlType;
+use diesel::sql_types::Integer;
+use diesel::sql_types::Nullable;
+use diesel::sql_types::Text;
+use diesel::sqlite::Sqlite;
+use juniper::FieldResult;
+use models::*;
+use diesel::query_builder::Query;
+use diesel::query_dsl::boxed_dsl::BoxedDsl;
 use diesel::query_builder::AsQuery;
-
-use database::album;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -100,11 +106,31 @@ impl Default for SortParams {
     }
 }
 
-trait GetConnection<T>
-where
-    Self: Sized + HasTable<Table = T>,
-    T: Table + AsQuery + QueryDsl,
-{
+#[derive(GraphQLEnum)]
+pub enum SortBy {
+    #[graphql(name = "RECENTLY_ADDED")]
+    RecentlyAdded,
+    #[graphql(name = "LEXICOGRAPHICALLY")]
+    Lexicographically,
+    #[graphql(name = "RECENTLY_PLAYED")]
+    RecentlyPlayed,
+}
+
+pub trait GetConnection<TB>
+    where
+        Self: Queryable<TB::SqlType, Sqlite> + Sized,
+        TB: Table,
+        <TB as QuerySource>::FromClause: QueryFragment<Sqlite>,
+        Sqlite: HasSqlType<TB::SqlType> {
+    type Name: Column<Table = TB, SqlType = Text> + AppearsOnTable<TB> + QueryFragment<Sqlite> + NonAggregate;
+    type TimeAdded: Column<Table = TB, SqlType = Integer> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
+    type LastPlayed: Column<Table = TB, SqlType = Nullable<Integer>> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
+
+    fn table() -> TB;
+    fn name() -> Self::Name;
+    fn time_added() -> Self::TimeAdded;
+    fn last_played() -> Self::LastPlayed;
+
     fn get_connection(
         context: &GraphQLContext,
         first: i64,
@@ -115,11 +141,11 @@ where
         let sort = sort.unwrap_or_default();
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let name = album::name;
-        let time_added = album::time_added;
-        let last_played = album::last_played;
+        let table = Self::table();
+        let name = Self::name();
+        let time_added = Self::time_added();
+        let last_played = Self::last_played();
 
-        let table: T = <Self as HasTable>::table();
         let mut query = table.into_boxed();
         if let Some(ref filter) = sort.filter {
             query = query.filter(name.like(filter));
@@ -153,7 +179,7 @@ where
 
         let results: Vec<Self> = query.limit(first).offset(lower_bound).load(conn)?;
 
-        let mut count_query = HasTable::table().into_boxed();
+        let mut count_query = table.into_boxed();
         if let Some(ref filter) = sort.filter {
             count_query = count_query.filter(name.like(filter));
         }
@@ -168,9 +194,9 @@ where
         let edges: Vec<Edge<Self>> = results
             .into_iter()
             .enumerate()
-            .map(|(idx, node)| Edge {
+            .map(|(idx, album)| Edge {
                 cursor: (lower_bound + idx as i64 + 1).to_string(),
-                node,
+                node: album,
             })
             .collect();
 
@@ -180,14 +206,4 @@ where
             has_next_page: upper_bound < count,
         })
     }
-}
-
-#[derive(GraphQLEnum)]
-pub enum SortBy {
-    #[graphql(name = "RECENTLY_ADDED")]
-    RecentlyAdded,
-    #[graphql(name = "LEXICOGRAPHICALLY")]
-    Lexicographically,
-    #[graphql(name = "RECENTLY_PLAYED")]
-    RecentlyPlayed,
 }
