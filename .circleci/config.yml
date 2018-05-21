@@ -78,12 +78,19 @@ jobs:
 
     environment:
       RUST_BACKTRACE: "1"
+      DATABASE_URL: /project/db.sqlite
 
     steps:
       - attach_workspace:
           at: /project
 
       - checkout
+
+      - run:
+          name: Check src/database.rs
+          command: |
+            diesel print-schema > src/database.expected.rs
+            diff database{,.expected}.rs || exit 1
 
       - run:
           name: Checkout Git Submodules
@@ -100,23 +107,17 @@ jobs:
 
       - run:
           name: Initialize Database
-          environment:
-            DATABASE_URL: ./db.sqlite
           command: diesel migration run
 
       - restore_cache: *restore_cargo_cache
 
       - run:
           name: Install Fixtures
-          environment:
-            DATABASE_URL: ../db.sqlite
           working_directory: fixture_setup
           command: cargo run
 
       - run:
           name: Start Core
-          environment:
-            DATABASE_URL: ./db.sqlite
           background: true
           command: cargo run
 
