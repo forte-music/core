@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>"]
 
 [dependencies]
+diesel = { version = "1.0.0", features = ["sqlite"] }
 forte_core = { path = ".." }
 serde_derive = "1.0"
 serde = "1.0"

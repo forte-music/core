@@ -7,7 +7,8 @@ use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Insertable)]
+#[table_name = "album"]
 pub struct Album {
     pub id: String,
     pub artwork_url: Option<String>,
@@ -44,6 +45,7 @@ impl Album {
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
         let conn = context.connection();
         let maybe_duration: Option<i64> = song::table
+            .filter(song::album_id.eq(self.id.as_str()))
             .select(dsl::sum(song::duration))
             .first::<Option<i64>>(conn)?;
         let duration = maybe_duration.unwrap_or(0);
