@@ -63,6 +63,15 @@ jobs:
 
       - save_cache: *save_cargo_cache
 
+      # The workspace stores some of the same information the cache does, but
+      # the workflow is shared across a workflow and updated on every build
+      # while the cache only updates when a lock file changes.
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target
+            - fixture_setup/target
+
   integration-test:
     docker:
       - image: fortemusic/core-build
@@ -71,6 +80,9 @@ jobs:
       RUST_BACKTRACE: "1"
 
     steps:
+      - attach_workspace:
+          at: /project
+
       - checkout
 
       - run:
