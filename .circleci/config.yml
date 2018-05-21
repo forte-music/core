@@ -62,12 +62,6 @@ jobs:
 
       - save_cache: *save_cargo_cache
 
-      - persist_to_workspace:
-          root: .
-          paths:
-            - target
-            - fixture_setup/target
-
   integration-test:
     docker:
       - image: fortemusic/core-build
