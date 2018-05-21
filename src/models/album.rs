@@ -45,6 +45,7 @@ impl Album {
         let conn = context.connection();
         let maybe_duration: Option<i64> = song::table
             .select(dsl::sum(song::duration))
+            .filter(song::album_id.eq(self.id.as_str()))
             .first::<Option<i64>>(conn)?;
         let duration = maybe_duration.unwrap_or(0);
 
