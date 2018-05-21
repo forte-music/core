@@ -81,9 +81,6 @@ jobs:
       RUST_BACKTRACE: "1"
 
     steps:
-      - attach_workspace:
-          at: /project
-
       - checkout
 
       - run:
@@ -106,6 +103,9 @@ jobs:
           command: diesel migration run
 
       - restore_cache: *restore_cargo_cache
+
+      - attach_workspace:
+          at: /project
 
       - run:
           name: Install Fixtures
