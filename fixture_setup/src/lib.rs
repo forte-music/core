@@ -1,4 +1,5 @@
 extern crate diesel;
+extern crate dotenv;
 extern crate forte_core;
 extern crate serde;
 extern crate toml;

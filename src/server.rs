@@ -7,6 +7,8 @@ use models::{Mutation, Query};
 use mount::Mount;
 
 pub fn start() {
+    dotenv::dotenv().unwrap();
+
     let mut mount = Mount::new();
 
     // Register Routes

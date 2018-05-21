@@ -2,11 +2,11 @@ extern crate r2d2;
 extern crate r2d2_diesel;
 
 use diesel::sqlite::SqliteConnection;
-use dotenv;
 use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
+use std::env;
 use std::error::Error;
 use std::ops::Deref;
 
@@ -25,7 +25,7 @@ impl Key for ContextKey {
 }
 
 pub fn init_pool() -> Result<Pool, Box<Error>> {
-    let database_url = dotenv::var("DATABASE_URL")?;
+    let database_url = env::var("DATABASE_URL")?;
     let manager = ConnectionManager::new(database_url);
     Ok(r2d2::Pool::new(manager)?)
 }

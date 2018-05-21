@@ -3,6 +3,8 @@ use std::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+
+use dotenv;
 use toml;
 
 use diesel::associations::HasTable;
@@ -12,6 +14,8 @@ use forte_core::models::*;
 use source_models::*;
 
 pub fn load() {
+    dotenv::dotenv().unwrap();
+
     let path = Path::new("./node_modules/@forte-music/schema/fixtures");
     if !path.is_dir() {
         println!(
