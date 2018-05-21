@@ -11,6 +11,7 @@ aliases:
   - &restore_cargo_cache
     keys:
       - v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+      - v3-cargo-{{ checksum "Cargo.lock" }}-
       - v3-cargo-
 
   - &save_yarn_cache
