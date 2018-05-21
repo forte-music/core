@@ -14,7 +14,7 @@ use forte_core::models::*;
 use source_models::*;
 
 pub fn load() -> Result<()> {
-    dotenv::dotenv();
+    dotenv::dotenv().ok();
 
     let path = Path::new("./node_modules/@forte-music/schema/fixtures");
     if !path.is_dir() {

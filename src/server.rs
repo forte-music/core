@@ -7,7 +7,7 @@ use models::{Mutation, Query};
 use mount::Mount;
 
 pub fn start() {
-    dotenv::dotenv();
+    dotenv::dotenv().ok();
 
     let mut mount = Mount::new();
 
