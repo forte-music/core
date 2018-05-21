@@ -15,10 +15,10 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
-use serde::de::Deserialize;
-use redis::Connection;
 use forte_core::schema::model::Playlist;
 use forte_core::schema::model::PlaylistItem;
+use redis::Connection;
+use serde::de::Deserialize;
 
 fn main() {
     let path = Path::new("./node_modules/@forte-music/schema/fixtures");

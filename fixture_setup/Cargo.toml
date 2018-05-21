@@ -5,7 +5,6 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>
 
 [dependencies]
 forte_core = { path = ".." }
-redis = "0.8.0"
 serde_derive = "1.0"
 serde = "1.0"
 toml = "0.4"

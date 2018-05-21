@@ -1,41 +1,70 @@
-extern crate r2d2;
-extern crate r2d2_redis;
-
-use std::ops::Deref;
-use std::error::Error;
-use self::r2d2_redis::RedisConnectionManager;
-use redis;
-use iron::prelude::*;
-use iron::typemap::Key;
-use persistent::Read;
-use juniper;
-
-pub type Pool = r2d2::Pool<RedisConnectionManager>;
-
-pub fn init_pool() -> Result<Pool, Box<Error>> {
-    let manager = RedisConnectionManager::new("redis://127.0.0.1/")?;
-    Ok(r2d2::Pool::new(manager)?)
-}
-
-pub fn from_request(request: &mut Request) -> Connection {
-    let pool = request.get::<Read<ConnectionKey>>().unwrap();
-    Connection(pool.get().unwrap())
-}
-
-#[derive(Copy, Clone)]
-pub struct ConnectionKey;
-impl Key for ConnectionKey {
-    type Value = Pool;
-}
-
-pub struct Connection(r2d2::PooledConnection<RedisConnectionManager>);
-
-impl juniper::Context for Connection {}
-
-impl Deref for Connection {
-    type Target = redis::Connection;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+table! {
+    album (id) {
+        id -> Text,
+        artwork_url -> Nullable<Text>,
+        name -> Text,
+        artist_id -> Text,
+        release_year -> Integer,
+        time_added -> Integer,
+        last_played -> Nullable<Integer>,
     }
 }
+
+table! {
+    artist (id) {
+        id -> Text,
+        name -> Text,
+        time_added -> Integer,
+        last_played -> Nullable<Integer>,
+    }
+}
+
+table! {
+    playlist (id) {
+        id -> Text,
+        name -> Text,
+        description -> Text,
+        time_added -> Integer,
+        last_played -> Nullable<Integer>,
+    }
+}
+
+table! {
+    playlist_item (id) {
+        id -> Text,
+        playlist_id -> Text,
+        rank -> Text,
+        song_id -> Text,
+    }
+}
+
+table! {
+    song (id) {
+        id -> Text,
+        name -> Text,
+        album_id -> Text,
+        track_number -> Integer,
+        disk_number -> Integer,
+        duration -> Integer,
+        time_added -> Integer,
+        play_count -> Integer,
+        last_played -> Nullable<Integer>,
+        liked -> Bool,
+    }
+}
+
+table! {
+    song_artist (song_id, artist_id) {
+        song_id -> Text,
+        artist_id -> Text,
+    }
+}
+
+joinable!(album -> artist (artist_id));
+joinable!(playlist_item -> playlist (playlist_id));
+joinable!(playlist_item -> song (song_id));
+joinable!(song -> album (album_id));
+joinable!(song_artist -> artist (artist_id));
+joinable!(song_artist -> song (song_id));
+
+allow_tables_to_appear_in_same_query!(album, artist, playlist, playlist_item, song, song_artist,);
