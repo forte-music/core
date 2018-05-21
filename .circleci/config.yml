@@ -120,8 +120,6 @@ jobs:
           background: true
           command: cargo run
 
-      - save_cache: *save_cargo_cache
-
       - run:
           name: Run Tests
           working_directory: fixture_setup
