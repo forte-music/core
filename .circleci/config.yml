@@ -54,6 +54,11 @@ jobs:
           command: *lint_commands
 
       - run:
+          name: Check Formatting of taglib-sys
+          working_directory: taglib-sys
+          command: *lint_commands
+
+      - run:
           name: Compile forte_core
           command: *compile_commands
 
