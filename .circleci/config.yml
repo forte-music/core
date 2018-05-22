@@ -55,7 +55,7 @@ jobs:
 
       - run:
           name: Check Formatting of taglib-sys
-          working_directory: taglib-sys
+          working_directory: taglib2-sys
           command: *lint_commands
 
       - run:
