@@ -6,6 +6,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::os::raw::c_char;
+use std::path::{Path, PathBuf};
 
 error_chain! {
     foreign_links {
@@ -16,6 +17,16 @@ error_chain! {
         NoTagError(name: String) {
             description("the file doesn't contain a tag")
             display("the file '{}' doesn't contain a tag", name)
+        }
+
+        InvalidPathError(path: PathBuf) {
+            description("the path point to a directory instead of a file")
+            display("the path '{}' points to a directory instead of a file", path.display())
+        }
+
+        ConvertPathToStringError(path: PathBuf) {
+            description("failed to convert the path to a string")
+            display("the path '{}' cound't be convereted", path.display())
         }
     }
 }
@@ -87,7 +98,16 @@ pub struct SongProperties {
 }
 
 impl SongProperties {
-    pub fn read(file_name: &str) -> Result<SongProperties> {
+    pub fn read(path: &Path) -> Result<SongProperties> {
+        if path.is_dir() {
+            return Err(ErrorKind::InvalidPathError(path.to_path_buf()).into());
+        }
+
+        let file_name = path.to_str()
+            .ok_or(Error::from(ErrorKind::ConvertPathToStringError(
+                path.to_path_buf(),
+            )))?;
+
         let file_name_c = CString::new(file_name)?;
         let props_c = unsafe { song_properties(file_name_c.as_ptr()).as_ref() }
             .ok_or(ErrorKind::NoTagError(file_name.to_string()))?;
