@@ -1,39 +1,37 @@
 version: 2
 
 aliases:
-  - &restore_cargo_cache
-    keys:
-      - v2-cargo-{{ checksum "Cargo.lock" }}
-      - cargo-
-
-  - &restore_fixture_cache
-    keys:
-      - fixture-{{ checksum "fixture_setup/Cargo.lock" }}
-      - fixture-
-
-  - &restore_yarn_cache
-    keys:
-      - yarn-{{ checksum "fixture_setup/yarn.lock" }}
-      - yarn-
-
   - &save_cargo_cache
-    key: v2-cargo-{{ checksum "Cargo.lock" }}
+    key: v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
     paths:
       - target
+      - fixture_setup/target
       - ~/.cargo
 
-  - &save_fixture_cache
-    key: fixture-{{ checksum "fixture_setup/Cargo.lock" }}
-    paths:
-      - fixture_setup/target
+  - &restore_cargo_cache
+    keys:
+      - v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+      - v3-cargo-{{ checksum "Cargo.lock" }}-
+      - v3-cargo-
 
   - &save_yarn_cache
     key: yarn-{{ checksum "fixture_setup/yarn.lock" }}
     paths:
       - fixture_setup/node_modules
 
+  - &restore_yarn_cache
+    keys:
+      - yarn-{{ checksum "fixture_setup/yarn.lock" }}
+      - yarn-
+
+  - &compile_commands |
+      cargo build
+
+  - &lint_commands |
+      cargo fmt -- --write-mode=diff
+
 jobs:
-  lint:
+  build:
     docker:
       - image: fortemusic/core-build
 
@@ -47,38 +45,45 @@ jobs:
       - restore_cache: *restore_cargo_cache
 
       - run:
-          name: Check for Errors
-          command: |
-            cargo clean
-            cargo check
-            cd fixture_setup
-            cargo check
+          name: Check Formatting of forte_core
+          command: *lint_commands
+
+      - run:
+          name: Check Formatting of fixture_setup
+          working_directory: fixture_setup
+          command: *lint_commands
+
+      - run:
+          name: Check Formatting of taglib-sys
+          working_directory: taglib2-sys
+          command: *lint_commands
+
+      - run:
+          name: Compile forte_core
+          command: *compile_commands
+
+      - run:
+          name: Compile fixture_setup
+          working_directory: fixture_setup
+          command: *compile_commands
 
       - save_cache: *save_cargo_cache
 
-      - run:
-          name: Check Formatting
-          command: |
-            cargo fmt -- --write-mode=diff
-            cd fixture_setup
-            cargo fmt -- --write-mode=diff
+      # The workspace stores some of the same information the cache does, but
+      # the workflow is shared across a workflow and updated on every build
+      # while the cache only updates when a lock file changes.
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target
+            - fixture_setup/target
 
-      - run:
-          name: Check Linting
-          command: |
-            cargo clippy -- -D warnings
-            cd fixture_setup
-            cargo clippy -- -D warnings
-
-      - save_cache: *save_cargo_cache
-
-  test:
+  integration-test:
     docker:
-      # Primary container
       - image: fortemusic/core-build
 
-      # Secondary container (available on localhost)
-      - image: redis:4.0.6
+    environment:
+      RUST_BACKTRACE: "1"
 
     steps:
       - checkout
@@ -86,50 +91,55 @@ jobs:
       - run:
           name: Checkout Git Submodules
           command: git submodule update --init
-
-      - restore_cache: *restore_cargo_cache
-
-      - restore_cache: *restore_fixture_cache
 
       - restore_cache: *restore_yarn_cache
 
       - run:
-          name: Install Schema
+          name: Install Test Runner
           working_directory: fixture_setup
-          command: yarn install
-
-      - run:
-          name: Install Fixtures
-          working_directory: fixture_setup
-          command: cargo run
-
-      - save_cache: *save_fixture_cache
+          command: yarn
 
       - save_cache: *save_yarn_cache
 
       - run:
-          name: Build Core
-          command: |
-            cargo clean
-            cargo build
+          name: Initialize Database
+          environment:
+            DATABASE_URL: ./db.sqlite
+          command: diesel migration run
+
+      - restore_cache: *restore_cargo_cache
+
+      - attach_workspace:
+          at: /project
+
+      - run:
+          name: Install Fixtures
+          environment:
+            DATABASE_URL: ../db.sqlite
+          working_directory: fixture_setup
+          command: cargo run
 
       - run:
           name: Start Core
           environment:
-            - ROCKET_ADDRESS: 127.0.0.1
+            DATABASE_URL: ./db.sqlite
           background: true
           command: cargo run
 
       - run:
           name: Run Tests
           working_directory: fixture_setup
+          # There is a timeout so that the code can be compiled from scratch if
+          # needed. This is useful when running locally.
           command: |
-            wait-for localhost:8000 -- echo "Core started"
-            yarn run forte-test-api http://localhost:8000/graphql
+            wait-for --timeout=3600 localhost:8080 -- echo "Core started"
+            yarn run forte-test-api http://localhost:8080/graphql
 
 workflows:
   version: 2
   test:
     jobs:
-      - lint
-      - test
+      - build
+      - integration-test:
+          requires:
+            - build
