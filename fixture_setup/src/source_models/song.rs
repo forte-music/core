@@ -15,7 +15,7 @@ pub struct SongSource {
     pub id: u64,
     pub name: String,
     pub duration: i32,
-    pub track_number: Option<u32>,
+    pub track_number: Option<i32>,
     pub time_added: Option<i64>,
 
     pub artist_ids: Option<Vec<u64>>,

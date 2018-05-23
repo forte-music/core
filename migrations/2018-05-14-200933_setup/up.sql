@@ -3,7 +3,7 @@ CREATE TABLE album (
   artwork_url TEXT,
   name TEXT NOT NULL,
   artist_id BINARY(128) NOT NULL REFERENCES artist(id),
-  release_year INTEGER NOT NULL,
+  release_year INTEGER,
   time_added TIMESTAMP NOT NULL,
 
   last_played TIMESTAMP,

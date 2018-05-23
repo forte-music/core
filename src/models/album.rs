@@ -7,14 +7,14 @@ use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
 
-#[derive(Queryable, Identifiable, Insertable)]
+#[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "album"]
 pub struct Album {
     pub id: UUID,
     pub artwork_url: Option<String>,
     pub name: String,
     pub artist_id: UUID,
-    pub release_year: i32,
+    pub release_year: Option<i32>,
     pub time_added: NaiveDateTime,
 
     pub last_played: Option<NaiveDateTime>,
@@ -82,7 +82,7 @@ graphql_object!(Album: GraphQLContext |&self| {
         self.duration(executor.context())
     }
 
-    field release_year() -> i32 {
+    field release_year() -> Option<i32> {
         self.release_year
     }
 

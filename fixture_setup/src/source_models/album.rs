@@ -9,7 +9,7 @@ pub struct AlbumSource {
     pub artwork_url: Option<String>,
     pub artist_id: u64,
     pub song_ids: Vec<u64>,
-    pub release_year: i32,
+    pub release_year: Option<i32>,
     pub time_added: Option<i64>,
     pub stats: Option<UserStatsSource>,
 }

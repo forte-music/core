@@ -13,7 +13,7 @@ pub struct Song {
     pub id: UUID,
     pub name: String,
     pub album_id: UUID,
-    pub track_number: u32,
+    pub track_number: i32,
     pub duration: i32,
     pub time_added: NaiveDateTime,
 

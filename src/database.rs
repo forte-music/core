@@ -4,7 +4,7 @@ table! {
         artwork_url -> Nullable<Text>,
         name -> Text,
         artist_id -> Binary,
-        release_year -> Integer,
+        release_year -> Nullable<Integer>,
         time_added -> Timestamp,
         last_played -> Nullable<Timestamp>,
     }

@@ -6,7 +6,7 @@ use context::GraphQLContext;
 use juniper::FieldResult;
 use models::*;
 
-#[derive(Queryable, Identifiable, Insertable)]
+#[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "artist"]
 pub struct Artist {
     pub id: UUID,

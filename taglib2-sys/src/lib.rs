@@ -59,8 +59,8 @@ struct SongPropertiesC {
 }
 
 pub struct Picture {
-    data: Vec<u8>,
-    mime: Option<String>,
+    pub data: Vec<u8>,
+    pub mime: Option<String>,
 }
 
 impl Picture {
@@ -87,14 +87,14 @@ impl Debug for Picture {
 
 #[derive(Debug)]
 pub struct SongProperties {
-    title: Option<String>,
-    album: Option<String>,
-    artist: Option<String>,
-    album_artist: Option<String>,
-    year: u32,
-    track_number: u32,
-    duration: i32,
-    cover: Option<Picture>,
+    pub title: Option<String>,
+    pub album: Option<String>,
+    pub artist: Option<String>,
+    pub album_artist: Option<String>,
+    pub year: Option<u32>,
+    pub track_number: u32,
+    pub duration: i32,
+    pub cover: Option<Picture>,
 }
 
 impl SongProperties {
@@ -120,12 +120,15 @@ impl SongProperties {
     }
 
     unsafe fn from(song_properties_c: &SongPropertiesC) -> Self {
+        let year = (*song_properties_c).year;
+        let year = if year == 0 { None } else { Some(year) };
+
         SongProperties {
             title: from_cstr((*song_properties_c).title),
             album: from_cstr((*song_properties_c).album),
             artist: from_cstr((*song_properties_c).artist),
             album_artist: from_cstr((*song_properties_c).album_artist),
-            year: (*song_properties_c).year,
+            year,
             track_number: (*song_properties_c).track_number,
             duration: (*song_properties_c).duration,
             cover: Picture::from_raw(
