@@ -38,7 +38,7 @@ impl UUID {
 fn number_to_arr(value: u64) -> [u8; 16] {
     let mut bytes = [0; 16];
     for i in 0..(64 / 8) {
-        bytes[i] = (value >> 8 * i) as u8;
+        bytes[16 - 1 - i] = ((value >> (8 * i)) & 0x000000ff) as u8;
     }
 
     bytes
@@ -50,10 +50,18 @@ fn test_number_to_arr_zero() {
 }
 
 #[test]
+fn test_number_to_arr_mid() {
+    assert_eq!(
+        number_to_arr(270),
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14]
+    )
+}
+
+#[test]
 fn test_number_to_arr_max() {
     let arr = number_to_arr(u64::max_value());
-    assert_eq!(arr[0..8], [u8::max_value(); 8]);
-    assert_eq!(arr[8..16], [0; 8]);
+    assert_eq!(arr[8..16], [u8::max_value(); 8]);
+    assert_eq!(arr[0..8], [0; 8]);
 }
 
 impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for UUID {
@@ -115,6 +123,12 @@ impl Eq for UUID {}
 impl ToString for UUID {
     fn to_string(&self) -> String {
         self.0.simple().to_string()
+    }
+}
+
+impl Into<UUID> for u64 {
+    fn into(self) -> UUID {
+        UUID::from_number(self).unwrap()
     }
 }
 

@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@forte-music/schema": "^0.0.22"
+    "@forte-music/schema": "^0.0.23"
   }
 }
