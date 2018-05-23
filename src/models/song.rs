@@ -4,15 +4,16 @@ use database::song_artist;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
-use juniper::{FieldResult, ID};
+use id::UUID;
+use juniper::FieldResult;
 use models::*;
 
 #[derive(Queryable, Identifiable, Insertable)]
 #[table_name = "song"]
 pub struct Song {
-    pub id: String,
+    pub id: UUID,
     pub name: String,
-    pub album_id: String,
+    pub album_id: UUID,
     pub track_number: i32,
     pub disk_number: i32,
     pub duration: i32,
@@ -24,13 +25,9 @@ pub struct Song {
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
         let conn = context.connection();
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
-    }
-
-    pub fn gql_id(&self) -> ID {
-        ID::from(self.id.to_owned())
     }
 
     pub fn stream_url(&self) -> FieldResult<String> {
@@ -38,13 +35,13 @@ impl Song {
     }
 
     pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
-        Album::from_id(context, self.album_id.as_str())
+        Album::from_id(context, &self.album_id)
     }
 
     pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
         let conn = context.connection();
         Ok(song_artist::table
-            .filter(song_artist::song_id.eq(self.id.as_str()))
+            .filter(song_artist::song_id.eq(&self.id))
             .inner_join(artist::table)
             .select(artist::all_columns)
             .load::<Artist>(conn)?)
@@ -52,14 +49,14 @@ impl Song {
 
     pub fn stats(&self) -> UserStats {
         UserStats {
-            id: format!("stats:{}", self.id),
+            id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
     }
 
     pub fn song_stats(&self) -> SongUserStats {
         SongUserStats {
-            id: format!("song_stats:{}", self.id),
+            id: format!("song_stats:{}", self.id.to_string()),
             play_count: self.play_count,
             liked: self.liked,
         }
@@ -67,8 +64,8 @@ impl Song {
 }
 
 graphql_object!(Song: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
+    field id() -> &UUID {
+        &self.id
     }
 
     field stream_url() -> FieldResult<String> {

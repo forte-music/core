@@ -1,17 +1,18 @@
 use context::GraphQLContext;
-use juniper::{FieldResult, ID};
+use id::UUID;
+use juniper::FieldResult;
 use models::*;
 
 pub struct StatsCollection {
-    pub song_id: ID,
-    pub album_id: Option<ID>,
-    pub artist_id: Option<ID>,
-    pub playlist_id: Option<ID>,
+    pub song_id: UUID,
+    pub album_id: Option<UUID>,
+    pub artist_id: Option<UUID>,
+    pub playlist_id: Option<UUID>,
 }
 
 impl StatsCollection {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        Song::from_id(context, self.song_id.as_ref())
+        Song::from_id(context, &self.song_id)
     }
 
     pub fn album_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {

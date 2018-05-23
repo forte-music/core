@@ -6,6 +6,7 @@ extern crate juniper_iron;
 extern crate logger;
 extern crate mount;
 extern crate persistent;
+extern crate uuid;
 
 #[macro_use]
 extern crate juniper;
@@ -15,5 +16,6 @@ extern crate diesel;
 
 pub mod context;
 pub mod database;
+pub mod id;
 pub mod models;
 pub mod server;

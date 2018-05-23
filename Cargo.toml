@@ -19,3 +19,4 @@ r2d2 = "0.8.0"
 r2d2-diesel = "1.0.0"
 chrono = "0.4"
 taglib2-sys = { path = "taglib2-sys" }
+uuid = { version = "0.6.3", features = ["v4"] }

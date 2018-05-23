@@ -5,14 +5,15 @@ use diesel::prelude::*;
 
 use context::GraphQLContext;
 use diesel::dsl;
-use juniper::{FieldResult, ID};
+use id::UUID;
+use juniper::FieldResult;
 use models::Connection;
 use models::*;
 
 #[derive(Queryable, Identifiable, Insertable)]
 #[table_name = "playlist"]
 pub struct Playlist {
-    pub id: String,
+    pub id: UUID,
     pub name: String,
     pub description: String,
     pub time_added: i32,
@@ -21,21 +22,17 @@ pub struct Playlist {
 }
 
 impl Playlist {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
         let conn = context.connection();
         Ok(playlist::table
             .filter(playlist::id.eq(id))
             .first::<Self>(conn)?)
     }
 
-    pub fn gql_id(&self) -> ID {
-        ID::from(self.id.to_owned())
-    }
-
     pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
         let conn = context.connection();
         let maybe_duration: Option<i64> = playlist_item::table
-            .filter(playlist_item::playlist_id.eq(self.id.as_str()))
+            .filter(playlist_item::playlist_id.eq(&self.id))
             .inner_join(song::table)
             .select(dsl::sum(song::duration))
             .first::<Option<i64>>(conn)?;
@@ -57,27 +54,27 @@ impl Playlist {
 
     pub fn stats(&self) -> UserStats {
         UserStats {
-            id: format!("stats:{}", self.id),
+            id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
     }
 }
 
 pub struct PlaylistItem {
-    pub id: String,
+    pub id: UUID,
     pub rank: String,
-    pub song_id: String,
+    pub song_id: UUID,
 }
 
 impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        Song::from_id(context, self.song_id.as_str())
+        Song::from_id(context, &self.song_id)
     }
 }
 
 graphql_object!(Playlist: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
+    field id() -> &UUID {
+        &self.id
     }
 
     field name() -> &str {
@@ -111,8 +108,8 @@ graphql_object!(Playlist: GraphQLContext |&self| {
 });
 
 graphql_object!(PlaylistItem: GraphQLContext |&self| {
-    field id() -> ID {
-        ID::from(self.id.clone())
+    field id() -> &UUID {
+        &self.id
     }
 
     field song(&executor) -> FieldResult<Song> {

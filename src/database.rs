@@ -1,9 +1,9 @@
 table! {
     album (id) {
-        id -> Text,
+        id -> Binary,
         artwork_url -> Nullable<Text>,
         name -> Text,
-        artist_id -> Text,
+        artist_id -> Binary,
         release_year -> Integer,
         time_added -> Integer,
         last_played -> Nullable<Integer>,
@@ -12,7 +12,7 @@ table! {
 
 table! {
     artist (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
         time_added -> Integer,
         last_played -> Nullable<Integer>,
@@ -21,7 +21,7 @@ table! {
 
 table! {
     playlist (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
         description -> Text,
         time_added -> Integer,
@@ -31,18 +31,18 @@ table! {
 
 table! {
     playlist_item (id) {
-        id -> Text,
-        playlist_id -> Text,
+        id -> Binary,
+        playlist_id -> Binary,
         rank -> Text,
-        song_id -> Text,
+        song_id -> Binary,
     }
 }
 
 table! {
     song (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
-        album_id -> Text,
+        album_id -> Binary,
         track_number -> Integer,
         disk_number -> Integer,
         duration -> Integer,
@@ -55,8 +55,8 @@ table! {
 
 table! {
     song_artist (song_id, artist_id) {
-        song_id -> Text,
-        artist_id -> Text,
+        song_id -> Binary,
+        artist_id -> Binary,
     }
 }
 

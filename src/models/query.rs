@@ -1,11 +1,12 @@
 use context::GraphQLContext;
-use juniper::{FieldResult, ID};
+use id::UUID;
+use juniper::FieldResult;
 use models::*;
 
 pub struct Query;
 
 impl Query {
-    pub fn album(context: &GraphQLContext, id: &str) -> FieldResult<Album> {
+    pub fn album(context: &GraphQLContext, id: &UUID) -> FieldResult<Album> {
         Album::from_id(context, id)
     }
 
@@ -18,7 +19,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn artist(context: &GraphQLContext, id: &str) -> FieldResult<Artist> {
+    pub fn artist(context: &GraphQLContext, id: &UUID) -> FieldResult<Artist> {
         Artist::from_id(context, id)
     }
 
@@ -31,7 +32,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn song(context: &GraphQLContext, id: &str) -> FieldResult<Song> {
+    pub fn song(context: &GraphQLContext, id: &UUID) -> FieldResult<Song> {
         Song::from_id(context, id)
     }
 
@@ -44,7 +45,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn playlist(context: &GraphQLContext, id: &str) -> FieldResult<Playlist> {
+    pub fn playlist(context: &GraphQLContext, id: &UUID) -> FieldResult<Playlist> {
         Playlist::from_id(context, id)
     }
 
@@ -59,7 +60,7 @@ impl Query {
 }
 
 graphql_object!(Query: GraphQLContext |&self| {
-    field album(&executor, id: ID) -> FieldResult<Album> {
+    field album(&executor, id: UUID) -> FieldResult<Album> {
         Query::album(executor.context(), &id)
     }
 
@@ -72,7 +73,7 @@ graphql_object!(Query: GraphQLContext |&self| {
         Query::albums(executor.context(), first, after, sort)
     }
 
-    field artist(&executor, id: ID) -> FieldResult<Artist> {
+    field artist(&executor, id: UUID) -> FieldResult<Artist> {
         Query::artist(executor.context(), &id)
     }
 
@@ -85,7 +86,7 @@ graphql_object!(Query: GraphQLContext |&self| {
         Query::artists(executor.context(), first, after, sort)
     }
 
-    field song(&executor, id: ID) -> FieldResult<Song> {
+    field song(&executor, id: UUID) -> FieldResult<Song> {
         Query::song(executor.context(), &id)
     }
 
@@ -98,7 +99,7 @@ graphql_object!(Query: GraphQLContext |&self| {
         Query::songs(executor.context(), first, after, sort)
     }
 
-    field playlist(&executor, id: ID) -> FieldResult<Playlist> {
+    field playlist(&executor, id: UUID) -> FieldResult<Playlist> {
         Query::playlist(executor.context(), &id)
     }
 
