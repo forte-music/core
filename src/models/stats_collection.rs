@@ -1,5 +1,4 @@
 use context::GraphQLContext;
-use id::UUID;
 use juniper::FieldResult;
 use models::*;
 

@@ -1,22 +1,24 @@
-use diesel::serialize;
-use diesel::serialize::Output;
-use diesel::sql_types::Binary;
-use diesel::types::ToSql;
-use std::io::Write;
-use uuid;
-use uuid::Uuid;
-
 use diesel::backend::Backend;
 use diesel::deserialize;
 use diesel::deserialize::FromSql;
 use diesel::expression::AsExpression;
 use diesel::expression::bound::Bound;
+use diesel::serialize;
+use diesel::serialize::Output;
+use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
 use diesel::sqlite::Sqlite;
-use juniper::InputValue;
-use juniper::Value;
+use diesel::types::ToSql;
+
 use std::hash::Hash;
 use std::hash::Hasher;
+use std::io::Write;
+
+use uuid;
+use uuid::Uuid;
+
+use juniper::InputValue;
+use juniper::Value;
 
 #[derive(Debug, AsExpression, FromSqlRow, Copy, Clone)]
 pub struct UUID(pub Uuid);
@@ -25,6 +27,33 @@ impl UUID {
     pub fn parse_str(input: &str) -> Result<UUID, uuid::ParseError> {
         Ok(UUID(Uuid::parse_str(input)?))
     }
+
+    pub fn from_number(value: u64) -> Result<UUID, uuid::ParseError> {
+        let bytes = number_to_arr(value);
+
+        Ok(UUID(Uuid::from_bytes(&bytes)?))
+    }
+}
+
+fn number_to_arr(value: u64) -> [u8; 16] {
+    let mut bytes = [0; 16];
+    for i in 0..(64 / 8) {
+        bytes[i] = (value >> 8 * i) as u8;
+    }
+
+    bytes
+}
+
+#[test]
+fn test_number_to_arr_zero() {
+    assert_eq!(number_to_arr(0), [0; 16]);
+}
+
+#[test]
+fn test_number_to_arr_max() {
+    let arr = number_to_arr(u64::max_value());
+    assert_eq!(arr[0..8], [u8::max_value(); 8]);
+    assert_eq!(arr[8..16], [0; 8]);
 }
 
 impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for UUID {

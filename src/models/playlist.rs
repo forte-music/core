@@ -1,12 +1,12 @@
 use database::playlist;
 use database::playlist_item;
 use database::song;
+use diesel::dsl;
 use diesel::prelude::*;
 
-use context::GraphQLContext;
-use diesel::dsl;
-use id::UUID;
 use juniper::FieldResult;
+
+use context::GraphQLContext;
 use models::Connection;
 use models::*;
 

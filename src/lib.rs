@@ -16,6 +16,5 @@ extern crate diesel;
 
 pub mod context;
 pub mod database;
-pub mod id;
 pub mod models;
 pub mod server;

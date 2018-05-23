@@ -1,6 +1,7 @@
 pub mod album;
 pub mod artist;
 pub mod connection;
+pub mod id;
 pub mod mutation;
 pub mod playlist;
 pub mod query;
@@ -12,6 +13,7 @@ pub mod user_stats;
 pub use self::album::*;
 pub use self::artist::*;
 pub use self::connection::*;
+pub use self::id::*;
 pub use self::mutation::*;
 pub use self::playlist::*;
 pub use self::query::*;

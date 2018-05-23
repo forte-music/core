@@ -4,7 +4,6 @@ use database::song_artist;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
-use id::UUID;
 use juniper::FieldResult;
 use models::*;
 

@@ -1,5 +1,3 @@
-extern crate chrono;
-
 use chrono::Utc;
 
 use context::GraphQLContext;
@@ -15,7 +13,6 @@ use diesel::Connection;
 use diesel::expression::dsl::not;
 use diesel::prelude::*;
 
-use id::UUID;
 use models::*;
 
 pub struct Mutation;

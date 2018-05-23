@@ -7,8 +7,6 @@ use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
 
-use id::UUID;
-
 #[derive(Queryable, Identifiable, Insertable)]
 #[table_name = "album"]
 pub struct Album {
