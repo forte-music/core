@@ -18,7 +18,7 @@ impl From<NaiveDateTime> for TimeWrapper {
     }
 }
 
-graphql_scalar!(TimeWrapper as "i32" {
+graphql_scalar!(TimeWrapper as "Int" {
     resolve(&self) -> Value {
         Value::int(self.timestamp() as i32)
     }
