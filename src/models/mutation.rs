@@ -39,7 +39,7 @@ impl Mutation {
             ));
         }
 
-        let now = Utc::now().timestamp() as i32;
+        let now = Utc::now().naive_utc();
 
         conn.transaction::<_, FieldError, _>(|| {
             if let Some(ref artist_id) = artist_id {

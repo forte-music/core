@@ -11,9 +11,9 @@ use models::*;
 pub struct Artist {
     pub id: UUID,
     pub name: String,
-    pub time_added: i32,
+    pub time_added: NaiveDateTime,
 
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
 }
 
 impl Artist {
@@ -55,7 +55,7 @@ graphql_object!(Artist: GraphQLContext |&self| {
         self.stats()
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field time_added() -> TimeWrapper {
+        self.time_added.into()
     }
 });

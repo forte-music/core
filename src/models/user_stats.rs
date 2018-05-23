@@ -1,9 +1,10 @@
 use context::GraphQLContext;
 use juniper::ID;
+use models::*;
 
 pub struct UserStats {
     pub id: String,
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
 }
 
 impl UserStats {
@@ -17,7 +18,7 @@ graphql_object!(UserStats: GraphQLContext |&self| {
         self.gql_id()
     }
 
-    field last_played() -> Option<i32> {
-        self.last_played
+    field last_played() -> Option<TimeWrapper> {
+        self.last_played.map(|t| t.into())
     }
 });

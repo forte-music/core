@@ -10,7 +10,7 @@ pub struct AlbumSource {
     pub artist_id: u64,
     pub song_ids: Vec<u64>,
     pub release_year: i32,
-    pub time_added: Option<i32>,
+    pub time_added: Option<i64>,
     pub stats: Option<UserStatsSource>,
 }
 
@@ -22,8 +22,10 @@ impl Into<Album> for AlbumSource {
             name: self.name,
             artist_id: self.artist_id.into(),
             release_year: self.release_year,
-            time_added: self.time_added.unwrap_or(0),
-            last_played: self.stats.and_then(|stats| stats.last_played),
+            time_added: self.time_added.unwrap_or(0).into_time(),
+            last_played: self.stats
+                .and_then(|stats| stats.last_played)
+                .map(|t| t.into_time()),
         }
     }
 }

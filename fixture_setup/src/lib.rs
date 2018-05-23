@@ -1,3 +1,4 @@
+extern crate chrono;
 extern crate diesel;
 extern crate dotenv;
 extern crate forte_core;

@@ -5,8 +5,8 @@ table! {
         name -> Text,
         artist_id -> Binary,
         release_year -> Integer,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
@@ -14,8 +14,8 @@ table! {
     artist (id) {
         id -> Binary,
         name -> Text,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
@@ -24,8 +24,8 @@ table! {
         id -> Binary,
         name -> Text,
         description -> Text,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
@@ -46,9 +46,9 @@ table! {
         track_number -> Integer,
         disk_number -> Integer,
         duration -> Integer,
-        time_added -> Integer,
+        time_added -> Timestamp,
         play_count -> Integer,
-        last_played -> Nullable<Integer>,
+        last_played -> Nullable<Timestamp>,
         liked -> Bool,
     }
 }

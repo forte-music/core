@@ -16,10 +16,10 @@ pub struct Song {
     pub track_number: i32,
     pub disk_number: i32,
     pub duration: i32,
-    pub time_added: i32,
+    pub time_added: NaiveDateTime,
 
     pub play_count: i32,
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
     pub liked: bool,
 }
 
@@ -103,7 +103,7 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.duration
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field time_added() -> TimeWrapper {
+        self.time_added.into()
     }
 });

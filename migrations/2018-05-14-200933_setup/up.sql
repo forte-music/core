@@ -4,9 +4,9 @@ CREATE TABLE album (
   name TEXT NOT NULL,
   artist_id BINARY(128) NOT NULL REFERENCES artist(id),
   release_year INTEGER NOT NULL,
-  time_added INTEGER NOT NULL,
+  time_added TIMESTAMP NOT NULL,
 
-  last_played INTEGER,
+  last_played TIMESTAMP,
 
   UNIQUE (name, artist_id)
 );
@@ -14,9 +14,9 @@ CREATE TABLE album (
 CREATE TABLE artist (
   id BINARY(128) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
-  time_added INTEGER NOT NULL,
+  time_added TIMESTAMP NOT NULL,
 
-  last_played INTEGER,
+  last_played TIMESTAMP,
 
   UNIQUE (name)
 );
@@ -34,9 +34,9 @@ CREATE TABLE song (
   track_number INTEGER NOT NULL,
   disk_number INTEGER NOT NULL,
   duration INTEGER NOT NULL,
-  time_added INTEGER NOT NULL,
+  time_added TIMESTAMP NOT NULL,
   play_count INTEGER NOT NULL,
-  last_played INTEGER,
+  last_played TIMESTAMP,
   liked BOOLEAN NOT NULL
 );
 
@@ -44,9 +44,9 @@ CREATE TABLE playlist (
   id BINARY(128) PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
-  time_added INTEGER NOT NULL,
+  time_added TIMESTAMP NOT NULL,
 
-  last_played INTEGER
+  last_played TIMESTAMP
 );
 
 CREATE TABLE playlist_item (

@@ -8,6 +8,7 @@ pub mod query;
 pub mod song;
 pub mod song_user_stats;
 pub mod stats_collection;
+pub mod time;
 pub mod user_stats;
 
 pub use self::album::*;
@@ -20,7 +21,9 @@ pub use self::query::*;
 pub use self::song::*;
 pub use self::song_user_stats::*;
 pub use self::stats_collection::*;
+pub use self::time::*;
 pub use self::user_stats::*;
+pub use chrono::NaiveDateTime;
 
 use juniper::FieldError;
 use juniper::FieldResult;

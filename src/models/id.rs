@@ -21,7 +21,7 @@ use juniper::InputValue;
 use juniper::Value;
 
 #[derive(Debug, AsExpression, FromSqlRow, Copy, Clone)]
-pub struct UUID(pub Uuid);
+pub struct UUID(Uuid);
 
 impl UUID {
     pub fn parse_str(input: &str) -> Result<UUID, uuid::ParseError> {
@@ -32,6 +32,10 @@ impl UUID {
         let bytes = number_to_arr(value);
 
         Ok(UUID(Uuid::from_bytes(&bytes)?))
+    }
+
+    pub fn new() -> UUID {
+        UUID(Uuid::new_v4())
     }
 }
 
