@@ -1,11 +1,17 @@
 use taglib2_sys::SongProperties;
 
 use chrono::Utc;
+
 use database::album;
 use database::artist;
+use database::song_artist;
+
+use diesel;
+use diesel::Connection;
 use diesel::associations::HasTable;
 use diesel::prelude::*;
 use diesel::result;
+
 use models::*;
 
 mod errors {
@@ -53,8 +59,9 @@ pub fn add_song(props: SongProperties, conn: &SqliteConnection) -> errors::Resul
     let album_name = props.album.ok_or(errors::ErrorKind::NoAlbumError)?;
     let album = add_or_get_album(album_name, album_artist.id, props.year, conn)?;
 
+    let song_id = UUID::new();
     let song = Song {
-        id: UUID::new(),
+        id: song_id,
         name: props.title.ok_or(errors::ErrorKind::NoTitleError)?,
         album_id: album.id,
         track_number: props.track_number as i32,
@@ -65,7 +72,18 @@ pub fn add_song(props: SongProperties, conn: &SqliteConnection) -> errors::Resul
         liked: false,
     };
 
-    song.insert_into(Song::table()).execute(conn)?;
+    conn.transaction::<(), result::Error, _>(|| {
+        song.insert_into(Song::table()).execute(conn)?;
+
+        diesel::insert_into(song_artist::table)
+            .values((
+                song_artist::song_id.eq(song_id),
+                song_artist::artist_id.eq(artist.id),
+            ))
+            .execute(conn)?;
+
+        Ok(())
+    })?;
 
     Ok(())
 }
