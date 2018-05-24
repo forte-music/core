@@ -29,8 +29,8 @@ impl Song {
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
     }
 
-    pub fn stream_url(&self) -> FieldResult<String> {
-        NotImplementedErr()
+    pub fn stream_url(&self) -> String {
+        format!("/files/music/{}/raw", self.id.to_string())
     }
 
     pub fn album(&self, context: &GraphQLContext) -> QueryResult<Album> {
@@ -67,7 +67,7 @@ graphql_object!(Song: GraphQLContext |&self| {
         &self.id
     }
 
-    field stream_url() -> FieldResult<String> {
+    field stream_url() -> String {
         self.stream_url()
     }
 
