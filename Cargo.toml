@@ -25,7 +25,7 @@ r2d2 = "0.8.0"
 r2d2-diesel = "1.0.0"
 taglib2-sys = { path = "taglib2-sys" }
 error-chain = "0.11.0"
-walkdir = "2"
+walkdir = "2.1.4"
 indicatif = "0.9.0"
 router = "0.6.0"
 iron = "0.6.0"
