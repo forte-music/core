@@ -14,11 +14,6 @@ error_chain! {
     }
 
     errors {
-        NoTagError(name: String) {
-            description("the file doesn't contain a tag")
-            display("the file '{}' doesn't contain a tag", name)
-        }
-
         InvalidPathError(path: PathBuf) {
             description("the path point to a directory instead of a file")
             display("the path '{}' points to a directory instead of a file", path.display())
@@ -98,7 +93,7 @@ pub struct SongProperties {
 }
 
 impl SongProperties {
-    pub fn read(path: &Path) -> Result<SongProperties> {
+    pub fn read(path: &Path) -> Result<Option<SongProperties>> {
         if path.is_dir() {
             return Err(ErrorKind::InvalidPathError(path.to_path_buf()).into());
         }
@@ -109,14 +104,16 @@ impl SongProperties {
             )))?;
 
         let file_name_c = CString::new(file_name)?;
-        let props_c = unsafe { song_properties(file_name_c.as_ptr()).as_ref() }
-            .ok_or(ErrorKind::NoTagError(file_name.to_string()))?;
+        let props_c = match unsafe { song_properties(file_name_c.as_ptr()).as_ref() } {
+            Some(props_c) => props_c,
+            None => return Ok(None),
+        };
 
         let props = unsafe { SongProperties::from(props_c) };
 
         unsafe { destroy_properties(props_c) };
 
-        Ok(props)
+        Ok(Some(props))
     }
 
     unsafe fn from(song_properties_c: &SongPropertiesC) -> Self {

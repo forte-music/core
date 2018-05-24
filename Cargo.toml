@@ -10,6 +10,10 @@ lto = true
 name = "forte-server"
 path = "src/bin/server/main.rs"
 
+[[bin]]
+name = "forte-sync"
+path = "src/bin/sync/main.rs"
+
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite", "chrono"] }
 dotenv = "0.9.0"
@@ -25,3 +29,4 @@ chrono = "0.4"
 taglib2-sys = { path = "taglib2-sys" }
 uuid = { version = "0.6.3", features = ["v4"] }
 error-chain = "0.11.0"
+walkdir = "2"

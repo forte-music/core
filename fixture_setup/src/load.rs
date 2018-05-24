@@ -26,8 +26,7 @@ pub fn load() -> Result<()> {
         );
     }
 
-    let pool = context::init_pool(&env::var("DATABASE_URL")?)
-        .map_err(|err| Error::from(err.description()))?;
+    let pool = context::init_pool(&env::var("DATABASE_URL")?)?;
     let db = pool.get()?;
 
     load_from_folder(&path, &db)?;

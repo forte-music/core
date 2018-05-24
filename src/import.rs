@@ -14,7 +14,7 @@ use diesel::result;
 
 use models::*;
 
-mod errors {
+pub mod errors {
     error_chain! {
         foreign_links {
             Diesel(::diesel::result::Error);
