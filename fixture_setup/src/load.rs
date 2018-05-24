@@ -14,6 +14,7 @@ use errors::*;
 use forte_core::models::*;
 use source_models::*;
 
+/// Load the test data into the database.
 pub fn load() -> Result<()> {
     dotenv::dotenv().ok();
 
@@ -34,6 +35,8 @@ pub fn load() -> Result<()> {
     Ok(())
 }
 
+/// Read test data from a folder.
+/// The test files must be in TOML format and end in `.toml`.
 fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<()> {
     let files = path.read_dir()?;
     for file in files {
@@ -49,6 +52,7 @@ fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<()> {
     Ok(())
 }
 
+/// Load test data from a TOML file
 fn load_from_file(path: &Path, conn: &SqliteConnection) -> Result<()> {
     let mut buffer = String::new();
     let imported: Import = read_items(path, &mut buffer)?;
@@ -108,6 +112,7 @@ fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<()>
     Ok(())
 }
 
+/// Parse a TOML file into a variable of type `T`
 fn read_items<'de, T: Deserialize<'de>>(path: &Path, mut buffer: &'de mut String) -> Result<T> {
     let mut f = File::open(path)?;
     f.read_to_string(&mut buffer)?;

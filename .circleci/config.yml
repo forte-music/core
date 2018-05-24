@@ -11,6 +11,7 @@ aliases:
   - &restore_cargo_cache
     keys:
       - v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+      - v3-cargo-{{ checksum "Cargo.lock" }}-
       - v3-cargo-
 
   - &save_yarn_cache
@@ -53,6 +54,11 @@ jobs:
           command: *lint_commands
 
       - run:
+          name: Check Formatting of taglib-sys
+          working_directory: taglib2-sys
+          command: *lint_commands
+
+      - run:
           name: Compile forte_core
           command: *compile_commands
 
@@ -80,9 +86,6 @@ jobs:
       RUST_BACKTRACE: "1"
 
     steps:
-      - attach_workspace:
-          at: /project
-
       - checkout
 
       - run:
@@ -105,6 +108,9 @@ jobs:
           command: diesel migration run
 
       - restore_cache: *restore_cargo_cache
+
+      - attach_workspace:
+          at: /project
 
       - run:
           name: Install Fixtures
