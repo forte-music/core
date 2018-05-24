@@ -1,5 +1,6 @@
 use forte_core::models::*;
 use source_models::*;
+use std::path::Path;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -44,6 +45,7 @@ impl Into<Song> for SongSource {
                 .as_ref()
                 .and_then(|stats| stats.liked)
                 .unwrap_or(false),
+            path: Path::new("").into(),
         }
     }
 }

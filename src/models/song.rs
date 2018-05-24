@@ -20,6 +20,7 @@ pub struct Song {
     pub play_count: i32,
     pub last_played: Option<NaiveDateTime>,
     pub liked: bool,
+    pub path: PathWrapper,
 }
 
 impl Song {

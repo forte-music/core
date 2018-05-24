@@ -49,6 +49,7 @@ table! {
         play_count -> Integer,
         last_played -> Nullable<Timestamp>,
         liked -> Bool,
+        path -> Text,
     }
 }
 

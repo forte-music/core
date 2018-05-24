@@ -85,7 +85,7 @@ fn start() -> Result<()> {
             continue;
         };
 
-        import::add_song(props, conn)?;
+        import::add_song(path, props, conn)?;
 
         bar.inc(1);
     }

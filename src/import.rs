@@ -13,6 +13,7 @@ use diesel::prelude::*;
 use diesel::result;
 
 use models::*;
+use std::path::Path;
 
 pub mod errors {
     error_chain! {
@@ -37,7 +38,7 @@ pub mod errors {
 }
 
 /// Takes information about a song read from tags and adds it to the database.
-pub fn add_song(props: SongProperties, conn: &SqliteConnection) -> errors::Result<()> {
+pub fn add_song(path: &Path, props: SongProperties, conn: &SqliteConnection) -> errors::Result<()> {
     let artist: Option<Artist> = props
         .artist
         .map_or(Ok(None), |name| add_or_get_artist(name, conn).map(Some))?;
@@ -70,6 +71,7 @@ pub fn add_song(props: SongProperties, conn: &SqliteConnection) -> errors::Resul
         play_count: 0,
         last_played: None,
         liked: false,
+        path: path.into(),
     };
 
     conn.transaction::<(), result::Error, _>(|| {

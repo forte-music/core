@@ -37,6 +37,7 @@ CREATE TABLE song (
   play_count INTEGER NOT NULL,
   last_played TIMESTAMP,
   liked BOOLEAN NOT NULL,
+  path TEXT UNIQUE NOT NULL,
 
   UNIQUE(track_number, album_id)
 );
