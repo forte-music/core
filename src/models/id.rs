@@ -10,8 +10,6 @@ use diesel::sql_types::HasSqlType;
 use diesel::sqlite::Sqlite;
 use diesel::types::ToSql;
 
-use std::hash::Hash;
-use std::hash::Hasher;
 use std::io::Write;
 
 use uuid;
@@ -20,7 +18,7 @@ use uuid::Uuid;
 use juniper::InputValue;
 use juniper::Value;
 
-#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone)]
+#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct UUID(Uuid);
 
 impl UUID {
@@ -97,32 +95,6 @@ impl<'a> AsExpression<Binary> for &'a UUID {
         Bound::new(self)
     }
 }
-
-impl Hash for UUID {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
-    }
-
-    fn hash_slice<H: Hasher>(data: &[Self], state: &mut H)
-    where
-        Self: Sized,
-    {
-        let inner: Vec<Uuid> = data.iter().map(|s| s.0).collect();
-        Uuid::hash_slice(inner.as_ref(), state);
-    }
-}
-
-impl PartialEq for UUID {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.eq(&other.0)
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        self.0.ne(&other.0)
-    }
-}
-
-impl Eq for UUID {}
 
 impl ToString for UUID {
     fn to_string(&self) -> String {
