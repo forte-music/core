@@ -123,7 +123,7 @@ impl SongProperties {
         let year = if year == 0 { None } else { Some(year) };
 
         let disk_number: Option<u32> =
-            from_cstr((*song_properties_c).disk_number).and_then(|str| str.parse::<u32>().ok());
+            from_cstr((*song_properties_c).disk_number).and_then(|s| s.parse().ok());
 
         SongProperties {
             title: from_cstr((*song_properties_c).title),
