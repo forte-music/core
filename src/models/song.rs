@@ -14,6 +14,8 @@ pub struct Song {
     pub name: String,
     pub album_id: UUID,
     pub track_number: i32,
+    pub disk_number: i32,
+
     pub duration: i32,
     pub time_added: NaiveDateTime,
 
@@ -73,6 +75,10 @@ graphql_object!(Song: GraphQLContext |&self| {
 
     field track_number() -> i32 {
         self.track_number as i32
+    }
+
+    field disk_number() -> i32 {
+        self.disk_number
     }
 
     field name() -> &str {

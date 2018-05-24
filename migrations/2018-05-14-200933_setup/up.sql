@@ -32,6 +32,7 @@ CREATE TABLE song (
   name TEXT NOT NULL,
   album_id BINARY(128) NOT NULL REFERENCES album(id),
   track_number INTEGER NOT NULL,
+  disk_number INTEGER NOT NULL,
   duration INTEGER NOT NULL,
   time_added TIMESTAMP NOT NULL,
   play_count INTEGER NOT NULL,
@@ -39,7 +40,7 @@ CREATE TABLE song (
   liked BOOLEAN NOT NULL,
   path TEXT UNIQUE NOT NULL,
 
-  UNIQUE(track_number, album_id)
+  UNIQUE(track_number, disk_number, album_id)
 );
 
 CREATE TABLE playlist (

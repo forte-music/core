@@ -13,6 +13,7 @@ extern "C" {
         char *album;
         char *artist;
         char *album_artist;
+        char *disk_number;
         unsigned int year;
         unsigned int track_number;
         int duration;
@@ -69,6 +70,10 @@ extern "C" {
             song_properties->album_artist = to_cstr(properties["ALBUM_ARTIST"].toString());
         } else if(properties.contains("ALBUM ARTIST")) {
             song_properties->album_artist = to_cstr(properties["ALBUM ARTIST"].toString());
+        }
+
+        if (properties.contains("DISCNUMBER")) {
+            song_properties->disk_number = to_cstr(properties["DISCNUMBER"].toString());
         }
 
         song_properties->year = tag->year();

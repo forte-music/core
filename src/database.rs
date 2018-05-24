@@ -44,6 +44,7 @@ table! {
         name -> Text,
         album_id -> Binary,
         track_number -> Integer,
+        disk_number -> Integer,
         duration -> Integer,
         time_added -> Timestamp,
         play_count -> Integer,

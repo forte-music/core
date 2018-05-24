@@ -34,7 +34,8 @@ impl Album {
         let conn = context.connection();
         Ok(song::table
             .filter(song::album_id.eq(&self.id))
-            .order(song::time_added.desc())
+            .order_by(song::disk_number.asc())
+            .then_order_by(song::track_number.asc())
             .load::<Song>(conn)?)
     }
 

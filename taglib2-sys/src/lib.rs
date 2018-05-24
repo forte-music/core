@@ -45,6 +45,7 @@ struct SongPropertiesC {
     album: *const c_char,
     artist: *const c_char,
     album_artist: *const c_char,
+    disk_number: *const c_char,
     year: u32,
     track_number: u32,
     duration: i32,
@@ -87,6 +88,7 @@ pub struct SongProperties {
     pub artist: Option<String>,
     pub album_artist: Option<String>,
     pub year: Option<u32>,
+    pub disk_number: Option<u32>,
     pub track_number: u32,
     pub duration: i32,
     pub cover: Option<Picture>,
@@ -120,12 +122,16 @@ impl SongProperties {
         let year = (*song_properties_c).year;
         let year = if year == 0 { None } else { Some(year) };
 
+        let disk_number: Option<u32> =
+            from_cstr((*song_properties_c).disk_number).and_then(|str| str.parse::<u32>().ok());
+
         SongProperties {
             title: from_cstr((*song_properties_c).title),
             album: from_cstr((*song_properties_c).album),
             artist: from_cstr((*song_properties_c).artist),
             album_artist: from_cstr((*song_properties_c).album_artist),
             year,
+            disk_number,
             track_number: (*song_properties_c).track_number,
             duration: (*song_properties_c).duration,
             cover: Picture::from_raw(

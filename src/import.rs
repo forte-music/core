@@ -66,6 +66,7 @@ pub fn add_song(path: &Path, props: SongProperties, conn: &SqliteConnection) -> 
         name: props.title.ok_or(errors::ErrorKind::NoTitleError)?,
         album_id: album.id,
         track_number: props.track_number as i32,
+        disk_number: props.disk_number.map_or(1, |n| n as i32),
         duration: props.duration,
         time_added: Utc::now().naive_utc(),
         play_count: 0,
