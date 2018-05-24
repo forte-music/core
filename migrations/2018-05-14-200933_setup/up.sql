@@ -36,7 +36,9 @@ CREATE TABLE song (
   time_added TIMESTAMP NOT NULL,
   play_count INTEGER NOT NULL,
   last_played TIMESTAMP,
-  liked BOOLEAN NOT NULL
+  liked BOOLEAN NOT NULL,
+
+  UNIQUE(track_number, album_id)
 );
 
 CREATE TABLE playlist (
