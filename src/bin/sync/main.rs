@@ -7,20 +7,24 @@ extern crate walkdir;
 
 #[macro_use]
 extern crate error_chain;
+extern crate diesel;
 
 use std::env;
 use std::ops::Deref;
 
 use dotenv::dotenv;
-use indicatif::ProgressBar;
+use walkdir::DirEntry;
 use walkdir::WalkDir;
 
 use forte_core::context;
 use forte_core::import;
 
+use indicatif::ProgressBar;
 use indicatif::ProgressStyle;
+
+use diesel::sqlite::SqliteConnection;
+use std::path::Path;
 use taglib2_sys::SongProperties;
-use walkdir::DirEntry;
 
 error_chain! {
     links {
@@ -32,6 +36,12 @@ error_chain! {
         R2d2(::r2d2::Error);
         VarError(::std::env::VarError);
         WalkdirError(::walkdir::Error);
+    }
+
+    errors {
+            MissingSongProperties {
+                description("this audio file doesn't have a tag")
+            }
     }
 }
 
@@ -46,7 +56,7 @@ fn start() -> Result<()> {
 
     let args: Vec<String> = env::args().skip(1).collect();
     if args.len() != 1 {
-        return Err("invalid number of arguments there should only be one".into());
+        return Err("invalid number of arguments; there should only be one".into());
     }
 
     let database_url = env::var("DATABASE_URL")?;
@@ -72,25 +82,37 @@ fn start() -> Result<()> {
     let bar = ProgressBar::new(entries.len() as u64);
     bar.set_style(
         ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})")
+            .template(
+                "{prefix}[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})\n {msg}",
+            )
             .progress_chars("#>-"),
     );
 
-    for entry in entries {
-        let path = entry.path();
-        let props = SongProperties::read(path)?;
-        let props = if let Some(props) = props {
-            props
-        } else {
-            continue;
-        };
+    let mut prefix: String = "".to_owned();
 
-        import::add_song(path, props, conn)?;
+    bar.wrap_iter(entries.iter()).for_each(|dir_entry| {
+        let path = dir_entry.path();
+        let path_string = path.display().to_string();
 
-        bar.inc(1);
-    }
+        let message = format!("Importing {}", path_string);
+        bar.set_message(message.as_str());
+
+        if let Err(e) = handle_entry(path, conn) {
+            prefix = prefix.clone() + &format!("Error importing '{}': {}\n", path_string, e);
+            bar.set_prefix(prefix.as_str())
+        }
+    });
 
     bar.finish();
+
+    Ok(())
+}
+
+fn handle_entry(path: &Path, conn: &SqliteConnection) -> Result<()> {
+    let props = SongProperties::read(path)?;
+    let props = props.ok_or(ErrorKind::MissingSongProperties)?;
+
+    import::add_song(path, props, conn)?;
 
     Ok(())
 }

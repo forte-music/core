@@ -73,8 +73,6 @@ fn start() -> Result<(), Box<Error>> {
     chain.link_after(logger_after);
 
     // Start Server
-    // let host: &str =
-
     let host: String = match env::var("HOST") {
         Err(env::VarError::NotPresent) => None,
         Err(o) => return Err(Box::new(o)),

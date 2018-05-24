@@ -8,7 +8,6 @@ use persistent::Read;
 use diesel::sqlite::SqliteConnection;
 use juniper;
 
-use std::error::Error;
 use std::ops::Deref;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
@@ -33,7 +32,7 @@ pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
 impl IronContext {
     pub fn init_middleware(
         database_url: &str,
-    ) -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
+    ) -> Result<(Read<ContextKey>, Read<ContextKey>), r2d2::Error> {
         let pool = init_pool(database_url)?;
         let context = IronContext { pool };
 
