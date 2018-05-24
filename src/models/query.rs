@@ -1,11 +1,12 @@
 use context::GraphQLContext;
+use diesel::QueryResult;
 use juniper::FieldResult;
 use models::*;
 
 pub struct Query;
 
 impl Query {
-    pub fn album(context: &GraphQLContext, id: &UUID) -> FieldResult<Album> {
+    pub fn album(context: &GraphQLContext, id: &UUID) -> QueryResult<Album> {
         Album::from_id(context, id)
     }
 
@@ -18,7 +19,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn artist(context: &GraphQLContext, id: &UUID) -> FieldResult<Artist> {
+    pub fn artist(context: &GraphQLContext, id: &UUID) -> QueryResult<Artist> {
         Artist::from_id(context, id)
     }
 
@@ -31,7 +32,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn song(context: &GraphQLContext, id: &UUID) -> FieldResult<Song> {
+    pub fn song(context: &GraphQLContext, id: &UUID) -> QueryResult<Song> {
         Ok(Song::from_id(context, id)?)
     }
 
@@ -44,7 +45,7 @@ impl Query {
         NotImplementedErr()
     }
 
-    pub fn playlist(context: &GraphQLContext, id: &UUID) -> FieldResult<Playlist> {
+    pub fn playlist(context: &GraphQLContext, id: &UUID) -> QueryResult<Playlist> {
         Playlist::from_id(context, id)
     }
 
@@ -60,7 +61,7 @@ impl Query {
 
 graphql_object!(Query: GraphQLContext |&self| {
     field album(&executor, id: UUID) -> FieldResult<Album> {
-        Query::album(executor.context(), &id)
+        Ok(Query::album(executor.context(), &id)?)
     }
 
     field albums(
@@ -73,7 +74,7 @@ graphql_object!(Query: GraphQLContext |&self| {
     }
 
     field artist(&executor, id: UUID) -> FieldResult<Artist> {
-        Query::artist(executor.context(), &id)
+        Ok(Query::artist(executor.context(), &id)?)
     }
 
     field artists(
@@ -86,7 +87,7 @@ graphql_object!(Query: GraphQLContext |&self| {
     }
 
     field song(&executor, id: UUID) -> FieldResult<Song> {
-        Query::song(executor.context(), &id)
+        Ok(Query::song(executor.context(), &id)?)
     }
 
     field songs(
@@ -99,7 +100,7 @@ graphql_object!(Query: GraphQLContext |&self| {
     }
 
     field playlist(&executor, id: UUID) -> FieldResult<Playlist> {
-        Query::playlist(executor.context(), &id)
+        Ok(Query::playlist(executor.context(), &id)?)
     }
 
     field playlists(

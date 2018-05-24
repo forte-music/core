@@ -1,7 +1,7 @@
 use chrono::Utc;
 
 use context::GraphQLContext;
-use juniper::{FieldError, FieldResult};
+use juniper::FieldResult;
 
 use database::album;
 use database::artist;
@@ -12,8 +12,23 @@ use diesel;
 use diesel::Connection;
 use diesel::expression::dsl::not;
 use diesel::prelude::*;
+use diesel::result;
 
 use models::*;
+
+pub mod errors {
+    error_chain! {
+        foreign_links {
+            Diesel(::diesel::result::Error);
+        }
+
+        errors {
+            MultipleDescriptors {
+                description("Multipl valid descriptors were passed. Only one should be passed.")
+            }
+        }
+    }
+}
 
 pub struct Mutation;
 
@@ -24,7 +39,7 @@ impl Mutation {
         artist_id: Option<UUID>,
         album_id: Option<UUID>,
         playlist_id: Option<UUID>,
-    ) -> FieldResult<StatsCollection> {
+    ) -> errors::Result<StatsCollection> {
         let conn = context.connection();
 
         let valid_descriptors = (vec![&artist_id, &album_id, &playlist_id])
@@ -34,14 +49,12 @@ impl Mutation {
             .len();
 
         if valid_descriptors > 1 {
-            return Err(FieldError::from(
-                "Multiple valid descriptors were passed. Only one should be passed.",
-            ));
+            return Err(errors::ErrorKind::MultipleDescriptors.into());
         }
 
         let now = Utc::now().naive_utc();
 
-        conn.transaction::<_, FieldError, _>(|| {
+        conn.transaction::<_, result::Error, _>(|| {
             if let Some(ref artist_id) = artist_id {
                 diesel::update(artist::table.filter(artist::id.eq(artist_id)))
                     .set(artist::last_played.eq(now))
@@ -75,7 +88,7 @@ impl Mutation {
         })
     }
 
-    pub fn toggle_like(context: &GraphQLContext, song_id: &UUID) -> FieldResult<Song> {
+    pub fn toggle_like(context: &GraphQLContext, song_id: &UUID) -> QueryResult<Song> {
         let conn = context.connection();
 
         diesel::update(song::table.filter(song::id.eq(song_id)))
@@ -94,10 +107,10 @@ graphql_object!(Mutation: GraphQLContext |&self| {
         album_id: Option<UUID>,
         playlist_id: Option<UUID>
     ) -> FieldResult<StatsCollection> {
-        Mutation::play_song(executor.context(), song_id, artist_id, album_id, playlist_id)
+        Ok(Mutation::play_song(executor.context(), song_id, artist_id, album_id, playlist_id)?)
     }
 
     field toggle_like(&executor, song_id: UUID) -> FieldResult<Song> {
-        Mutation::toggle_like(executor.context(), &song_id)
+        Ok(Mutation::toggle_like(executor.context(), &song_id)?)
     }
 });

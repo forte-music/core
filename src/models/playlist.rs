@@ -22,14 +22,14 @@ pub struct Playlist {
 }
 
 impl Playlist {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         Ok(playlist::table
             .filter(playlist::id.eq(id))
             .first::<Self>(conn)?)
     }
 
-    pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
+    pub fn duration(&self, context: &GraphQLContext) -> QueryResult<i32> {
         let conn = context.connection();
         let maybe_duration: Option<i64> = playlist_item::table
             .filter(playlist_item::playlist_id.eq(&self.id))
@@ -67,7 +67,7 @@ pub struct PlaylistItem {
 }
 
 impl PlaylistItem {
-    pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
+    pub fn song(&self, context: &GraphQLContext) -> QueryResult<Song> {
         Ok(Song::from_id(context, &self.song_id)?)
     }
 }
@@ -86,7 +86,7 @@ graphql_object!(Playlist: GraphQLContext |&self| {
     }
 
     field duration(&executor) -> FieldResult<i32> {
-        self.duration(executor.context())
+        Ok(self.duration(executor.context())?)
     }
 
     field items(
@@ -113,6 +113,6 @@ graphql_object!(PlaylistItem: GraphQLContext |&self| {
     }
 
     field song(&executor) -> FieldResult<Song> {
-        self.song(executor.context())
+        Ok(self.song(executor.context())?)
     }
 });

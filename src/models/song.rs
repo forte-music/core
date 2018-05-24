@@ -2,7 +2,6 @@ use database::artist;
 use database::song;
 use database::song_artist;
 use diesel::prelude::*;
-use diesel::result;
 
 use context::GraphQLContext;
 use juniper::FieldResult;
@@ -25,7 +24,7 @@ pub struct Song {
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> result::QueryResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
     }
@@ -34,11 +33,11 @@ impl Song {
         NotImplementedErr()
     }
 
-    pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
+    pub fn album(&self, context: &GraphQLContext) -> QueryResult<Album> {
         Album::from_id(context, &self.album_id)
     }
 
-    pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
+    pub fn artists(&self, context: &GraphQLContext) -> QueryResult<Vec<Artist>> {
         let conn = context.connection();
         Ok(song_artist::table
             .filter(song_artist::song_id.eq(&self.id))
@@ -81,11 +80,11 @@ graphql_object!(Song: GraphQLContext |&self| {
     }
 
     field album(&executor) -> FieldResult<Album> {
-        self.album(executor.context())
+        Ok(self.album(executor.context())?)
     }
 
     field artists(&executor) -> FieldResult<Vec<Artist>> {
-        self.artists(executor.context())
+        Ok(self.artists(executor.context())?)
     }
 
     field stats() -> UserStats {

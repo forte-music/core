@@ -17,12 +17,12 @@ pub struct Artist {
 }
 
 impl Artist {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         Ok(artist::table.filter(artist::id.eq(id)).first::<Self>(conn)?)
     }
 
-    pub fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
+    pub fn albums(&self, context: &GraphQLContext) -> QueryResult<Vec<Album>> {
         let conn = context.connection();
         Ok(album::table
             .filter(album::artist_id.eq(&self.id))
@@ -48,7 +48,7 @@ graphql_object!(Artist: GraphQLContext |&self| {
     }
 
     field albums(&executor) -> FieldResult<Vec<Album>> {
-        self.albums(executor.context())
+        Ok(self.albums(executor.context())?)
     }
 
     field stats() -> UserStats {

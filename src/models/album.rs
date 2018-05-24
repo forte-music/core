@@ -21,16 +21,16 @@ pub struct Album {
 }
 
 impl Album {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         Ok(album::table.filter(album::id.eq(id)).first::<Self>(conn)?)
     }
 
-    pub fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
-        Artist::from_id(context, &self.artist_id)
+    pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
+        Ok(Artist::from_id(context, &self.artist_id)?)
     }
 
-    pub fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {
+    pub fn songs(&self, context: &GraphQLContext) -> QueryResult<Vec<Song>> {
         let conn = context.connection();
         Ok(song::table
             .filter(song::album_id.eq(&self.id))
@@ -38,7 +38,7 @@ impl Album {
             .load::<Song>(conn)?)
     }
 
-    pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
+    pub fn duration(&self, context: &GraphQLContext) -> QueryResult<i32> {
         let conn = context.connection();
         let maybe_duration: Option<i64> = song::table
             .filter(song::album_id.eq(&self.id))
@@ -71,15 +71,15 @@ graphql_object!(Album: GraphQLContext |&self| {
     }
 
     field artist(&executor) -> FieldResult<Artist> {
-        self.artist(executor.context())
+        Ok(self.artist(executor.context())?)
     }
 
     field songs(&executor) -> FieldResult<Vec<Song>> {
-        self.songs(executor.context())
+        Ok(self.songs(executor.context())?)
     }
 
     field duration(&executor) -> FieldResult<i32> {
-        self.duration(executor.context())
+        Ok(self.duration(executor.context())?)
     }
 
     field release_year() -> Option<i32> {
