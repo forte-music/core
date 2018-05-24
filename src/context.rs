@@ -6,7 +6,6 @@ use iron::prelude::*;
 use iron::typemap::Key;
 use juniper;
 use persistent::Read;
-use std::env;
 use std::error::Error;
 use std::ops::Deref;
 
@@ -24,15 +23,16 @@ impl Key for ContextKey {
     type Value = IronContext;
 }
 
-pub fn init_pool() -> Result<Pool, Box<Error>> {
-    let database_url = env::var("DATABASE_URL")?;
+pub fn init_pool(database_url: &str) -> Result<Pool, Box<Error>> {
     let manager = ConnectionManager::new(database_url);
     Ok(r2d2::Pool::new(manager)?)
 }
 
 impl IronContext {
-    pub fn init_middleware() -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
-        let pool = init_pool()?;
+    pub fn init_middleware(
+        database_url: &str,
+    ) -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
+        let pool = init_pool(database_url)?;
         let context = IronContext { pool };
 
         Ok(Read::<ContextKey>::both(context))

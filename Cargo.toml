@@ -6,6 +6,10 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>
 [profile.release]
 lto = true
 
+[[bin]]
+name = "forte-server"
+path = "src/bin/server/main.rs"
+
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite", "chrono"] }
 dotenv = "0.9.0"

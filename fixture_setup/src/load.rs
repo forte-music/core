@@ -1,4 +1,5 @@
 use forte_core::context;
+use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -25,7 +26,8 @@ pub fn load() -> Result<()> {
         );
     }
 
-    let pool = context::init_pool().map_err(|err| Error::from(err.description()))?;
+    let pool = context::init_pool(&env::var("DATABASE_URL")?)
+        .map_err(|err| Error::from(err.description()))?;
     let db = pool.get()?;
 
     load_from_folder(&path, &db)?;
