@@ -33,7 +33,7 @@ impl Query {
     }
 
     pub fn song(context: &GraphQLContext, id: &UUID) -> QueryResult<Song> {
-        Ok(Song::from_id(context, id)?)
+        Song::from_id(context, id)
     }
 
     pub fn songs(

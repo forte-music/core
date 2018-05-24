@@ -68,7 +68,7 @@ pub struct PlaylistItem {
 
 impl PlaylistItem {
     pub fn song(&self, context: &GraphQLContext) -> QueryResult<Song> {
-        Ok(Song::from_id(context, &self.song_id)?)
+        Song::from_id(context, &self.song_id)
     }
 }
 

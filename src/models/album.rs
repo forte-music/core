@@ -23,11 +23,11 @@ pub struct Album {
 impl Album {
     pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(album::table.filter(album::id.eq(id)).first::<Self>(conn)?)
+        album::table.filter(album::id.eq(id)).first::<Self>(conn)
     }
 
     pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
-        Ok(Artist::from_id(context, &self.artist_id)?)
+        Artist::from_id(context, &self.artist_id)
     }
 
     pub fn songs(&self, context: &GraphQLContext) -> QueryResult<Vec<Song>> {

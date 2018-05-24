@@ -28,7 +28,7 @@ pub struct Song {
 impl Song {
     pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
+        song::table.filter(song::id.eq(id)).first::<Self>(conn)
     }
 
     pub fn stream_url(&self) -> String {

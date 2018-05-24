@@ -95,7 +95,7 @@ impl Mutation {
             .set(song::liked.eq(not(song::liked)))
             .execute(conn)?;
 
-        Ok(Song::from_id(context, &song_id)?)
+        Song::from_id(context, &song_id)
     }
 }
 

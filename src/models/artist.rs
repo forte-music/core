@@ -19,7 +19,7 @@ pub struct Artist {
 impl Artist {
     pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(artist::table.filter(artist::id.eq(id)).first::<Self>(conn)?)
+        artist::table.filter(artist::id.eq(id)).first::<Self>(conn)
     }
 
     pub fn albums(&self, context: &GraphQLContext) -> QueryResult<Vec<Album>> {

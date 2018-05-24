@@ -26,7 +26,7 @@ impl Key for ContextKey {
 
 pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
     let manager = ConnectionManager::new(database_url);
-    Ok(r2d2::Pool::new(manager)?)
+    r2d2::Pool::new(manager)
 }
 
 impl IronContext {

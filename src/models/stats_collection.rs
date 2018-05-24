@@ -12,7 +12,7 @@ pub struct StatsCollection {
 
 impl StatsCollection {
     pub fn song(&self, context: &GraphQLContext) -> QueryResult<Song> {
-        Ok(Song::from_id(context, &self.song_id)?)
+        Song::from_id(context, &self.song_id)
     }
 
     pub fn album_stats(&self, context: &GraphQLContext) -> QueryResult<Option<UserStats>> {
