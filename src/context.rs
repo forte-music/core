@@ -1,11 +1,13 @@
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-use diesel::sqlite::SqliteConnection;
 use iron::prelude::*;
 use iron::typemap::Key;
-use juniper;
 use persistent::Read;
+
+use diesel::sqlite::SqliteConnection;
+use juniper;
+
 use std::error::Error;
 use std::ops::Deref;
 

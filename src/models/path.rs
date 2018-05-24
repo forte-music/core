@@ -12,11 +12,20 @@ use diesel::types::ToSql;
 use std::io::Write;
 
 use diesel::sqlite::Sqlite;
+use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Debug, AsExpression, FromSqlRow, Clone)]
 pub struct PathWrapper(PathBuf);
+
+impl Deref for PathWrapper {
+    type Target = PathBuf;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 impl<DB: Backend + HasSqlType<Text>> ToSql<Text, DB> for PathWrapper {
     fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
