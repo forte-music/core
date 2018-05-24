@@ -88,7 +88,7 @@ fn start() -> Result<()> {
             .progress_chars("#>-"),
     );
 
-    let mut prefix: String = "".to_owned();
+    let mut prefix = String::new();
 
     bar.wrap_iter(entries.iter()).for_each(|dir_entry| {
         let path = dir_entry.path();
