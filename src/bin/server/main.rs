@@ -1,3 +1,4 @@
+extern crate diesel;
 extern crate dotenv;
 extern crate forte_core;
 extern crate iron;
@@ -6,8 +7,9 @@ extern crate logger;
 extern crate persistent;
 extern crate router;
 
+use diesel::result;
+
 use forte_core::context::{GraphQLContext, IronContext};
-use forte_core::import;
 use forte_core::models::{Mutation, Query, Song, UUID};
 
 use iron::IronError;
@@ -37,12 +39,9 @@ fn raw_handler(req: &mut Request) -> IronResult<Response> {
     let uuid = UUID::parse_str(id)
         .map_err(|err| IronError::new(err, ("invalid uuid", status::BadRequest)))?;
 
-    // TODO: Refine Error
-    let song = Song::from_id(&ctx, &uuid).map_err(|_err| {
-        IronError::new(
-            import::errors::Error::from(import::errors::ErrorKind::NoArtistError),
-            status::NotFound,
-        )
+    let song = Song::from_id(&ctx, &uuid).map_err(|err| match err {
+        result::Error::NotFound => IronError::new(err, status::NotFound),
+        _ => IronError::new(err, status::InternalServerError),
     })?;
 
     Ok(Response::with((status::Ok, song.path.deref().clone())))

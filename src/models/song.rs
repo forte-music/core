@@ -2,6 +2,7 @@ use database::artist;
 use database::song;
 use database::song_artist;
 use diesel::prelude::*;
+use diesel::result;
 
 use context::GraphQLContext;
 use juniper::FieldResult;
@@ -24,7 +25,7 @@ pub struct Song {
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> result::QueryResult<Self> {
         let conn = context.connection();
         Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
     }

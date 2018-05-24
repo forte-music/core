@@ -11,7 +11,7 @@ pub struct StatsCollection {
 
 impl StatsCollection {
     pub fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        Song::from_id(context, &self.song_id)
+        Ok(Song::from_id(context, &self.song_id)?)
     }
 
     pub fn album_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
