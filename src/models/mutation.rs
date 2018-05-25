@@ -74,7 +74,10 @@ impl Mutation {
             }
 
             diesel::update(song::table.filter(song::id.eq(song_id)))
-                .set(song::play_count.eq(song::play_count + 1))
+                .set((
+                    song::play_count.eq(song::play_count + 1),
+                    song::last_played.eq(now),
+                ))
                 .execute(conn)?;
 
             Ok(())
