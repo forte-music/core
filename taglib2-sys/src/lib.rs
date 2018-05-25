@@ -1,12 +1,17 @@
 #[macro_use]
 extern crate error_chain;
 
+extern crate mime;
+
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
+
+use mime::Mime;
 
 error_chain! {
     foreign_links {
@@ -56,20 +61,23 @@ struct SongPropertiesC {
 
 pub struct Picture {
     pub data: Vec<u8>,
-    pub mime: Option<String>,
+    pub mime: Mime,
 }
 
 impl Picture {
-    fn from_raw(data: *const u8, len: u32, mime: *const c_char) -> Option<Picture> {
+    fn from_raw(data: *const u8, len: u32, raw_mime: *const c_char) -> Option<Picture> {
         if data.is_null() {
             return None;
         }
 
         unsafe {
             let bytes = std::slice::from_raw_parts(data, len as usize);
+            let mime_string = from_cstr(raw_mime)?;
+            let mime = Mime::from_str(&mime_string).ok()?;
+
             Some(Picture {
                 data: bytes.to_vec(),
-                mime: from_cstr(mime),
+                mime,
             })
         }
     }
