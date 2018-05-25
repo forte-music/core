@@ -24,7 +24,7 @@ pub mod errors {
 
         errors {
             MultipleDescriptors {
-                description("Multipl valid descriptors were passed. Only one should be passed.")
+                description("multiple valid descriptors were passed. Only one should be passed")
             }
         }
     }
