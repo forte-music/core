@@ -124,7 +124,7 @@ jobs:
           environment:
             DATABASE_URL: ./db.sqlite
           background: true
-          command: cargo run --bin forte-server
+          command: cargo run -- serve --app-dir .
 
       - run:
           name: Run Tests

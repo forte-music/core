@@ -30,13 +30,9 @@ pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
 }
 
 impl IronContext {
-    pub fn init_middleware(
-        database_url: &str,
-    ) -> Result<(Read<ContextKey>, Read<ContextKey>), r2d2::Error> {
-        let pool = init_pool(database_url)?;
+    pub fn init_middleware(pool: Pool) -> (Read<ContextKey>, Read<ContextKey>) {
         let context = IronContext { pool };
-
-        Ok(Read::<ContextKey>::both(context))
+        Read::<ContextKey>::both(context)
     }
 }
 

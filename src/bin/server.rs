@@ -1,46 +1,27 @@
-extern crate diesel;
-extern crate dotenv;
-extern crate forte_core;
 extern crate iron;
 extern crate juniper_iron;
 extern crate logger;
 extern crate persistent;
 extern crate router;
-extern crate r2d2;
-
-#[macro_use]
-extern crate error_chain;
 
 use diesel::result;
 
+use forte_core::context;
 use forte_core::context::{GraphQLContext, IronContext};
 use forte_core::models::{Mutation, Query, Song, UUID};
 
-use iron::IronError;
-use iron::IronResult;
-use iron::Request;
-use iron::Response;
-use iron::{Chain, Iron};
+use self::iron::IronError;
+use self::iron::IronResult;
+use self::iron::Request;
+use self::iron::Response;
+use self::iron::status;
+use self::iron::{Chain, Iron};
 
-use juniper_iron::{GraphQLHandler, GraphiQLHandler};
-use logger::Logger;
-use router::Router;
+use self::juniper_iron::{GraphQLHandler, GraphiQLHandler};
+use self::logger::Logger;
+use self::router::Router;
 
-use dotenv::dotenv;
-use iron::status;
-use std::env;
 use std::ops::Deref;
-
-error_chain! {
-    foreign_links {
-        R2d2(::r2d2::Error);
-        VarError(::std::env::VarError);
-    }
-}
-
-fn main() {
-    start().unwrap();
-}
 
 fn raw_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
@@ -57,9 +38,7 @@ fn raw_handler(req: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::Ok, song.path.deref().clone())))
 }
 
-fn start() -> Result<()> {
-    dotenv().ok();
-
+pub fn serve(pool: context::Pool, host: String) {
     let mut router = Router::new();
 
     // Register Routes
@@ -73,8 +52,7 @@ fn start() -> Result<()> {
 
     // Setup Context Middleware
     let mut chain = Chain::new(router);
-    let database_url = env::var("DATABASE_URL")?;
-    chain.link(IronContext::init_middleware(&database_url)?);
+    chain.link(IronContext::init_middleware(pool));
 
     // Setup Logging Middleware
     let (logger_before, logger_after) = Logger::new(None);
@@ -82,15 +60,7 @@ fn start() -> Result<()> {
     chain.link_after(logger_after);
 
     // Start Server
-    let host: String = match env::var("HOST") {
-        Err(env::VarError::NotPresent) => None,
-        Err(o) => return Err(o.into()),
-        Ok(s) => Some(s),
-    }.unwrap_or("0.0.0.0:8080".to_owned());
-
     println!("Starting Server on {}", host);
     let iron = Iron::new(chain);
     iron.http(host).unwrap();
-
-    Ok(())
 }
