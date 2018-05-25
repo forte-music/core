@@ -11,7 +11,7 @@ use models::*;
 #[table_name = "album"]
 pub struct Album {
     pub id: UUID,
-    pub artwork_url: Option<String>,
+    pub artwork_path: Option<PathWrapper>,
     pub name: String,
     pub artist_id: UUID,
     pub release_year: Option<i32>,
@@ -24,6 +24,15 @@ impl Album {
     pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         album::table.filter(album::id.eq(id)).first::<Self>(conn)
+    }
+
+    pub fn get_artwork_url(id: &str) -> String {
+        format!("/files/artwork/{}/raw", id)
+    }
+
+    pub fn artwork_url(&self) -> Option<String> {
+        self.artwork_path.as_ref()
+            .map(|_| Album::get_artwork_url(&self.id.to_string()))
     }
 
     pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {

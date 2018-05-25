@@ -131,7 +131,7 @@ fn add_or_get_album(
 
     let album = Album {
         id: UUID::new(),
-        artwork_url: None,
+        artwork_path: None,
         name,
         artist_id,
         release_year: release_year.map(|year| year as i32),
