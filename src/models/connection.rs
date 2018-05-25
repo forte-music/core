@@ -156,7 +156,7 @@ where
         let mut query: BoxedSelectStatement<<TB as AsQuery>::SqlType, TB, Sqlite> =
             Self::table().into_boxed();
         if let Some(ref filter) = sort.filter {
-            query = QueryDsl::filter(query, Self::name().like(filter));
+            query = QueryDsl::filter(query, Self::name().like(format!("%{}%", filter)));
         }
 
         query = match sort.sort_by {
