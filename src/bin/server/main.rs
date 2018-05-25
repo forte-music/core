@@ -6,6 +6,10 @@ extern crate juniper_iron;
 extern crate logger;
 extern crate persistent;
 extern crate router;
+extern crate r2d2;
+
+#[macro_use]
+extern crate error_chain;
 
 use diesel::result;
 
@@ -25,8 +29,14 @@ use router::Router;
 use dotenv::dotenv;
 use iron::status;
 use std::env;
-use std::error::Error;
 use std::ops::Deref;
+
+error_chain! {
+    foreign_links {
+        R2d2(::r2d2::Error);
+        VarError(::std::env::VarError);
+    }
+}
 
 fn main() {
     start().unwrap();
@@ -47,7 +57,7 @@ fn raw_handler(req: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::Ok, song.path.deref().clone())))
 }
 
-fn start() -> Result<(), Box<Error>> {
+fn start() -> Result<()> {
     dotenv().ok();
 
     let mut router = Router::new();
@@ -74,13 +84,13 @@ fn start() -> Result<(), Box<Error>> {
     // Start Server
     let host: String = match env::var("HOST") {
         Err(env::VarError::NotPresent) => None,
-        Err(o) => return Err(Box::new(o)),
+        Err(o) => return Err(o.into()),
         Ok(s) => Some(s),
     }.unwrap_or("0.0.0.0:8080".to_owned());
 
     println!("Starting Server on {}", host);
     let iron = Iron::new(chain);
-    iron.http(host)?;
+    iron.http(host).unwrap();
 
     Ok(())
 }
