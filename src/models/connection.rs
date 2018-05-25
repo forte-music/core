@@ -3,17 +3,17 @@ use diesel::associations::HasTable;
 use diesel::dsl;
 use diesel::expression::NonAggregate;
 use diesel::prelude::*;
+use diesel::query_builder::AsQuery;
+use diesel::query_builder::BoxedSelectStatement;
 use diesel::query_builder::QueryFragment;
+use diesel::query_dsl::boxed_dsl::BoxedDsl;
 use diesel::sql_types::HasSqlType;
 use diesel::sql_types::Nullable;
 use diesel::sql_types::Text;
+use diesel::sql_types::Timestamp;
 use diesel::sqlite::Sqlite;
 use juniper::FieldResult;
 use models::*;
-use diesel::query_dsl::boxed_dsl::BoxedDsl;
-use diesel::query_builder::AsQuery;
-use diesel::query_builder::BoxedSelectStatement;
-use diesel::sql_types::Timestamp;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -117,15 +117,27 @@ pub enum SortBy {
 }
 
 pub trait GetConnection<TB>
-    where
-        Self: HasTable<Table = TB> + Queryable<TB::SqlType, Sqlite> + Sized,
-        TB: Table + BoxedDsl<'static, Sqlite, Output = BoxedSelectStatement<'static, <TB as AsQuery>::SqlType, TB, Sqlite>>,
-        <TB as QuerySource>::FromClause: QueryFragment<Sqlite>,
-        Sqlite: HasSqlType<TB::SqlType>
+where
+    Self: HasTable<Table = TB> + Queryable<TB::SqlType, Sqlite> + Sized,
+    TB: Table
+        + BoxedDsl<
+            'static,
+            Sqlite,
+            Output = BoxedSelectStatement<'static, <TB as AsQuery>::SqlType, TB, Sqlite>,
+        >,
+    <TB as QuerySource>::FromClause: QueryFragment<Sqlite>,
+    Sqlite: HasSqlType<TB::SqlType>,
 {
-    type Name: Column<Table = TB, SqlType = Text> + AppearsOnTable<TB> + QueryFragment<Sqlite> + NonAggregate;
-    type TimeAdded: Column<Table = TB, SqlType = Timestamp> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
-    type LastPlayed: Column<Table = TB, SqlType = Nullable<Timestamp>> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
+    type Name: Column<Table = TB, SqlType = Text>
+        + AppearsOnTable<TB>
+        + QueryFragment<Sqlite>
+        + NonAggregate;
+    type TimeAdded: Column<Table = TB, SqlType = Timestamp>
+        + AppearsOnTable<TB>
+        + QueryFragment<Sqlite>;
+    type LastPlayed: Column<Table = TB, SqlType = Nullable<Timestamp>>
+        + AppearsOnTable<TB>
+        + QueryFragment<Sqlite>;
 
     fn name() -> Self::Name;
     fn time_added() -> Self::TimeAdded;
@@ -141,7 +153,8 @@ pub trait GetConnection<TB>
         let sort = sort.unwrap_or_default();
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let mut query: BoxedSelectStatement<<TB as AsQuery>::SqlType, TB, Sqlite> = Self::table().into_boxed();
+        let mut query: BoxedSelectStatement<<TB as AsQuery>::SqlType, TB, Sqlite> =
+            Self::table().into_boxed();
         if let Some(ref filter) = sort.filter {
             query = QueryDsl::filter(query, Self::name().like(filter));
         }
