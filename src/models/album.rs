@@ -45,7 +45,6 @@ impl Album {
         let maybe_duration: Option<i64> = song::table
             .filter(song::album_id.eq(&self.id))
             .select(dsl::sum(song::duration))
-            .filter(song::album_id.eq(self.id.as_str()))
             .first::<Option<i64>>(conn)?;
         let duration = maybe_duration.unwrap_or(0);
 
@@ -57,14 +56,6 @@ impl Album {
             id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
-    }
-}
-
-impl HasTable for Album {
-    type Table = album::table;
-
-    fn table() -> Self::Table {
-        album::table
     }
 }
 

@@ -14,6 +14,7 @@ use models::*;
 use diesel::query_dsl::boxed_dsl::BoxedDsl;
 use diesel::query_builder::AsQuery;
 use diesel::query_builder::BoxedSelectStatement;
+use diesel::sql_types::Timestamp;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -124,8 +125,8 @@ pub trait GetConnection<TB>
         Sqlite: HasSqlType<TB::SqlType>
 {
     type Name: Column<Table = TB, SqlType = Text> + AppearsOnTable<TB> + QueryFragment<Sqlite> + NonAggregate;
-    type TimeAdded: Column<Table = TB, SqlType = Integer> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
-    type LastPlayed: Column<Table = TB, SqlType = Nullable<Integer>> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
+    type TimeAdded: Column<Table = TB, SqlType = Timestamp> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
+    type LastPlayed: Column<Table = TB, SqlType = Nullable<Timestamp>> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
 
     fn name() -> Self::Name;
     fn time_added() -> Self::TimeAdded;
