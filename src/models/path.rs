@@ -40,6 +40,12 @@ impl FromSql<Text, Sqlite> for PathWrapper {
     }
 }
 
+impl From<PathBuf> for PathWrapper {
+    fn from(path: PathBuf) -> Self {
+        PathWrapper(path)
+    }
+}
+
 impl<'a> From<&'a Path> for PathWrapper {
     fn from(path: &'a Path) -> Self {
         PathWrapper(path.to_owned())

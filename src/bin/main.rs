@@ -29,6 +29,7 @@ use app_dirs::app_root;
 use error_chain::ChainedError;
 
 use forte_core::context;
+use std::fs;
 
 embed_migrations!("./migrations");
 
@@ -37,6 +38,7 @@ error_chain! {
         R2d2(::r2d2::Error);
         AppDirs(::app_dirs::AppDirsError);
         DieselMigration(::diesel_migrations::RunMigrationsError);
+        Io(::std::io::Error);
     }
 
     links {
@@ -111,7 +113,13 @@ fn run() -> Result<()> {
 
     match opt.command {
         Command::Serve { host } => Ok(server::serve(pool, host)),
-        Command::Sync { directory } => sync::sync(pool, &directory),
+        Command::Sync { directory } => {
+            let mut artwork_directory = app_dir.clone();
+            artwork_directory.push("artwork");
+            fs::create_dir_all(&artwork_directory)?;
+
+            sync::sync(pool, &directory, &artwork_directory)
+        }
     }?;
 
     Ok(())

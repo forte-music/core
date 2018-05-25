@@ -36,7 +36,7 @@ error_chain! {
 
 const FORMAT_EXTENSIONS: [&str; 3] = ["flac", "mp3", "m4a"];
 
-pub fn sync(pool: context::Pool, path: &Path) -> Result<()> {
+pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Result<()> {
     let connection = pool.get()?;
     let conn = connection.deref();
 
@@ -48,7 +48,11 @@ pub fn sync(pool: context::Pool, path: &Path) -> Result<()> {
             let path = entry.path();
             let extension = path.extension().and_then(|e| e.to_str());
             match extension {
-                Some(extension) if FORMAT_EXTENSIONS.contains(&extension) => true,
+                Some(extension)
+                    if FORMAT_EXTENSIONS.contains(&extension.to_lowercase().as_ref()) =>
+                {
+                    true
+                }
                 _ => false,
             }
         })
@@ -72,7 +76,7 @@ pub fn sync(pool: context::Pool, path: &Path) -> Result<()> {
         let message = format!("Importing {}", path_string);
         bar.set_message(message.as_str());
 
-        if let Err(e) = handle_entry(path, conn) {
+        if let Err(e) = handle_entry(path, artwork_directory, conn) {
             prefix = prefix.clone() + &format!("Error importing '{}': {}\n", path_string, e);
             bar.set_prefix(prefix.as_str())
         }
@@ -83,11 +87,11 @@ pub fn sync(pool: context::Pool, path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn handle_entry(path: &Path, conn: &SqliteConnection) -> Result<()> {
+fn handle_entry(path: &Path, artwork_directory: &Path, conn: &SqliteConnection) -> Result<()> {
     let props = SongProperties::read(path)?;
     let props = props.ok_or(ErrorKind::MissingSongProperties)?;
 
-    import::add_song(path, props, conn)?;
+    import::add_song(path, artwork_directory, props, conn)?;
 
     Ok(())
 }

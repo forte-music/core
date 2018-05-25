@@ -12,6 +12,7 @@ extern crate diesel;
 #[macro_use]
 extern crate error_chain;
 
+extern crate mime_guess;
 extern crate taglib2_sys;
 
 pub mod context;

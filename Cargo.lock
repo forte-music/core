@@ -221,6 +221,7 @@ dependencies = [
  "juniper 0.9.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper_iron 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "logger 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mime_guess 1.8.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "persistent 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "r2d2-diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -296,7 +297,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "hyper 0.10.13 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "mime_guess 1.8.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mime_guess 1.8.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "modifier 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "plugin 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -450,7 +451,7 @@ dependencies = [
 
 [[package]]
 name = "mime_guess"
-version = "1.8.3"
+version = "1.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "mime 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -863,6 +864,7 @@ dependencies = [
  "cc 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "cmake 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
  "error-chain 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "mime 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1138,7 +1140,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum migrations_internals 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8cf7c8c4f83fa9f47440c0b4af99973502de55e6e7b875f693bd263e03f93e7e"
 "checksum migrations_macros 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "79f12499ef7353bdeca2d081bc61edd8351dac09a33af845952009b5a3d68c1a"
 "checksum mime 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)" = "ba626b8a6de5da682e1caa06bdb42a335aee5a84db8e5046a3e8ab17ba0a3ae0"
-"checksum mime_guess 1.8.3 (registry+https://github.com/rust-lang/crates.io-index)" = "dc7e82a15629bb4ecd9e72365bf33d1382be91e030f820edb8e2a21c02430da8"
+"checksum mime_guess 1.8.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b7e2b09d08313f84e0fb82d13a4d859109a17543fe9af3b6d941dc1431f7de79"
 "checksum modifier 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "41f5c9112cb662acd3b204077e0de5bc66305fa8df65c8019d5adb10e9ab6e58"
 "checksum num 0.1.41 (registry+https://github.com/rust-lang/crates.io-index)" = "cc4083e14b542ea3eb9b5f33ff48bd373a92d78687e74f4cc0a30caeb754f0ca"
 "checksum num-integer 0.1.35 (registry+https://github.com/rust-lang/crates.io-index)" = "d1452e8b06e448a07f0e6ebb0bb1d92b8890eea63288c0b627331d53514d0fba"
