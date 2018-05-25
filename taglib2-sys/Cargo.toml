@@ -6,3 +6,6 @@ authors = ["Mcat12 <newtoncat12@yahoo.com>"]
 [build-dependencies]
 cmake = "0.1"
 cc = "1.0"
+
+[dependencies]
+error-chain = "0.11.0"

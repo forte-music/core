@@ -3,48 +3,44 @@ use database::artist;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
-use juniper::{FieldResult, ID};
+use juniper::FieldResult;
 use models::*;
 
-#[derive(Queryable, Identifiable, Insertable)]
+#[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "artist"]
 pub struct Artist {
-    pub id: String,
+    pub id: UUID,
     pub name: String,
-    pub time_added: i32,
+    pub time_added: NaiveDateTime,
 
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
 }
 
 impl Artist {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(artist::table.filter(artist::id.eq(id)).first::<Self>(conn)?)
+        artist::table.filter(artist::id.eq(id)).first::<Self>(conn)
     }
 
-    pub fn gql_id(&self) -> ID {
-        ID::from(self.id.to_owned())
-    }
-
-    pub fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
+    pub fn albums(&self, context: &GraphQLContext) -> QueryResult<Vec<Album>> {
         let conn = context.connection();
         Ok(album::table
-            .filter(album::artist_id.eq(self.id.as_str()))
+            .filter(album::artist_id.eq(&self.id))
             .order(album::time_added.desc())
             .load::<Album>(conn)?)
     }
 
     pub fn stats(&self) -> UserStats {
         UserStats {
-            id: format!("stats:{}", self.id),
+            id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
     }
 }
 
 graphql_object!(Artist: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
+    field id() -> &UUID {
+        &self.id
     }
 
     field name() -> &str {
@@ -52,14 +48,14 @@ graphql_object!(Artist: GraphQLContext |&self| {
     }
 
     field albums(&executor) -> FieldResult<Vec<Album>> {
-        self.albums(executor.context())
+        Ok(self.albums(executor.context())?)
     }
 
     field stats() -> UserStats {
         self.stats()
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field time_added() -> TimeWrapper {
+        self.time_added.into()
     }
 });

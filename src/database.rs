@@ -1,62 +1,63 @@
 table! {
     album (id) {
-        id -> Text,
+        id -> Binary,
         artwork_url -> Nullable<Text>,
         name -> Text,
-        artist_id -> Text,
-        release_year -> Integer,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        artist_id -> Binary,
+        release_year -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
 table! {
     artist (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
 table! {
     playlist (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
         description -> Text,
-        time_added -> Integer,
-        last_played -> Nullable<Integer>,
+        time_added -> Timestamp,
+        last_played -> Nullable<Timestamp>,
     }
 }
 
 table! {
     playlist_item (id) {
-        id -> Text,
-        playlist_id -> Text,
+        id -> Binary,
+        playlist_id -> Binary,
         rank -> Text,
-        song_id -> Text,
+        song_id -> Binary,
     }
 }
 
 table! {
     song (id) {
-        id -> Text,
+        id -> Binary,
         name -> Text,
-        album_id -> Text,
+        album_id -> Binary,
         track_number -> Integer,
         disk_number -> Integer,
         duration -> Integer,
-        time_added -> Integer,
+        time_added -> Timestamp,
         play_count -> Integer,
-        last_played -> Nullable<Integer>,
+        last_played -> Nullable<Timestamp>,
         liked -> Bool,
+        path -> Text,
     }
 }
 
 table! {
     song_artist (song_id, artist_id) {
-        song_id -> Text,
-        artist_id -> Text,
+        song_id -> Binary,
+        artist_id -> Binary,
     }
 }
 
