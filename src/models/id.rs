@@ -1,8 +1,6 @@
 use diesel::backend::Backend;
 use diesel::deserialize;
 use diesel::deserialize::FromSql;
-use diesel::expression::AsExpression;
-use diesel::expression::bound::Bound;
 use diesel::serialize;
 use diesel::serialize::Output;
 use diesel::sql_types::Binary;
@@ -19,6 +17,7 @@ use juniper::InputValue;
 use juniper::Value;
 
 #[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
+#[sql_type="Binary"]
 pub struct UUID(Uuid);
 
 impl UUID {
@@ -82,22 +81,6 @@ impl FromSql<Binary, Sqlite> for UUID {
     fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> deserialize::Result<Self> {
         let bytes_vec: Vec<u8> = <Vec<u8> as FromSql<Binary, Sqlite>>::from_sql(bytes)?;
         Ok(UUID(Uuid::from_bytes(&bytes_vec)?))
-    }
-}
-
-impl AsExpression<Binary> for UUID {
-    type Expression = Bound<Binary, UUID>;
-
-    fn as_expression(self) -> Self::Expression {
-        Bound::new(self)
-    }
-}
-
-impl<'a> AsExpression<Binary> for &'a UUID {
-    type Expression = Bound<Binary, &'a UUID>;
-
-    fn as_expression(self) -> Self::Expression {
-        Bound::new(self)
     }
 }
 

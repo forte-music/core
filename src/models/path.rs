@@ -1,13 +1,10 @@
 use diesel::backend::Backend;
 use diesel::deserialize;
 use diesel::deserialize::FromSql;
-use diesel::expression::AsExpression;
-use diesel::expression::bound::Bound;
 use diesel::serialize;
 use diesel::serialize::Output;
 use diesel::sql_types::HasSqlType;
 use diesel::sql_types::Text;
-use diesel::types::ToSql;
 
 use std::io::Write;
 
@@ -15,8 +12,10 @@ use diesel::sqlite::Sqlite;
 use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
+use diesel::types::ToSql;
 
 #[derive(Debug, AsExpression, FromSqlRow, Clone)]
+#[sql_type="Text"]
 pub struct PathWrapper(PathBuf);
 
 impl Deref for PathWrapper {
@@ -38,22 +37,6 @@ impl FromSql<Text, Sqlite> for PathWrapper {
     fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> deserialize::Result<Self> {
         let string: String = <String as FromSql<Text, Sqlite>>::from_sql(bytes)?;
         Ok(PathWrapper(Path::new(&string).to_owned()))
-    }
-}
-
-impl AsExpression<Text> for PathWrapper {
-    type Expression = Bound<Text, PathWrapper>;
-
-    fn as_expression(self) -> Self::Expression {
-        Bound::new(self)
-    }
-}
-
-impl<'a> AsExpression<Text> for &'a PathWrapper {
-    type Expression = Bound<Text, &'a PathWrapper>;
-
-    fn as_expression(self) -> Self::Expression {
-        Bound::new(self)
     }
 }
 
