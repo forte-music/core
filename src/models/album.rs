@@ -81,8 +81,8 @@ graphql_object!(Album: GraphQLContext |&self| {
         &self.id
     }
 
-    field artwork_url() -> &Option<String> {
-        &self.artwork_url
+    field artwork_url() -> Option<String> {
+        self.artwork_url()
     }
 
     field name() -> &str {
