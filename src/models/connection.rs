@@ -11,9 +11,9 @@ use diesel::sql_types::Text;
 use diesel::sqlite::Sqlite;
 use juniper::FieldResult;
 use models::*;
-use diesel::query_builder::Query;
 use diesel::query_dsl::boxed_dsl::BoxedDsl;
 use diesel::query_builder::AsQuery;
+use diesel::query_builder::BoxedSelectStatement;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -118,15 +118,15 @@ pub enum SortBy {
 
 pub trait GetConnection<TB>
     where
-        Self: Queryable<TB::SqlType, Sqlite> + Sized,
-        TB: Table,
+        Self: HasTable<Table = TB> + Queryable<TB::SqlType, Sqlite> + Sized,
+        TB: Table + BoxedDsl<'static, Sqlite, Output = BoxedSelectStatement<'static, <TB as AsQuery>::SqlType, TB, Sqlite>>,
         <TB as QuerySource>::FromClause: QueryFragment<Sqlite>,
-        Sqlite: HasSqlType<TB::SqlType> {
+        Sqlite: HasSqlType<TB::SqlType>
+{
     type Name: Column<Table = TB, SqlType = Text> + AppearsOnTable<TB> + QueryFragment<Sqlite> + NonAggregate;
     type TimeAdded: Column<Table = TB, SqlType = Integer> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
     type LastPlayed: Column<Table = TB, SqlType = Nullable<Integer>> + AppearsOnTable<TB> + QueryFragment<Sqlite>;
 
-    fn table() -> TB;
     fn name() -> Self::Name;
     fn time_added() -> Self::TimeAdded;
     fn last_played() -> Self::LastPlayed;
@@ -141,47 +141,42 @@ pub trait GetConnection<TB>
         let sort = sort.unwrap_or_default();
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let table = Self::table();
-        let name = Self::name();
-        let time_added = Self::time_added();
-        let last_played = Self::last_played();
-
-        let mut query = table.into_boxed();
+        let mut query: BoxedSelectStatement<<TB as AsQuery>::SqlType, TB, Sqlite> = Self::table().into_boxed();
         if let Some(ref filter) = sort.filter {
-            query = query.filter(name.like(filter));
+            query = QueryDsl::filter(query, Self::name().like(filter));
         }
 
         query = match sort.sort_by {
             SortBy::Lexicographically => {
                 if !sort.reverse {
-                    query.order_by(name.asc())
+                    query.order_by(Self::name().asc())
                 } else {
-                    query.order_by(name.desc())
+                    query.order_by(Self::name().desc())
                 }
             }
 
             SortBy::RecentlyAdded => {
                 if !sort.reverse {
-                    query.order_by(time_added.desc())
+                    query.order_by(Self::time_added().desc())
                 } else {
-                    query.order_by(time_added.asc())
+                    query.order_by(Self::time_added().asc())
                 }
             }
 
             SortBy::RecentlyPlayed => {
                 if !sort.reverse {
-                    query.order_by(last_played.desc())
+                    query.order_by(Self::last_played().desc())
                 } else {
-                    query.order_by(last_played.asc())
+                    query.order_by(Self::last_played().asc())
                 }
             }
         };
 
         let results: Vec<Self> = query.limit(first).offset(lower_bound).load(conn)?;
 
-        let mut count_query = table.into_boxed();
+        let mut count_query = Self::table().into_boxed();
         if let Some(ref filter) = sort.filter {
-            count_query = count_query.filter(name.like(filter));
+            count_query = QueryDsl::filter(count_query, Self::name().like(filter));
         }
 
         let count: i64 = count_query

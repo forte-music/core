@@ -6,6 +6,7 @@ use juniper::{FieldResult, ID};
 use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
+use diesel::associations::HasTable;
 
 #[derive(Queryable)]
 pub struct Album {
@@ -60,14 +61,18 @@ impl Album {
     }
 }
 
+impl HasTable for Album {
+    type Table = album::table;
+
+    fn table() -> Self::Table {
+        album::table
+    }
+}
+
 impl GetConnection<album::table> for Album {
     type Name = album::name;
     type TimeAdded = album::time_added;
     type LastPlayed = album::last_played;
-
-    fn table() -> album::table {
-        album::table
-    }
 
     fn name() -> Self::Name {
         album::name
