@@ -47,7 +47,7 @@ impl Into<Song> for SongSource {
                 .as_ref()
                 .and_then(|stats| stats.liked)
                 .unwrap_or(false),
-            path: Path::new("").into(),
+            path: Path::new(&UUID::new().to_string()).into(),
         }
     }
 }
