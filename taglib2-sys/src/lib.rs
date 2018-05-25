@@ -91,7 +91,7 @@ pub struct SongProperties {
     pub disk_number: Option<u32>,
     pub track_number: u32,
     pub duration: i32,
-    pub cover: Option<Picture>,
+    pub cover_artwork: Option<Picture>,
 }
 
 impl SongProperties {
@@ -134,7 +134,7 @@ impl SongProperties {
             disk_number,
             track_number: (*song_properties_c).track_number,
             duration: (*song_properties_c).duration,
-            cover: Picture::from_raw(
+            cover_artwork: Picture::from_raw(
                 song_properties_c.picture_data,
                 song_properties_c.picture_data_len,
                 song_properties_c.picture_mime,
