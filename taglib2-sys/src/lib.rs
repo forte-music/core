@@ -21,7 +21,7 @@ error_chain! {
 
         ConvertPathToStringError(path: PathBuf) {
             description("failed to convert the path to a string")
-            display("the path '{}' cound't be convereted", path.display())
+            display("the path '{}' couldn't be converted", path.display())
         }
     }
 }
