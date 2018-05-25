@@ -24,9 +24,7 @@ graphql_scalar!(TimeWrapper as "Int" {
     }
 
     from_input_value(v: &InputValue) -> Option<TimeWrapper> {
-        match *v {
-            _ => None
-        }
+        None
     }
 
 });
