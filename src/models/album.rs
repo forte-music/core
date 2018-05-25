@@ -1,50 +1,49 @@
 use database::album;
 use database::song;
 use diesel::prelude::*;
-use juniper::{FieldResult, ID};
+use juniper::FieldResult;
 
 use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
 use diesel::associations::HasTable;
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Insertable, Clone)]
+#[table_name = "album"]
 pub struct Album {
-    pub id: String,
+    pub id: UUID,
     pub artwork_url: Option<String>,
     pub name: String,
-    pub artist_id: String,
-    pub release_year: i32,
-    pub time_added: i32,
+    pub artist_id: UUID,
+    pub release_year: Option<i32>,
+    pub time_added: NaiveDateTime,
 
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
 }
 
 impl Album {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(album::table.filter(album::id.eq(id)).first::<Self>(conn)?)
+        album::table.filter(album::id.eq(id)).first::<Self>(conn)
     }
 
-    pub fn gql_id(&self) -> ID {
-        ID::from(self.id.to_owned())
+    pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
+        Artist::from_id(context, &self.artist_id)
     }
 
-    pub fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
-        Artist::from_id(context, self.artist_id.as_str())
-    }
-
-    pub fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {
+    pub fn songs(&self, context: &GraphQLContext) -> QueryResult<Vec<Song>> {
         let conn = context.connection();
         Ok(song::table
-            .filter(song::album_id.eq(self.id.as_str()))
-            .order(song::time_added.desc())
+            .filter(song::album_id.eq(&self.id))
+            .order_by(song::disk_number.asc())
+            .then_order_by(song::track_number.asc())
             .load::<Song>(conn)?)
     }
 
-    pub fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
+    pub fn duration(&self, context: &GraphQLContext) -> QueryResult<i32> {
         let conn = context.connection();
         let maybe_duration: Option<i64> = song::table
+            .filter(song::album_id.eq(&self.id))
             .select(dsl::sum(song::duration))
             .filter(song::album_id.eq(self.id.as_str()))
             .first::<Option<i64>>(conn)?;
@@ -55,7 +54,7 @@ impl Album {
 
     pub fn stats(&self) -> UserStats {
         UserStats {
-            id: format!("stats:{}", self.id),
+            id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
     }
@@ -88,8 +87,8 @@ impl GetConnection<album::table> for Album {
 }
 
 graphql_object!(Album: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
+    field id() -> &UUID {
+        &self.id
     }
 
     field artwork_url() -> &Option<String> {
@@ -101,18 +100,18 @@ graphql_object!(Album: GraphQLContext |&self| {
     }
 
     field artist(&executor) -> FieldResult<Artist> {
-        self.artist(executor.context())
+        Ok(self.artist(executor.context())?)
     }
 
     field songs(&executor) -> FieldResult<Vec<Song>> {
-        self.songs(executor.context())
+        Ok(self.songs(executor.context())?)
     }
 
     field duration(&executor) -> FieldResult<i32> {
-        self.duration(executor.context())
+        Ok(self.duration(executor.context())?)
     }
 
-    field release_year() -> i32 {
+    field release_year() -> Option<i32> {
         self.release_year
     }
 
@@ -120,7 +119,7 @@ graphql_object!(Album: GraphQLContext |&self| {
         self.stats()
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field time_added() -> TimeWrapper {
+        self.time_added.into()
     }
 });

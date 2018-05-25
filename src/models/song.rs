@@ -4,46 +4,45 @@ use database::song_artist;
 use diesel::prelude::*;
 
 use context::GraphQLContext;
-use juniper::{FieldResult, ID};
+use juniper::FieldResult;
 use models::*;
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Insertable)]
+#[table_name = "song"]
 pub struct Song {
-    pub id: String,
+    pub id: UUID,
     pub name: String,
-    pub album_id: String,
+    pub album_id: UUID,
     pub track_number: i32,
     pub disk_number: i32,
+
     pub duration: i32,
-    pub time_added: i32,
+    pub time_added: NaiveDateTime,
 
     pub play_count: i32,
-    pub last_played: Option<i32>,
+    pub last_played: Option<NaiveDateTime>,
     pub liked: bool,
+    pub path: PathWrapper,
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: &str) -> FieldResult<Self> {
+    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
-        Ok(song::table.filter(song::id.eq(id)).first::<Self>(conn)?)
+        song::table.filter(song::id.eq(id)).first::<Self>(conn)
     }
 
-    pub fn gql_id(&self) -> ID {
-        ID::from(self.id.to_owned())
+    pub fn stream_url(&self) -> String {
+        format!("/files/music/{}/raw", self.id.to_string())
     }
 
-    pub fn stream_url(&self) -> FieldResult<String> {
-        NotImplementedErr()
+    pub fn album(&self, context: &GraphQLContext) -> QueryResult<Album> {
+        Album::from_id(context, &self.album_id)
     }
 
-    pub fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
-        Album::from_id(context, self.album_id.as_str())
-    }
-
-    pub fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
+    pub fn artists(&self, context: &GraphQLContext) -> QueryResult<Vec<Artist>> {
         let conn = context.connection();
         Ok(song_artist::table
-            .filter(song_artist::song_id.eq(self.id.as_str()))
+            .filter(song_artist::song_id.eq(&self.id))
             .inner_join(artist::table)
             .select(artist::all_columns)
             .load::<Artist>(conn)?)
@@ -51,14 +50,14 @@ impl Song {
 
     pub fn stats(&self) -> UserStats {
         UserStats {
-            id: format!("stats:{}", self.id),
+            id: format!("stats:{}", self.id.to_string()),
             last_played: self.last_played,
         }
     }
 
     pub fn song_stats(&self) -> SongUserStats {
         SongUserStats {
-            id: format!("song_stats:{}", self.id),
+            id: format!("song_stats:{}", self.id.to_string()),
             play_count: self.play_count,
             liked: self.liked,
         }
@@ -66,16 +65,16 @@ impl Song {
 }
 
 graphql_object!(Song: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
+    field id() -> &UUID {
+        &self.id
     }
 
-    field stream_url() -> FieldResult<String> {
+    field stream_url() -> String {
         self.stream_url()
     }
 
     field track_number() -> i32 {
-        self.track_number
+        self.track_number as i32
     }
 
     field disk_number() -> i32 {
@@ -87,11 +86,11 @@ graphql_object!(Song: GraphQLContext |&self| {
     }
 
     field album(&executor) -> FieldResult<Album> {
-        self.album(executor.context())
+        Ok(self.album(executor.context())?)
     }
 
     field artists(&executor) -> FieldResult<Vec<Artist>> {
-        self.artists(executor.context())
+        Ok(self.artists(executor.context())?)
     }
 
     field stats() -> UserStats {
@@ -106,7 +105,7 @@ graphql_object!(Song: GraphQLContext |&self| {
         self.duration
     }
 
-    field time_added() -> i32 {
-        self.time_added
+    field time_added() -> TimeWrapper {
+        self.time_added.into()
     }
 });

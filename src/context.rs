@@ -1,13 +1,13 @@
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-use diesel::sqlite::SqliteConnection;
-use dotenv;
 use iron::prelude::*;
 use iron::typemap::Key;
-use juniper;
 use persistent::Read;
-use std::error::Error;
+
+use diesel::sqlite::SqliteConnection;
+use juniper;
+
 use std::ops::Deref;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
@@ -24,12 +24,17 @@ impl Key for ContextKey {
     type Value = IronContext;
 }
 
+pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
+    let manager = ConnectionManager::new(database_url);
+    r2d2::Pool::new(manager)
+}
+
 impl IronContext {
-    pub fn init_middleware() -> Result<(Read<ContextKey>, Read<ContextKey>), Box<Error>> {
-        let database_url = dotenv::var("DATABASE_URL")?;
-        let manager = ConnectionManager::new(database_url);
-        let pool: Pool = r2d2::Pool::new(manager)?;
-        let context = IronContext { pool: pool };
+    pub fn init_middleware(
+        database_url: &str,
+    ) -> Result<(Read<ContextKey>, Read<ContextKey>), r2d2::Error> {
+        let pool = init_pool(database_url)?;
+        let context = IronContext { pool };
 
         Ok(Read::<ContextKey>::both(context))
     }
