@@ -6,7 +6,6 @@ use juniper::FieldResult;
 use context::GraphQLContext;
 use diesel::dsl;
 use models::*;
-use diesel::associations::HasTable;
 
 #[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "album"]

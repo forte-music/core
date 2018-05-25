@@ -38,6 +38,24 @@ impl Artist {
     }
 }
 
+impl GetConnection<artist::table> for Artist {
+    type Name = artist::name;
+    type TimeAdded = artist::time_added;
+    type LastPlayed = artist::last_played;
+
+    fn name() -> Self::Name {
+        artist::name
+    }
+
+    fn time_added() -> Self::TimeAdded {
+        artist::time_added
+    }
+
+    fn last_played() -> Self::LastPlayed {
+        artist::last_played
+    }
+}
+
 graphql_object!(Artist: GraphQLContext |&self| {
     field id() -> &UUID {
         &self.id

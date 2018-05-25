@@ -64,6 +64,24 @@ impl Song {
     }
 }
 
+impl GetConnection<song::table> for Song {
+    type Name = song::name;
+    type TimeAdded = song::time_added;
+    type LastPlayed = song::last_played;
+
+    fn name() -> Self::Name {
+        song::name
+    }
+
+    fn time_added() -> Self::TimeAdded {
+        song::time_added
+    }
+
+    fn last_played() -> Self::LastPlayed {
+        song::last_played
+    }
+}
+
 graphql_object!(Song: GraphQLContext |&self| {
     field id() -> &UUID {
         &self.id

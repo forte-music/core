@@ -5,7 +5,6 @@ use diesel::expression::NonAggregate;
 use diesel::prelude::*;
 use diesel::query_builder::QueryFragment;
 use diesel::sql_types::HasSqlType;
-use diesel::sql_types::Integer;
 use diesel::sql_types::Nullable;
 use diesel::sql_types::Text;
 use diesel::sqlite::Sqlite;
