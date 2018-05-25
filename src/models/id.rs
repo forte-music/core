@@ -17,7 +17,7 @@ use juniper::InputValue;
 use juniper::Value;
 
 #[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
-#[sql_type="Binary"]
+#[sql_type = "Binary"]
 pub struct UUID(Uuid);
 
 impl UUID {

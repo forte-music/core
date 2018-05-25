@@ -9,13 +9,13 @@ use diesel::sql_types::Text;
 use std::io::Write;
 
 use diesel::sqlite::Sqlite;
+use diesel::types::ToSql;
 use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
-use diesel::types::ToSql;
 
 #[derive(Debug, AsExpression, FromSqlRow, Clone)]
-#[sql_type="Text"]
+#[sql_type = "Text"]
 pub struct PathWrapper(PathBuf);
 
 impl Deref for PathWrapper {
