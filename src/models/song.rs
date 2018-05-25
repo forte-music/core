@@ -31,8 +31,12 @@ impl Song {
         song::table.filter(song::id.eq(id)).first::<Self>(conn)
     }
 
+    pub fn get_stream_url_for_id<T: AsRef<str>>(id: T) -> String {
+        format!("/files/music/{}/raw", id)
+    }
+
     pub fn stream_url(&self) -> String {
-        format!("/files/music/{}/raw", self.id.to_string())
+        Song::get_stream_url_for_id(self.id.to_string())
     }
 
     pub fn album(&self, context: &GraphQLContext) -> QueryResult<Album> {

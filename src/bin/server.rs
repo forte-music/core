@@ -48,7 +48,7 @@ pub fn serve(pool: context::Pool, host: String) {
     let graphiql_handler = GraphiQLHandler::new("/graphql");
     router.any("/", graphiql_handler, "graphiql");
 
-    router.get("/files/music/:id/raw", raw_handler, "raw");
+    router.get(Song::get_stream_url_for_id(":id"), raw_handler, "audio_stream");
 
     // Setup Context Middleware
     let mut chain = Chain::new(router);
