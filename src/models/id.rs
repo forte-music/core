@@ -46,24 +46,29 @@ fn number_to_arr(value: u64) -> [u8; 16] {
     bytes
 }
 
-#[test]
-fn test_number_to_arr_zero() {
-    assert_eq!(number_to_arr(0), [0; 16]);
-}
+#[cfg(test)]
+mod test {
+    use super::number_to_arr;
 
-#[test]
-fn test_number_to_arr_mid() {
-    assert_eq!(
-        number_to_arr(270),
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14]
-    )
-}
+    #[test]
+    fn test_number_to_arr_zero() {
+        assert_eq!(number_to_arr(0), [0; 16]);
+    }
 
-#[test]
-fn test_number_to_arr_max() {
-    let arr = number_to_arr(u64::max_value());
-    assert_eq!(arr[8..16], [u8::max_value(); 8]);
-    assert_eq!(arr[0..8], [0; 8]);
+    #[test]
+    fn test_number_to_arr_mid() {
+        assert_eq!(
+            number_to_arr(270),
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14]
+        )
+    }
+
+    #[test]
+    fn test_number_to_arr_max() {
+        let arr = number_to_arr(u64::max_value());
+        assert_eq!(arr[8..16], [u8::max_value(); 8]);
+        assert_eq!(arr[0..8], [0; 8]);
+    }
 }
 
 impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for UUID {
