@@ -70,9 +70,8 @@ fn create_file_for_picture(
     mime_guess::get_mime_extensions(&picture.mime)
         .and_then(|extensions| extensions.get(0))
         .map_or(Ok(None), |extension| {
-            let artwork_path = artwork_dir
-                .with_file_name(album_id.to_string())
-                .with_extension(extension);
+            let mut artwork_path = artwork_dir.to_owned();
+            artwork_path.push(format!("{}.{}", album_id.to_string(), extension));
 
             // Write Picture
             let mut artwork_file = File::create(&artwork_path)?;
