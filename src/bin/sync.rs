@@ -46,15 +46,11 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
         .filter_map(|d| d.ok())
         .filter(|entry| {
             let path = entry.path();
-            let extension = path.extension().and_then(|e| e.to_str());
-            match extension {
-                Some(extension)
-                    if FORMAT_EXTENSIONS.contains(&extension.to_lowercase().as_ref()) =>
-                {
-                    true
-                }
-                _ => false,
-            }
+            path.extension()
+                .and_then(|e| e.to_str())
+                .map_or(false, |extension| {
+                    FORMAT_EXTENSIONS.contains(&extension.to_lowercase().as_ref())
+                })
         })
         .collect();
 
