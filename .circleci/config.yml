@@ -133,7 +133,7 @@ jobs:
           # needed. This is useful when running locally.
           command: |
             wait-for --timeout=3600 localhost:8080 -- echo "Core started"
-            yarn run forte-test-api http://localhost:8080/graphql
+            yarn run forte-test-api http://localhost:8080/graphql --runInBand
 
 workflows:
   version: 2
