@@ -124,7 +124,7 @@ jobs:
           environment:
             DATABASE_URL: ./db.sqlite
           background: true
-          command: cargo run -- serve --app-dir .
+          command: cargo run -- --app-dir . serve
 
       - run:
           name: Run Tests
