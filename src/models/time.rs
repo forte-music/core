@@ -18,13 +18,12 @@ impl From<NaiveDateTime> for TimeWrapper {
     }
 }
 
-graphql_scalar!(TimeWrapper as "Int" {
+graphql_scalar!(TimeWrapper as "Time" {
     resolve(&self) -> Value {
         Value::int(self.timestamp() as i32)
     }
 
-    from_input_value(v: &InputValue) -> Option<TimeWrapper> {
+    from_input_value(_v: &InputValue) -> Option<TimeWrapper> {
         None
     }
-
 });

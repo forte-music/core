@@ -60,6 +60,24 @@ impl Playlist {
     }
 }
 
+impl GetConnection<playlist::table> for Playlist {
+    type Name = playlist::name;
+    type TimeAdded = playlist::time_added;
+    type LastPlayed = playlist::last_played;
+
+    fn name() -> Self::Name {
+        playlist::name
+    }
+
+    fn time_added() -> Self::TimeAdded {
+        playlist::time_added
+    }
+
+    fn last_played() -> Self::LastPlayed {
+        playlist::last_played
+    }
+}
+
 pub struct PlaylistItem {
     pub id: UUID,
     pub rank: String,
