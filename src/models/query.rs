@@ -3,8 +3,6 @@ use diesel::QueryResult;
 use juniper::FieldResult;
 use models::*;
 
-use models::Connection;
-
 pub struct Query;
 
 impl Query {
