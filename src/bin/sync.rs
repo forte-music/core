@@ -56,13 +56,9 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
     let bar = ProgressBar::new(entries.len() as u64);
     bar.set_style(
         ProgressStyle::default_bar()
-            .template(
-                "{prefix}[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})\n {msg}",
-            )
+            .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} ({eta})\n {msg}")
             .progress_chars("#>-"),
     );
-
-    let mut prefix = String::new();
 
     bar.wrap_iter(entries.iter()).for_each(|dir_entry| {
         let path = dir_entry.path();
@@ -72,8 +68,7 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
         bar.set_message(message.as_str());
 
         if let Err(e) = handle_entry(path, artwork_directory, &conn) {
-            prefix = prefix.clone() + &format!("Error importing '{}': {}\n", path_string, e);
-            bar.set_prefix(prefix.as_str())
+            bar.println(format!("Error importing '{}': {}", path_string, e));
         }
     });
 
