@@ -36,11 +36,7 @@ error_chain! {
 ///
 /// 1. The artwork embedded in the file's tags.
 ///
-/// 2. PNG and JPEG files in the same directory as the song named (case insensitive) one of:
-///     * folder
-///     * cover
-///     * front
-///     * thumb
+/// 2. PNG and JPEG files in the same directory as the song.
 ///
 /// Artwork must be a square image. The artwork with the highest resolution is returned.
 ///
@@ -137,8 +133,7 @@ impl<'a> ImageInfo<'a> {
     }
 }
 
-/// Finds PNGs and JPEGs which are squares in the directory at `path` and have a name like folder,
-/// cover or front.
+/// Finds PNGs and JPEGs which are squares in the directory at `path`.
 fn find_covers_in_path(path: &Path) -> Result<Vec<ImageInfo<'static>>> {
     let images = path.read_dir()?
         .filter_map(|e| e.ok())
@@ -149,12 +144,9 @@ fn find_covers_in_path(path: &Path) -> Result<Vec<ImageInfo<'static>>> {
             };
 
             let extension = path.extension()?.to_string_lossy().to_lowercase();
-            let file_name = path.file_stem().unwrap().to_string_lossy().to_lowercase();
 
-            if ["folder", "cover", "front", "thumb"].contains(&file_name.as_str())
-                && ["jpg", "jpe", "jpeg", "png"].contains(&extension.as_str())
-            {
-             return Some(path);
+            if ["jpg", "jpe", "jpeg", "png"].contains(&extension.as_str()) {
+                return Some(path);
             }
 
             None
