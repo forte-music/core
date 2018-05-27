@@ -107,6 +107,13 @@ jobs:
             DATABASE_URL: ./db.sqlite
           command: diesel migration run
 
+      - run:
+          name: Check src/database.rs
+          command: |
+            diesel print-schema > src/database.expected.rs
+            rustfmt src/database.expected.rs
+            diff src/database{,.expected}.rs || exit 1
+
       - restore_cache: *restore_cargo_cache
 
       - attach_workspace:
