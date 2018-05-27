@@ -56,7 +56,7 @@ fn convert_option<T>(r: Option<T>, status: status::Status) -> IronResult<T> {
 
 fn song_stream_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
-    let ref id = convert_option(
+    let id = convert_option(
         req.extensions.get::<Router>().unwrap().find("id"),
         status::BadRequest,
     )?;
@@ -69,7 +69,7 @@ fn song_stream_handler(req: &mut Request) -> IronResult<Response> {
 
 fn artwork_stream_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
-    let ref id = convert_option(
+    let id = convert_option(
         req.extensions.get::<Router>().unwrap().find("id"),
         status::BadRequest,
     )?;
