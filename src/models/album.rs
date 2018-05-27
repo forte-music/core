@@ -31,9 +31,10 @@ impl Album {
     }
 
     pub fn artwork_url(&self) -> Option<String> {
-        self.artwork_path
-            .as_ref()
-            .map(|_| Album::get_artwork_url(&self.id.to_string()))
+        match self.artwork_path {
+            Some(..) => Some(Album::get_artwork_url(&self.id.to_string())),
+            _ => None,
+        }
     }
 
     pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
