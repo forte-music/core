@@ -85,6 +85,9 @@ jobs:
     steps:
       - checkout
 
+      - attach_workspace:
+          at: ~/project
+
       - restore_cache: *restore_yarn_cache
 
       - run:
@@ -109,15 +112,12 @@ jobs:
             rustfmt src/database.expected.rs
             diff src/database{,.expected}.rs || exit 1
 
-      - attach_workspace:
-          at: /project
-
       - run:
           name: Install Fixtures
           environment:
             DATABASE_URL: ../db.sqlite
           working_directory: fixture_setup
-          command: ./fixture_setup/target/debug/fixture_setup
+          command: ./target/debug/fixture_setup
 
       - run:
           name: Start Core
