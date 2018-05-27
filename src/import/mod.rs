@@ -1,5 +1,6 @@
 mod album;
 mod artist;
+pub mod artwork;
 pub mod errors;
 mod song;
 

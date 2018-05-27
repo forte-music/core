@@ -1,7 +1,13 @@
+use super::artwork;
+
 error_chain! {
     foreign_links {
         Diesel(::diesel::result::Error);
         Io(::std::io::Error);
+    }
+
+    links {
+        Artwork(artwork::Error, artwork::ErrorKind);
     }
 
     errors {
