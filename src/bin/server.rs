@@ -56,10 +56,7 @@ fn convert_option<T>(r: Option<T>, status: status::Status) -> IronResult<T> {
 
 fn song_stream_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
-    let id = convert_option(
-        req.extensions.get::<Router>().unwrap().find("id"),
-        status::BadRequest,
-    )?;
+    let id = req.extensions.get::<Router>().unwrap().find("id").unwrap();
     let uuid = convert_parse_error(UUID::parse_str(id))?;
     let song = convert_query_error(Song::from_id(&ctx, &uuid))?;
     let path: &Path = song.path.deref();
@@ -69,10 +66,7 @@ fn song_stream_handler(req: &mut Request) -> IronResult<Response> {
 
 fn artwork_stream_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
-    let id = convert_option(
-        req.extensions.get::<Router>().unwrap().find("id"),
-        status::BadRequest,
-    )?;
+    let id = req.extensions.get::<Router>().unwrap().find("id").unwrap();
     let uuid = convert_parse_error(UUID::parse_str(id))?;
 
     let album = convert_query_error(Album::from_id(&ctx, &uuid))?;
