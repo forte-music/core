@@ -23,18 +23,6 @@ use self::logger::Logger;
 use self::router::Router;
 
 use diesel::result::QueryResult;
-use std::ops::Deref;
-use std::path::Path;
-
-mod errors {
-    error_chain! {
-        errors {
-            EmptyOption {
-                description("the option was empty when it was expected to be non empty")
-            }
-        }
-    }
-}
 
 fn convert_parse_error(r: Result<UUID, uuid::ParseError>) -> IronResult<UUID> {
     r.map_err(|err| IronError::new(err, ("invalid uuid", status::BadRequest)))
@@ -47,21 +35,13 @@ fn convert_query_error<T>(r: QueryResult<T>) -> IronResult<T> {
     })
 }
 
-fn convert_option<T>(r: Option<T>, status: status::Status) -> IronResult<T> {
-    r.ok_or(IronError::new(
-        errors::Error::from(errors::ErrorKind::EmptyOption),
-        status,
-    ))
-}
-
 fn song_stream_handler(req: &mut Request) -> IronResult<Response> {
     let ctx = GraphQLContext::from_request(req);
     let id = req.extensions.get::<Router>().unwrap().find("id").unwrap();
     let uuid = convert_parse_error(UUID::parse_str(id))?;
     let song = convert_query_error(Song::from_id(&ctx, &uuid))?;
-    let path: &Path = song.path.deref();
 
-    Ok(Response::with((status::Ok, path)))
+    Ok(Response::with((status::Ok, song.path.as_path())))
 }
 
 fn artwork_stream_handler(req: &mut Request) -> IronResult<Response> {
@@ -70,10 +50,12 @@ fn artwork_stream_handler(req: &mut Request) -> IronResult<Response> {
     let uuid = convert_parse_error(UUID::parse_str(id))?;
 
     let album = convert_query_error(Album::from_id(&ctx, &uuid))?;
-    let artwork_path_wrapper = convert_option(album.artwork_path, status::NotFound)?;
-    let artwork_path: &Path = artwork_path_wrapper.deref();
+    let response = match album.artwork_path {
+        Some(path) => Response::with((status::Ok, path.as_path())),
+        None => Response::with(status::NotFound),
+    };
 
-    Ok(Response::with((status::Ok, artwork_path)))
+    Ok(response)
 }
 
 pub fn serve(pool: context::Pool, host: &str) {

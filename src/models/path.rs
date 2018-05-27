@@ -18,6 +18,12 @@ use std::path::PathBuf;
 #[sql_type = "Text"]
 pub struct PathWrapper(PathBuf);
 
+impl PathWrapper {
+    pub fn as_path(&self) -> &Path {
+        self.0.as_ref()
+    }
+}
+
 impl Deref for PathWrapper {
     type Target = PathBuf;
 
