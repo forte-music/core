@@ -170,8 +170,7 @@ fn find_best_artwork<'a>(path: &Path, props: &'a SongProperties) -> Result<Optio
 
     let mut linked_artwork = find_covers_in_path(path.parent().unwrap())?;
 
-    let mut all_artwork: Vec<ImageInfo> = vec![];
-    all_artwork.append(&mut linked_artwork);
+    let mut all_artwork = linked_artwork;
     if let Some(embedded_artwork) = embedded_artwork {
         all_artwork.push(embedded_artwork);
     }
