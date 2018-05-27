@@ -1,40 +1,28 @@
-extern crate dotenv;
-extern crate forte_core;
 extern crate indicatif;
-extern crate r2d2;
-extern crate taglib2_sys;
-extern crate walkdir;
 
-#[macro_use]
-extern crate error_chain;
-extern crate diesel;
-
-use std::env;
-use std::ops::Deref;
-
-use dotenv::dotenv;
-use walkdir::DirEntry;
-use walkdir::WalkDir;
+use std::path::Path;
 
 use forte_core::context;
 use forte_core::import;
 
-use indicatif::ProgressBar;
-use indicatif::ProgressStyle;
-
 use diesel::sqlite::SqliteConnection;
-use std::path::Path;
+
+use walkdir::DirEntry;
+use walkdir::WalkDir;
+
 use taglib2_sys::SongProperties;
+
+use self::indicatif::ProgressBar;
+use self::indicatif::ProgressStyle;
 
 error_chain! {
     links {
         Taglib(::taglib2_sys::Error, ::taglib2_sys::ErrorKind);
-        Import(::import::errors::Error, ::import::errors::ErrorKind);
+        Import(import::errors::Error, import::errors::ErrorKind);
     }
 
     foreign_links {
         R2d2(::r2d2::Error);
-        VarError(::std::env::VarError);
         WalkdirError(::walkdir::Error);
     }
 
@@ -45,37 +33,23 @@ error_chain! {
     }
 }
 
-fn main() {
-    start().unwrap();
-}
-
 const FORMAT_EXTENSIONS: [&str; 3] = ["flac", "mp3", "m4a"];
 
-fn start() -> Result<()> {
-    dotenv().ok();
+pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Result<()> {
+    let conn = pool.get()?;
 
-    let args: Vec<String> = env::args().skip(1).collect();
-    if args.len() != 1 {
-        return Err("invalid number of arguments; there should only be one".into());
-    }
-
-    let database_url = env::var("DATABASE_URL")?;
-    let pool = context::init_pool(&database_url)?;
-    let connection = pool.get()?;
-    let conn = connection.deref();
-
-    let path = args.get(0).unwrap();
     let entries: Vec<DirEntry> = WalkDir::new(path)
         .follow_links(true)
         .into_iter()
         .filter_map(|d| d.ok())
         .filter(|entry| {
-            let path = entry.path();
-            let extension = path.extension().and_then(|e| e.to_str());
-            match extension {
-                Some(extension) if FORMAT_EXTENSIONS.contains(&extension) => true,
-                _ => false,
-            }
+            entry
+                .path()
+                .extension()
+                .and_then(|e| e.to_str())
+                .map_or(false, |extension| {
+                    FORMAT_EXTENSIONS.contains(&extension.to_lowercase().as_ref())
+                })
         })
         .collect();
 
@@ -97,7 +71,7 @@ fn start() -> Result<()> {
         let message = format!("Importing {}", path_string);
         bar.set_message(message.as_str());
 
-        if let Err(e) = handle_entry(path, conn) {
+        if let Err(e) = handle_entry(path, artwork_directory, &conn) {
             prefix = prefix.clone() + &format!("Error importing '{}': {}\n", path_string, e);
             bar.set_prefix(prefix.as_str())
         }
@@ -108,11 +82,11 @@ fn start() -> Result<()> {
     Ok(())
 }
 
-fn handle_entry(path: &Path, conn: &SqliteConnection) -> Result<()> {
+fn handle_entry(path: &Path, artwork_directory: &Path, conn: &SqliteConnection) -> Result<()> {
     let props = SongProperties::read(path)?;
     let props = props.ok_or(ErrorKind::MissingSongProperties)?;
 
-    import::add_song(path, props, conn)?;
+    import::add_song(path, artwork_directory, props, conn)?;
 
     Ok(())
 }

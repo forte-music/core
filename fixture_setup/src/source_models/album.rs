@@ -18,7 +18,7 @@ impl Into<Album> for AlbumSource {
     fn into(self) -> Album {
         Album {
             id: self.id.into(),
-            artwork_url: self.artwork_url,
+            artwork_path: None,
             name: self.name,
             artist_id: self.artist_id.into(),
             release_year: self.release_year,

@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate image;
 extern crate iron;
 extern crate juniper_iron;
 extern crate persistent;
@@ -12,6 +13,7 @@ extern crate diesel;
 #[macro_use]
 extern crate error_chain;
 
+extern crate mime_guess;
 extern crate taglib2_sys;
 
 pub mod context;

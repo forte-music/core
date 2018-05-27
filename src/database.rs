@@ -1,7 +1,7 @@
 table! {
     album (id) {
         id -> Binary,
-        artwork_url -> Nullable<Text>,
+        artwork_path -> Nullable<Text>,
         name -> Text,
         artist_id -> Binary,
         release_year -> Nullable<Integer>,

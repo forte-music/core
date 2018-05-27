@@ -11,7 +11,7 @@ use models::*;
 #[table_name = "album"]
 pub struct Album {
     pub id: UUID,
-    pub artwork_url: Option<String>,
+    pub artwork_path: Option<PathWrapper>,
     pub name: String,
     pub artist_id: UUID,
     pub release_year: Option<i32>,
@@ -24,6 +24,17 @@ impl Album {
     pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
         let conn = context.connection();
         album::table.filter(album::id.eq(id)).first::<Self>(conn)
+    }
+
+    pub fn get_artwork_url(id: &str) -> String {
+        format!("/files/artwork/{}/raw", id)
+    }
+
+    pub fn artwork_url(&self) -> Option<String> {
+        match self.artwork_path {
+            Some(..) => Some(Album::get_artwork_url(&self.id.to_string())),
+            _ => None,
+        }
     }
 
     pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
@@ -81,8 +92,8 @@ graphql_object!(Album: GraphQLContext |&self| {
         &self.id
     }
 
-    field artwork_url() -> &Option<String> {
-        &self.artwork_url
+    field artwork_url() -> Option<String> {
+        self.artwork_url()
     }
 
     field name() -> &str {

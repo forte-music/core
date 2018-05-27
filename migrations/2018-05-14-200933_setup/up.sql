@@ -1,6 +1,6 @@
 CREATE TABLE album (
   id BINARY(128) PRIMARY KEY NOT NULL,
-  artwork_url TEXT,
+  artwork_path TEXT,
   name TEXT NOT NULL,
   artist_id BINARY(128) NOT NULL REFERENCES artist(id),
   release_year INTEGER,

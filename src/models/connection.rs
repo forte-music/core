@@ -197,7 +197,7 @@ where
             .first(context.connection())?;
 
         // The exclusive upper bound of the window into the data.
-        let upper_bound = lower_bound + first;
+        let upper_bound = lower_bound + if first < 0 { count } else { first };
 
         let edges: Vec<Edge<Self>> = results
             .into_iter()

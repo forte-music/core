@@ -69,14 +69,11 @@ jobs:
 
       - save_cache: *save_cargo_cache
 
-      # The workspace stores some of the same information the cache does, but
-      # the workflow is shared across a workflow and updated on every build
-      # while the cache only updates when a lock file changes.
       - persist_to_workspace:
           root: .
           paths:
-            - target
-            - fixture_setup/target
+            - target/debug/forte
+            - fixture_setup/target/debug/fixture_setup
 
   integration-test:
     docker:
@@ -88,9 +85,8 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Checkout Git Submodules
-          command: git submodule update --init
+      - attach_workspace:
+          at: ~/project
 
       - restore_cache: *restore_yarn_cache
 
@@ -116,33 +112,26 @@ jobs:
             rustfmt src/database.expected.rs
             diff src/database{,.expected}.rs || exit 1
 
-      - restore_cache: *restore_cargo_cache
-
-      - attach_workspace:
-          at: /project
-
       - run:
           name: Install Fixtures
           environment:
             DATABASE_URL: ../db.sqlite
           working_directory: fixture_setup
-          command: cargo run
+          command: ./target/debug/fixture_setup
 
       - run:
           name: Start Core
           environment:
             DATABASE_URL: ./db.sqlite
           background: true
-          command: cargo run --bin forte-server
+          command: ./target/debug/forte --app-dir . serve
 
       - run:
           name: Run Tests
           working_directory: fixture_setup
-          # There is a timeout so that the code can be compiled from scratch if
-          # needed. This is useful when running locally.
           command: |
             wait-for --timeout=3600 localhost:8080 -- echo "Core started"
-            yarn run forte-test-api http://localhost:8080/graphql
+            yarn run forte-test-api http://localhost:8080/graphql --runInBand
 
 workflows:
   version: 2
