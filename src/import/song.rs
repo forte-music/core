@@ -44,16 +44,7 @@ pub fn add_song(
             .ok_or(errors::ErrorKind::NoArtistError)?,
     );
 
-    let album_name = props.album.as_ref().ok_or(errors::ErrorKind::NoAlbumError)?;
-    let album = add_or_get_album(
-        path,
-        artwork_directory,
-        &props,
-        album_name,
-        album_artist.id,
-        props.year,
-        conn,
-    )?;
+    let album = add_or_get_album(path, artwork_directory, &props, album_artist.id, conn)?;
 
     let song_id = UUID::new();
     let song = Song {

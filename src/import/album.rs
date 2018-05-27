@@ -15,11 +15,11 @@ pub fn add_or_get_album(
     path: &Path,
     artwork_dir: &Path,
     props: &SongProperties,
-    name: &str,
     artist_id: UUID,
-    release_year: Option<u32>,
     conn: &SqliteConnection,
 ) -> errors::Result<Album> {
+    let name = props.album.as_ref().ok_or(errors::ErrorKind::NoAlbumError)?;
+
     let album: Option<Album> = album::table
         .filter(album::name.eq(name))
         .filter(album::artist_id.eq(artist_id))
@@ -40,7 +40,7 @@ pub fn add_or_get_album(
         artwork_path: artwork_path.map(|p| p.into()),
         name: name.to_string(),
         artist_id,
-        release_year: release_year.map(|year| year as i32),
+        release_year: props.year.map(|year| year as i32),
         time_added: Utc::now().naive_utc(),
         last_played: None,
     };
