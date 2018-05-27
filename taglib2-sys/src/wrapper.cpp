@@ -2,6 +2,18 @@
 #include "../taglib/taglib/tag.h"
 #include "../taglib/taglib/fileref.h"
 #include "../taglib/taglib/toolkit/tpicturemap.h"
+#include "../taglib/taglib/toolkit/tdebuglistener.cpp"
+
+/// A debug listener which does nothing. It is used to mute debug output.
+class NopListener : public DebugListener {
+public:
+    virtual void printMessage(const String &msg) {
+        (void)msg;
+        // Do nothing.
+    }
+};
+
+NopListener nopListener;
 
 char *to_cstr(TagLib::String str) {
     return strdup(str.toCString(true));
@@ -45,6 +57,7 @@ void read_artwork(SongProperties *song, TagLib::PictureMap &map) {
 
 extern "C" {
     SongProperties *song_properties(const char *fileName) {
+        TagLib::setDebugListener(&nopListener);
         TagLib::FileRef file((TagLib::FileName) fileName);
 
         // Check if the file was opened
