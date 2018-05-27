@@ -112,7 +112,7 @@ fn run() -> Result<()> {
     embedded_migrations::run(pool.get()?.deref())?;
 
     match opt.command {
-        Command::Serve { host } => Ok(server::serve(pool, host)),
+        Command::Serve { host } => Ok(server::serve(pool, &host)),
         Command::Sync { directory } => {
             let mut artwork_directory = app_dir.clone();
             artwork_directory.push("artwork");

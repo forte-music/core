@@ -82,7 +82,7 @@ fn artwork_stream_handler(req: &mut Request) -> IronResult<Response> {
     Ok(Response::with((status::Ok, artwork_path)))
 }
 
-pub fn serve(pool: context::Pool, host: String) {
+pub fn serve(pool: context::Pool, host: &str) {
     let mut router = Router::new();
 
     // Register Routes
