@@ -109,6 +109,8 @@ jobs:
 
       - run:
           name: Check src/database.rs
+          environment:
+            DATABASE_URL: ./db.sqlite
           command: |
             diesel print-schema > src/database.expected.rs
             rustfmt src/database.expected.rs
