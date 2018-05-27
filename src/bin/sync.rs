@@ -1,6 +1,5 @@
 extern crate indicatif;
 
-use std::ops::Deref;
 use std::path::Path;
 
 use forte_core::context;
