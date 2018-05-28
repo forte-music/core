@@ -42,19 +42,3 @@ CREATE TABLE song (
 
   UNIQUE(track_number, disk_number, album_id)
 );
-
-CREATE TABLE playlist (
-  id BINARY(128) PRIMARY KEY NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  time_added TIMESTAMP NOT NULL,
-
-  last_played TIMESTAMP
-);
-
-CREATE TABLE playlist_item (
-  id BINARY(128) PRIMARY KEY NOT NULL,
-  playlist_id BINARY(128) NOT NULL REFERENCES playlist(id),
-  rank TEXT NOT NULL,
-  song_id BINARY(128) NOT NULL REFERENCES song(id)
-);
