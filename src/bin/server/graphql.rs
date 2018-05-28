@@ -13,11 +13,12 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Json;
 use actix_web::State;
+use actix_web::error;
 
 use serde_json;
 use std::sync::Arc;
 
-use futures::Future;
+use futures::{self, Future};
 
 mod errors {
     error_chain! {
@@ -49,7 +50,7 @@ impl AppState {
 
 struct ResolveMessage {
     request: GraphQLRequest,
-    connection_pool: context::Pool,
+    context: GraphQLContext,
 }
 
 impl Message for ResolveMessage {
@@ -74,8 +75,7 @@ impl Handler<ResolveMessage> for GraphQLExecutor {
     type Result = Result<(bool, String), errors::Error>;
 
     fn handle(&mut self, request: ResolveMessage, _ctx: &mut Self::Context) -> Self::Result {
-        let context = GraphQLContext::new(request.connection_pool.get()?);
-        let response = request.request.execute(&self.schema, &context);
+        let response = request.request.execute(&self.schema, &request.context);
         let text = serde_json::to_string(&response)?;
 
         Ok((response.is_ok(), text))
@@ -90,7 +90,10 @@ pub fn graphql(
         .executor
         .send(ResolveMessage {
             request: request.0,
-            connection_pool: state.connection_pool.clone(),
+            context: match state.build_context() {
+                Ok(context) => context,
+                Err(e) => return Box::new(futures::failed(error::ErrorInternalServerError(e))),
+            },
         })
         .from_err()
         .and_then(|resp| match resp {
