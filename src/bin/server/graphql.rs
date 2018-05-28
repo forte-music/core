@@ -18,7 +18,8 @@ use actix_web::error;
 use serde_json;
 use std::sync::Arc;
 
-use futures::{self, Future};
+use futures;
+use futures::Future;
 
 mod errors {
     error_chain! {
@@ -86,16 +87,22 @@ pub fn graphql(
     state: State<AppState>,
     request: Json<GraphQLRequest>,
 ) -> FutureResponse<HttpResponse> {
-    state
-        .executor
-        .send(ResolveMessage {
-            request: request.0,
-            context: match state.build_context() {
-                Ok(context) => context,
-                Err(e) => return Box::new(futures::failed(error::ErrorInternalServerError(e))),
-            },
+    let context_future = futures::done(
+        state
+            .build_context()
+            .map_err(error::ErrorInternalServerError),
+    );
+
+    context_future
+        .and_then(move |context| {
+            state
+                .executor
+                .send(ResolveMessage {
+                    request: request.0,
+                    context,
+                })
+                .from_err()
         })
-        .from_err()
         .and_then(|resp| match resp {
             Ok((true, body)) => Ok(HttpResponse::Ok()
                 .content_type("application/json")
