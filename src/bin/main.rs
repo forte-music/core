@@ -14,6 +14,14 @@ extern crate r2d2;
 extern crate taglib2_sys;
 extern crate walkdir;
 
+extern crate actix;
+extern crate actix_web;
+extern crate futures;
+extern crate juniper;
+extern crate serde;
+extern crate serde_json;
+extern crate uuid;
+
 pub mod server;
 pub mod sync;
 

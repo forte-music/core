@@ -1,10 +1,6 @@
 extern crate r2d2;
 extern crate r2d2_diesel;
 
-use iron::prelude::*;
-use iron::typemap::Key;
-use persistent::Read;
-
 use diesel::sqlite::SqliteConnection;
 use juniper;
 
@@ -18,22 +14,9 @@ pub struct IronContext {
     pub pool: Pool,
 }
 
-#[derive(Copy, Clone)]
-pub struct ContextKey;
-impl Key for ContextKey {
-    type Value = IronContext;
-}
-
 pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
     let manager = ConnectionManager::new(database_url);
     r2d2::Pool::new(manager)
-}
-
-impl IronContext {
-    pub fn init_middleware(pool: Pool) -> (Read<ContextKey>, Read<ContextKey>) {
-        let context = IronContext { pool };
-        Read::<ContextKey>::both(context)
-    }
 }
 
 pub struct GraphQLContext {
@@ -41,13 +24,12 @@ pub struct GraphQLContext {
 }
 
 impl GraphQLContext {
-    pub fn from_request(request: &mut Request) -> Self {
-        let iron_context = request.get::<Read<ContextKey>>().unwrap();
-        let connection: PooledConnection = iron_context.pool.get().unwrap();
-
+    pub fn new(connection: PooledConnection) -> GraphQLContext {
         GraphQLContext { connection }
     }
+}
 
+impl GraphQLContext {
     pub fn connection(&self) -> &SqliteConnection {
         self.connection.deref()
     }
