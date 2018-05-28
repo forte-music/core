@@ -96,6 +96,12 @@ impl Into<UUID> for u64 {
     }
 }
 
+impl From<Uuid> for UUID {
+    fn from(id: Uuid) -> Self {
+        UUID(id)
+    }
+}
+
 graphql_scalar!(UUID as "ID" {
     resolve(&self) -> Value {
         Value::string(self.to_string())

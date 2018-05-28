@@ -17,6 +17,8 @@ use actix_web::State;
 use serde_json;
 use std::sync::Arc;
 
+use futures::Future;
+
 mod errors {
     error_chain! {
         foreign_links {
@@ -25,8 +27,6 @@ mod errors {
         }
     }
 }
-
-use futures::Future;
 
 pub struct AppState {
     pub executor: Addr<Syn, GraphQLExecutor>,
@@ -39,6 +39,11 @@ impl AppState {
             executor,
             connection_pool,
         }
+    }
+
+    pub fn build_context(&self) -> Result<GraphQLContext, ::r2d2::Error> {
+        let connection = self.connection_pool.get()?;
+        Ok(GraphQLContext::new(connection))
     }
 }
 

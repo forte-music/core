@@ -1,10 +1,10 @@
 extern crate uuid;
 
 mod graphql;
+mod streaming;
 
 use forte_core::context;
-use forte_core::models::create_schema;
-use forte_core::models::song::Song;
+use forte_core::models::{create_schema, Album, Song};
 
 use server::graphql::{graphiql, graphql, AppState, GraphQLExecutor};
 
@@ -26,6 +26,13 @@ pub fn serve(pool: context::Pool, host: &str) {
         App::with_state(AppState::new(addr.clone(), pool.clone()))
             .resource("/graphql", |r| r.method(http::Method::POST).with2(graphql))
             .resource("/", |r| r.method(http::Method::GET).h(graphiql))
+            .resource(&Song::get_stream_url("{id}"), |r| {
+                r.method(http::Method::GET).with2(streaming::song_handler)
+            })
+            .resource(&Album::get_artwork_url("{id}"), |r| {
+                r.method(http::Method::GET)
+                    .with2(streaming::artwork_handler)
+            })
     }).bind(host)
         .unwrap()
         .start();
