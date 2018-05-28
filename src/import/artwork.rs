@@ -168,7 +168,7 @@ fn find_best_artwork<'a>(path: &Path, props: &'a SongProperties) -> Result<Optio
         .as_ref()
         .map_or(Ok(None), ImageInfo::from_embedded)?;
 
-    let mut linked_artwork = find_covers_in_path(path.parent().unwrap())?;
+    let linked_artwork = find_covers_in_path(path.parent().unwrap())?;
 
     let mut all_artwork = linked_artwork;
     if let Some(embedded_artwork) = embedded_artwork {
