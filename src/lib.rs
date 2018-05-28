@@ -1,8 +1,5 @@
 extern crate chrono;
 extern crate image;
-extern crate iron;
-extern crate juniper_iron;
-extern crate persistent;
 
 extern crate uuid;
 

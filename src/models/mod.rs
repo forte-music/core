@@ -29,6 +29,13 @@ pub use chrono::NaiveDateTime;
 
 use juniper::FieldError;
 use juniper::FieldResult;
+use juniper::RootNode;
+
+pub type Schema = RootNode<'static, Query, Mutation>;
+
+pub fn create_schema() -> Schema {
+    Schema::new(Query, Mutation)
+}
 
 pub fn NotImplementedErr<T>() -> FieldResult<T> {
     Err(FieldError::from("Not Implemented"))
