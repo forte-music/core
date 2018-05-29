@@ -9,12 +9,15 @@ use actix_web::fs::NamedFile;
 
 use server::graphql::AppState;
 
+use std::fs::File;
 use std::ops::Deref;
 
 use uuid::Uuid;
 
+use self::super::stream;
 use diesel;
 use forte_core::models::album::Album;
+use server::stream::RangeStream;
 
 fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {
     match err {
@@ -23,14 +26,18 @@ fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {
     }
 }
 
-pub fn song_handler(state: State<AppState>, song_id: Path<Uuid>) -> Result<NamedFile> {
+pub fn song_handler(state: State<AppState>, song_id: Path<Uuid>) -> Result<RangeStream<File>> {
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
 
     let song = Song::from_id(&context, &song_id.into_inner().into()).map_err(convert_diesel_err)?;
 
-    Ok(NamedFile::open(&song.path.deref())?)
+    let file = File::open(&song.path.deref())?;
+    let metadata = file.metadata()?;
+
+    let responder = stream::RangeStream::new(file, metadata.len());
+    Ok(responder)
 }
 
 pub fn artwork_handler(state: State<AppState>, album_id: Path<Uuid>) -> Result<NamedFile> {

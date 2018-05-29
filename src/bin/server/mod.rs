@@ -1,6 +1,7 @@
 extern crate uuid;
 
 mod graphql;
+mod stream;
 mod streaming;
 
 use forte_core::context;

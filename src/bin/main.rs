@@ -16,7 +16,10 @@ extern crate walkdir;
 
 extern crate actix;
 extern crate actix_web;
+extern crate bytes;
+#[macro_use]
 extern crate futures;
+extern crate futures_cpupool;
 extern crate juniper;
 extern crate serde;
 extern crate serde_json;
