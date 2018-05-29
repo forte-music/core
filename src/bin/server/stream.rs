@@ -27,9 +27,9 @@ use std::io::SeekFrom;
 
 /// A wrapper around io.Read + io.Seek which responds to HTTP Range requests.
 ///
-/// Much of it's implementation comes from actix_web's NamedFile. It is far less opinionated, works
-/// and works with streams. Caching isn't implemented, because we think it should be implemented by
-/// wrapping this responder.
+/// Much of it's implementation comes from actix_web's NamedFile. It is less opinionated, works any
+/// io.Read + io.Seek, and supports compression. Caching isn't implemented, because we think it
+/// should be implemented by wrapping this responder.
 ///
 /// It currently only responds to single ranges. The NamedFile implementation in actix also lacks
 /// support. This is due to the lack of a strong multipart writer in rust.
@@ -71,8 +71,6 @@ where
                             self.size
                         ),
                     )
-                    .header("Content-Type", "audio/flac")
-                    .header(header::CONTENT_LENGTH, self.size.to_string())
                     .streaming(ChunkedStreamReader::new(
                         self.reader,
                         range,
@@ -80,8 +78,6 @@ where
                     ))
             }
             Ok(_) => HttpResponse::build(StatusCode::OK)
-                .header("Content-Type", "audio/flac")
-                .header(header::CONTENT_LENGTH, self.size.to_string())
                 .header(header::ACCEPT_RANGES, "bytes")
                 .streaming(ChunkedStreamReader::new(
                     self.reader,
@@ -108,7 +104,8 @@ struct ChunkedStreamReader<R>
 where
     R: Read + Seek + Send + 'static,
 {
-    /// A container for the stream. This is used to manually keep track of the lifetime of the reader.
+    /// A container for the stream. This is used to manually keep track of the lifetime of the
+    /// reader.
     stream_option: Option<R>,
 
     /// A future which resolves once a chunk is read.

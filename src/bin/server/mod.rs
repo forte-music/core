@@ -1,5 +1,6 @@
 extern crate uuid;
 
+mod files;
 mod graphql;
 mod stream;
 mod streaming;

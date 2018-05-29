@@ -17,6 +17,7 @@ extern crate walkdir;
 extern crate actix;
 extern crate actix_web;
 extern crate bytes;
+extern crate mime_guess;
 #[macro_use]
 extern crate futures;
 extern crate futures_cpupool;
