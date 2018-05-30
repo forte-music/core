@@ -2,7 +2,7 @@ version: 2
 
 aliases:
   - &save_cargo_cache
-    key: v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+    key: v4-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
     paths:
       - target
       - fixture_setup/target
@@ -10,9 +10,7 @@ aliases:
 
   - &restore_cargo_cache
     keys:
-      - v3-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
-      - v3-cargo-{{ checksum "Cargo.lock" }}-
-      - v3-cargo-
+      - v4-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
 
   - &save_yarn_cache
     key: yarn-{{ checksum "fixture_setup/yarn.lock" }}
