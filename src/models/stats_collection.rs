@@ -7,7 +7,6 @@ pub struct StatsCollection {
     pub song_id: UUID,
     pub album_id: Option<UUID>,
     pub artist_id: Option<UUID>,
-    pub playlist_id: Option<UUID>,
 }
 
 impl StatsCollection {
@@ -36,17 +35,6 @@ impl StatsCollection {
 
         Ok(None)
     }
-
-    pub fn playlist_stats(&self, context: &GraphQLContext) -> QueryResult<Option<UserStats>> {
-        if let Some(ref playlist_id) = self.playlist_id {
-            let playlist = Playlist::from_id(context, playlist_id)?;
-            let stats = playlist.stats();
-
-            return Ok(Some(stats));
-        }
-
-        Ok(None)
-    }
 }
 
 graphql_object!(StatsCollection: GraphQLContext |&self| {
@@ -60,9 +48,5 @@ graphql_object!(StatsCollection: GraphQLContext |&self| {
 
     field artist_stats(&executor) -> FieldResult<Option<UserStats>> {
         Ok(self.artist_stats(executor.context())?)
-    }
-
-    field playlist_stats(&executor) -> FieldResult<Option<UserStats>> {
-        Ok(self.playlist_stats(executor.context())?)
     }
 });

@@ -10,9 +10,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@forte-music/schema@^0.0.26":
-  version "0.0.26"
-  resolved "https://registry.yarnpkg.com/@forte-music/schema/-/schema-0.0.26.tgz#b469943194aeb179475504033b77f0d12518939b"
+"@forte-music/schema@^0.0.30":
+  version "0.0.30"
+  resolved "https://registry.yarnpkg.com/@forte-music/schema/-/schema-0.0.30.tgz#33ff8e03c7a2495c2da70928e20c23b0fadf08e9"
   dependencies:
     babel-core "^6.26.0"
     babel-jest "^22.1.0"

@@ -44,19 +44,6 @@ impl Query {
     ) -> FieldResult<Connection<Song>> {
         Song::get_connection(context, first, after, sort)
     }
-
-    pub fn playlist(context: &GraphQLContext, id: &UUID) -> QueryResult<Playlist> {
-        Playlist::from_id(context, id)
-    }
-
-    pub fn playlists(
-        context: &GraphQLContext,
-        first: i64,
-        after: Option<String>,
-        sort: Option<SortParams>,
-    ) -> FieldResult<Connection<Playlist>> {
-        Playlist::get_connection(context, first, after, sort)
-    }
 }
 
 graphql_object!(Query: GraphQLContext |&self| {
@@ -97,18 +84,5 @@ graphql_object!(Query: GraphQLContext |&self| {
         sort: Option<SortParams>
     ) -> FieldResult<Connection<Song>> {
         Query::songs(executor.context(), first as i64, after, sort)
-    }
-
-    field playlist(&executor, id: UUID) -> FieldResult<Playlist> {
-        Ok(Query::playlist(executor.context(), &id)?)
-    }
-
-    field playlists(
-        &executor,
-        first = 25: i32,
-        after: Option<String>,
-        sort: Option<SortParams>
-    ) -> FieldResult<Connection<Playlist>> {
-        Query::playlists(executor.context(), first as i64, after, sort)
     }
 });

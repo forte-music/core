@@ -65,10 +65,6 @@ fn load_from_file(path: &Path, conn: &SqliteConnection) -> Result<()> {
         add_all_artists(artists, conn)?;
     };
 
-    if let Some(playlists) = imported.playlists {
-        add_all_playlists(playlists, conn)?;
-    };
-
     if let Some(songs) = imported.songs {
         add_all_songs(songs, conn)?;
     };
@@ -89,15 +85,6 @@ fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result
     for thing in things {
         let thing: Artist = thing.into();
         thing.insert_into(Artist::table()).execute(conn)?;
-    }
-
-    Ok(())
-}
-
-fn add_all_playlists(things: Vec<PlaylistSource>, conn: &SqliteConnection) -> Result<()> {
-    for thing in things {
-        let thing: Playlist = thing.into();
-        thing.insert_into(Playlist::table()).execute(conn)?;
     }
 
     Ok(())
