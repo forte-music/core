@@ -95,7 +95,7 @@ fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result
 
 fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<()> {
     for song_source in things {
-        let artist_ids = song_source.artist_ids.clone().unwrap_or(vec![]);
+        let artist_ids = song_source.artist_ids.clone().unwrap_or_default();
         let song: Song = song_source.into();
         let song_id = song.id.clone();
 
