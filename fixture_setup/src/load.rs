@@ -1,3 +1,4 @@
+use diesel;
 use forte_core::context;
 use std::env;
 use std::fs::File;
@@ -9,6 +10,8 @@ use toml;
 
 use diesel::associations::HasTable;
 use diesel::prelude::*;
+
+use forte_core::database::song_artist;
 
 use errors::*;
 use forte_core::models::*;
@@ -91,9 +94,27 @@ fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result
 }
 
 fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<()> {
-    for thing in things {
-        let thing: Song = thing.into();
-        thing.insert_into(Song::table()).execute(conn)?;
+    for song_source in things {
+        let artist_ids = song_source.artist_ids.clone().unwrap_or_default();
+        let song: Song = song_source.into();
+        let song_id = song.id.clone();
+
+        song.insert_into(Song::table()).execute(conn)?;
+
+        let records: Vec<_> = artist_ids
+            .into_iter()
+            .map(|id| id.into())
+            .map(|artist_id: UUID| {
+                (
+                    song_artist::song_id.eq(song_id),
+                    song_artist::artist_id.eq(artist_id),
+                )
+            })
+            .collect();
+
+        diesel::insert_into(song_artist::table)
+            .values(records)
+            .execute(conn)?;
     }
 
     Ok(())
