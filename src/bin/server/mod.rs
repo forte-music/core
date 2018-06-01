@@ -1,9 +1,11 @@
+extern crate ffmpeg;
 extern crate uuid;
 
 mod files;
 mod graphql;
 mod stream;
 mod streaming;
+mod transcoding;
 
 use forte_core::context;
 use forte_core::models::{create_schema, Album, Song};
@@ -19,6 +21,7 @@ use actix_web::server;
 use std::sync::Arc;
 
 pub fn serve(pool: context::Pool, host: &str) {
+    ffmpeg::init().unwrap();
     let sys = System::new("forte");
 
     let schema = Arc::new(create_schema());
@@ -28,7 +31,10 @@ pub fn serve(pool: context::Pool, host: &str) {
         App::with_state(AppState::new(addr.clone(), pool.clone()))
             .resource("/graphql", |r| r.method(http::Method::POST).with2(graphql))
             .resource("/", |r| r.method(http::Method::GET).h(graphiql))
-            .resource(&Song::get_stream_url("{id}"), |r| {
+            .resource(&Song::get_mp3_stream_url("{id}"), |r| {
+                r.method(http::Method::GET).with2(transcoding::handler)
+            })
+            .resource(&Song::get_raw_stream_url("{id}"), |r| {
                 r.method(http::Method::GET).with2(streaming::song_handler)
             })
             .resource(&Album::get_artwork_url("{id}"), |r| {
