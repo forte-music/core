@@ -77,11 +77,28 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
     Ok(())
 }
 
-fn handle_entry(path: &Path, artwork_directory: &Path, conn: &SqliteConnection) -> Result<()> {
+/// The non-error outcomes of handling a path.
+enum EntryResult {
+    /// Importing the path was skipped because it is already in the database.
+    Skipped,
+
+    /// A new item was imported.
+    Imported,
+}
+
+fn handle_entry(
+    path: &Path,
+    artwork_directory: &Path,
+    conn: &SqliteConnection,
+) -> Result<EntryResult> {
+    if import::is_imported(path, conn)? {
+        return Ok(EntryResult::Skipped);
+    }
+
     let props = SongProperties::read(path)?;
     let props = props.ok_or(ErrorKind::MissingSongProperties)?;
 
     import::add_song(path, artwork_directory, props, conn)?;
 
-    Ok(())
+    Ok(EntryResult::Imported)
 }

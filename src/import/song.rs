@@ -17,6 +17,17 @@ use import::artist::add_or_get_artist;
 
 use super::errors;
 
+/// Checks whether the file at the path is already imported.
+pub fn is_imported(path: &Path, conn: &SqliteConnection) -> errors::Result<bool> {
+    let does_exist = song::table
+        .select(song::id)
+        .filter(song::path.eq(PathWrapper::from(path)))
+        .first::<UUID>(conn)
+        .optional()?;
+
+    Ok(does_exist.is_some())
+}
+
 /// Takes information about a song read from tags and adds it to the database.
 pub fn add_song(
     path: &Path,

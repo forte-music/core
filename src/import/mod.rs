@@ -5,3 +5,4 @@ pub mod errors;
 mod song;
 
 pub use self::song::add_song;
+pub use self::song::is_imported;
