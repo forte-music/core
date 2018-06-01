@@ -69,7 +69,7 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
 
         if let Err(e) = handle_entry(path, artwork_directory, &conn) {
             bar.println(format!("Error importing '{}': {}", path_string, e));
-        };
+        }
     });
 
     bar.finish();
