@@ -33,7 +33,7 @@ aliases:
 jobs:
   build:
     docker:
-      - image: fortemusic/core-build
+      - image: fortemusic/core-build:ffmpeg
 
     steps:
       - checkout
@@ -77,7 +77,7 @@ jobs:
 
   integration-test:
     docker:
-      - image: fortemusic/core-build
+      - image: fortemusic/core-build:ffmpeg
 
     environment:
       RUST_BACKTRACE: "1"
