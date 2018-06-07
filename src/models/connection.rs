@@ -35,16 +35,6 @@ graphql_object!(Edge<Song>: GraphQLContext as "SongEdge" |&self| {
     field node() -> &Song { &self.node }
 });
 
-graphql_object!(Edge<Playlist>: GraphQLContext as "PlaylistEdge" |&self| {
-    field cursor() -> &str { &self.cursor }
-    field node() -> &Playlist { &self.node }
-});
-
-graphql_object!(Edge<PlaylistItem>: GraphQLContext as "PlaylistItemEdge" |&self| {
-    field cursor() -> &str { &self.cursor }
-    field node() -> &PlaylistItem { &self.node }
-});
-
 pub struct Connection<T> {
     pub count: usize,
     pub edges: Vec<Edge<T>>,
@@ -66,18 +56,6 @@ graphql_object!(Connection<Artist>: GraphQLContext as "ArtistConnection" |&self|
 graphql_object!(Connection<Song>: GraphQLContext as "SongConnection" |&self| {
     field count() -> i32 { self.count as i32 }
     field edges() -> &[Edge<Song>] { &self.edges }
-    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
-});
-
-graphql_object!(Connection<Playlist>: GraphQLContext as "PlaylistConnection" |&self| {
-    field count() -> i32 { self.count as i32 }
-    field edges() -> &[Edge<Playlist>] { &self.edges }
-    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
-});
-
-graphql_object!(Connection<PlaylistItem>: GraphQLContext as "PlaylistItemConnection" |&self| {
-    field count() -> i32 { self.count as i32 }
-    field edges() -> &[Edge<PlaylistItem>] { &self.edges }
     field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
 });
 

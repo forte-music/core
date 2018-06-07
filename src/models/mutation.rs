@@ -5,7 +5,6 @@ use juniper::FieldResult;
 
 use database::album;
 use database::artist;
-use database::playlist;
 use database::song;
 
 use diesel;
@@ -38,11 +37,10 @@ impl Mutation {
         song_id: UUID,
         artist_id: Option<UUID>,
         album_id: Option<UUID>,
-        playlist_id: Option<UUID>,
     ) -> errors::Result<StatsCollection> {
         let conn = context.connection();
 
-        let valid_descriptors = (vec![&artist_id, &album_id, &playlist_id])
+        let valid_descriptors = vec![&artist_id, &album_id]
             .iter()
             .filter(|option| option.is_some())
             .collect::<Vec<&&Option<UUID>>>()
@@ -67,12 +65,6 @@ impl Mutation {
                     .execute(conn)?;
             }
 
-            if let Some(ref playlist_id) = playlist_id {
-                diesel::update(playlist::table.filter(playlist::id.eq(playlist_id)))
-                    .set(playlist::last_played.eq(now))
-                    .execute(conn)?;
-            }
-
             diesel::update(song::table.filter(song::id.eq(song_id)))
                 .set((
                     song::play_count.eq(song::play_count + 1),
@@ -87,7 +79,6 @@ impl Mutation {
             song_id,
             artist_id,
             album_id,
-            playlist_id,
         })
     }
 
@@ -108,9 +99,8 @@ graphql_object!(Mutation: GraphQLContext |&self| {
         song_id: UUID,
         artist_id: Option<UUID>,
         album_id: Option<UUID>,
-        playlist_id: Option<UUID>
     ) -> FieldResult<StatsCollection> {
-        Ok(Mutation::play_song(executor.context(), song_id, artist_id, album_id, playlist_id)?)
+        Ok(Mutation::play_song(executor.context(), song_id, artist_id, album_id)?)
     }
 
     field toggle_like(&executor, song_id: UUID) -> FieldResult<Song> {
