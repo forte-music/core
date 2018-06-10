@@ -46,14 +46,12 @@ impl FromSql<Text, Sqlite> for PathWrapper {
     }
 }
 
-impl From<PathBuf> for PathWrapper {
-    fn from(path: PathBuf) -> Self {
-        PathWrapper(path)
-    }
-}
-
-impl<'a> From<&'a Path> for PathWrapper {
-    fn from(path: &'a Path) -> Self {
+impl<T> From<T> for PathWrapper
+where
+    T: AsRef<Path>,
+{
+    fn from(path: T) -> Self {
+        let path = path.as_ref();
         PathWrapper(path.to_owned())
     }
 }

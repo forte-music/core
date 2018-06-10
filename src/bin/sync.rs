@@ -35,7 +35,11 @@ error_chain! {
 
 const FORMAT_EXTENSIONS: [&str; 3] = ["flac", "mp3", "m4a"];
 
-pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Result<()> {
+pub fn sync<P: AsRef<Path>, Q: AsRef<Path>>(
+    pool: context::Pool,
+    path: P,
+    artwork_directory: Q,
+) -> Result<()> {
     let conn = pool.get()?;
 
     let entries: Vec<DirEntry> = WalkDir::new(path)
@@ -67,7 +71,7 @@ pub fn sync(pool: context::Pool, path: &Path, artwork_directory: &Path) -> Resul
         let message = format!("Importing {}", path_string);
         bar.set_message(message.as_str());
 
-        if let Err(e) = handle_entry(path, artwork_directory, &conn) {
+        if let Err(e) = handle_entry(path, artwork_directory.as_ref(), &conn) {
             bar.println(format!("Error importing '{}': {}", path_string, e));
         }
     });

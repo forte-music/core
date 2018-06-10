@@ -24,6 +24,7 @@ extern crate uuid;
 
 pub mod server;
 pub mod sync;
+mod utils;
 
 use std::ops::Deref;
 use std::path::PathBuf;
@@ -37,7 +38,6 @@ use app_dirs::app_root;
 use error_chain::ChainedError;
 
 use forte_core::context;
-use std::fs;
 
 embed_migrations!("./migrations");
 
@@ -120,15 +120,11 @@ fn run() -> Result<()> {
     embedded_migrations::run(pool.get()?.deref())?;
 
     match opt.command {
-        Command::Serve { host } => Ok(server::serve(pool, &host)),
+        Command::Serve { host } => server::serve(pool, &host),
         Command::Sync { directory } => {
-            let mut artwork_directory = app_dir.clone();
-            artwork_directory.push("artwork");
-            fs::create_dir_all(&artwork_directory)?;
-
-            sync::sync(pool, &directory, &artwork_directory)
+            sync::sync(pool, directory, utils::get_and_make_artwork_dir(app_dir)?)?
         }
-    }?;
+    };
 
     Ok(())
 }
