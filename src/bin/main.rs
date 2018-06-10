@@ -22,6 +22,7 @@ extern crate serde;
 extern crate serde_json;
 extern crate uuid;
 
+pub mod beets_sync;
 pub mod server;
 pub mod sync;
 mod utils;
@@ -51,6 +52,7 @@ error_chain! {
 
     links {
         Sync(::sync::Error, ::sync::ErrorKind);
+        BeetsSync(::beets_sync::Error, ::beets_sync::ErrorKind);
     }
 }
 
@@ -77,6 +79,14 @@ enum Command {
         /// The directory to sync.
         #[structopt(name = "sync-dir", parse(from_os_str))]
         directory: PathBuf,
+    },
+
+    #[structopt(name = "beets-sync")]
+    BeetsSync {
+        /// The file to read data from. This file should be populated by calling
+        /// `beet export --include-keys='*' --library`
+        #[structopt(name = "export-file", parse(try_from_str))]
+        input_file: utils::FileWrapper,
     },
 }
 
@@ -123,6 +133,9 @@ fn run() -> Result<()> {
         Command::Serve { host } => server::serve(pool, &host),
         Command::Sync { directory } => {
             sync::sync(pool, directory, utils::get_and_make_artwork_dir(app_dir)?)?
+        }
+        Command::BeetsSync { input_file } => {
+            beets_sync::sync(pool, &input_file, utils::get_and_make_artwork_dir(app_dir)?)?
         }
     };
 
