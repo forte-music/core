@@ -12,12 +12,10 @@ pub enum RecentItem {
 }
 
 fn merge_recents(albums: Vec<Album>, artists: Vec<Artist>) -> Vec<RecentItem> {
-    let recent_albums: Vec<RecentItem> = albums.into_iter().map(RecentItem::Album).collect();
+    let recent_albums = albums.into_iter().map(RecentItem::Album);
+    let recent_artists = artists.into_iter().map(RecentItem::Artist);
 
-    let mut recent_artists: Vec<RecentItem> = artists.into_iter().map(RecentItem::Artist).collect();
-
-    let mut recent = recent_albums;
-    recent.append(&mut recent_artists);
+    let recent: Vec<RecentItem> = recent_albums.chain(recent_artists).collect();
 
     recent
 }
