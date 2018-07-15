@@ -44,6 +44,14 @@ impl Query {
     ) -> FieldResult<Connection<Song>> {
         Song::get_connection(context, first, after, sort)
     }
+
+    pub fn recently_added(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
+        RecentItem::recently_added(context, first)
+    }
+
+    pub fn recently_played(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
+        RecentItem::recently_played(context, first)
+    }
 }
 
 graphql_object!(Query: GraphQLContext |&self| {
@@ -84,5 +92,19 @@ graphql_object!(Query: GraphQLContext |&self| {
         sort: Option<SortParams>
     ) -> FieldResult<Connection<Song>> {
         Query::songs(executor.context(), first as i64, after, sort)
+    }
+
+    field recentlyAdded(
+        &executor,
+        first = 25: i32
+    ) -> FieldResult<Vec<RecentItem>> {
+        Query::recently_added(executor.context(), first as i64)
+    }
+
+    field recentlyPlayed(
+        &executor,
+        first = 25: i32
+    ) -> FieldResult<Vec<RecentItem>> {
+        Query::recently_played(executor.context(), first as i64)
     }
 });
