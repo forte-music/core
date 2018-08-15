@@ -7,8 +7,8 @@ use server::stream::RandomRead;
 /// Wraps an io.Read in a container which implements io.Read and io.Seek, reads from the underlying
 /// reader only once fulfilling reads of the same region from a cache.
 pub struct CachedReader<R>
-    where
-        R: Read,
+where
+    R: Read,
 {
     /// Underlying reader where reads are directed to
     inner: R,
@@ -23,8 +23,8 @@ pub struct CachedReader<R>
 }
 
 impl<R> CachedReader<R>
-    where
-        R: Read,
+where
+    R: Read,
 {
     pub fn new(inner: R) -> CachedReader<R> {
         CachedReader {
@@ -52,8 +52,8 @@ impl<R> CachedReader<R>
 }
 
 impl<R> RandomRead for CachedReader<R>
-    where
-        R: Read,
+where
+    R: Read,
 {
     fn read(&mut self, read_from_index: u64, mut buf: &mut [u8]) -> io::Result<usize> {
         if !self.has_cached(read_from_index) {

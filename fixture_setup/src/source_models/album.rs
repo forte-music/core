@@ -23,7 +23,8 @@ impl Into<Album> for AlbumSource {
             artist_id: self.artist_id.into(),
             release_year: self.release_year,
             time_added: self.time_added.unwrap_or(0).into_time(),
-            last_played: self.stats
+            last_played: self
+                .stats
                 .and_then(|stats| stats.last_played)
                 .map(|t| t.into_time()),
         }

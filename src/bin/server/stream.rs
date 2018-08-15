@@ -1,12 +1,12 @@
 use actix_web;
+use actix_web::error::HttpRangeError;
+use actix_web::http::header;
+use actix_web::http::HttpRange;
+use actix_web::http::StatusCode;
 use actix_web::HttpMessage;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
-use actix_web::error::HttpRangeError;
-use actix_web::http::HttpRange;
-use actix_web::http::StatusCode;
-use actix_web::http::header;
 
 use bytes::BufMut;
 use bytes::Bytes;

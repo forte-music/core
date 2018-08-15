@@ -7,13 +7,13 @@ use forte_core::models::Schema;
 
 use actix::prelude::*;
 
+use actix_web::error;
 use actix_web::AsyncResponder;
 use actix_web::FutureResponse;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Json;
 use actix_web::State;
-use actix_web::error;
 
 use serde_json;
 use std::sync::Arc;

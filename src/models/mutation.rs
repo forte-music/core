@@ -8,10 +8,10 @@ use database::artist;
 use database::song;
 
 use diesel;
-use diesel::Connection;
 use diesel::expression::dsl::not;
 use diesel::prelude::*;
 use diesel::result;
+use diesel::Connection;
 
 use models::*;
 

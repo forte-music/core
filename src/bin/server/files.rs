@@ -1,8 +1,8 @@
 use actix_web;
+use actix_web::http::header;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
-use actix_web::http::header;
 use mime_guess;
 use server::stream::RangeStream;
 use std::fs::File;
@@ -25,7 +25,8 @@ impl FileStream {
         let size = metadata.len();
 
         let inner = RangeStream::new(file, size);
-        let mime = path.extension()
+        let mime = path
+            .extension()
             .map(|ext| mime_guess::get_mime_type(&ext.to_string_lossy()))
             .map(|mime| mime.to_string());
 

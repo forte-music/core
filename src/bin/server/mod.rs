@@ -12,11 +12,11 @@ use forte_core::models::{create_schema, Album, Song};
 
 use server::graphql::{graphiql, graphql, AppState, GraphQLExecutor};
 
-use actix::System;
 use actix::prelude::*;
-use actix_web::App;
+use actix::System;
 use actix_web::http;
 use actix_web::server;
+use actix_web::App;
 
 use std::sync::Arc;
 

@@ -34,9 +34,9 @@ use std::path::PathBuf;
 
 use structopt::StructOpt;
 
+use app_dirs::app_root;
 use app_dirs::AppDataType;
 use app_dirs::AppInfo;
-use app_dirs::app_root;
 
 use error_chain::ChainedError;
 

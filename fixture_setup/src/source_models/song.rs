@@ -35,15 +35,18 @@ impl Into<Song> for SongSource {
             disk_number: self.disk_number.unwrap_or(1),
             duration: self.duration,
             time_added: self.time_added.unwrap_or(0).into_time(),
-            play_count: self.stats
+            play_count: self
+                .stats
                 .as_ref()
                 .and_then(|stats| stats.play_count)
                 .unwrap_or(0),
-            last_played: self.stats
+            last_played: self
+                .stats
                 .as_ref()
                 .and_then(|stats| stats.last_played)
                 .map(|t| t.into_time()),
-            liked: self.stats
+            liked: self
+                .stats
                 .as_ref()
                 .and_then(|stats| stats.liked)
                 .unwrap_or(false),
