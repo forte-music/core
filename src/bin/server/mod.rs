@@ -1,4 +1,3 @@
-extern crate ffmpeg;
 extern crate uuid;
 
 mod files;
@@ -21,7 +20,6 @@ use actix_web::server;
 use std::sync::Arc;
 
 pub fn serve(pool: context::Pool, host: &str) {
-    ffmpeg::init().unwrap();
     let sys = System::new("forte");
 
     let schema = Arc::new(create_schema());
