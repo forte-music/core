@@ -26,12 +26,12 @@ aliases:
       cargo build
 
   - &lint_commands |
-      cargo fmt -- --write-mode=diff
+      cargo fmt -- --check
 
 jobs:
   build:
     docker:
-      - image: fortemusic/core-build:ffmpeg
+      - image: fortemusic/core-build
 
     steps:
       - checkout
@@ -75,7 +75,7 @@ jobs:
 
   integration-test:
     docker:
-      - image: fortemusic/core-build:ffmpeg
+      - image: fortemusic/core-build
 
     environment:
       RUST_BACKTRACE: "1"
