@@ -21,6 +21,8 @@ use std::sync::Arc;
 use futures;
 use futures::Future;
 
+use server::transcoder::Transcoder;
+
 mod errors {
     error_chain! {
         foreign_links {
@@ -33,12 +35,18 @@ mod errors {
 pub struct AppState {
     pub executor: Addr<Syn, GraphQLExecutor>,
     pub connection_pool: context::Pool,
+    pub transcoder: Addr<Syn, Transcoder>,
 }
 
 impl AppState {
-    pub fn new(executor: Addr<Syn, GraphQLExecutor>, connection_pool: context::Pool) -> AppState {
+    pub fn new(
+        executor: Addr<Syn, GraphQLExecutor>,
+        transcoder: Addr<Syn, Transcoder>,
+        connection_pool: context::Pool,
+    ) -> AppState {
         AppState {
             executor,
+            transcoder,
             connection_pool,
         }
     }
