@@ -27,6 +27,7 @@ extern crate futures_cpupool;
 extern crate juniper;
 extern crate serde;
 extern crate serde_json;
+extern crate tokio_process;
 extern crate uuid;
 
 pub mod server;
