@@ -35,10 +35,6 @@ impl Song {
         format!("/files/music/{}/raw", id)
     }
 
-    pub fn get_mp3_stream_url(id: &str) -> String {
-        format!("/files/music/{}/mp3", id)
-    }
-
     pub fn stream_url(&self) -> String {
         Song::get_raw_stream_url(&self.id.to_string())
     }

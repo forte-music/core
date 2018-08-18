@@ -1,6 +1,8 @@
 use actix_web;
 use actix_web::dev::Handler;
 use actix_web::error;
+use actix_web::http;
+use actix_web::App;
 use actix_web::AsyncResponder;
 use actix_web::FromRequest;
 use actix_web::HttpRequest;
@@ -95,6 +97,19 @@ fn get_size<R: ReadSeek>(reader: &mut R) -> io::Result<u64> {
     reader.seek(SeekFrom::Start(0))?;
 
     Ok(size)
+}
+
+pub trait TranscodedHandlerAppExt {
+    fn register_transcode_handler(mut self, target: TranscodeTarget) -> Self;
+}
+
+impl TranscodedHandlerAppExt for App<AppState> {
+    fn register_transcode_handler(self, target: TranscodeTarget) -> Self {
+        self.resource(target.get_template_url(), |r| {
+            r.method(http::Method::GET)
+                .h(TranscodedSongHandler::new(target))
+        })
+    }
 }
 
 fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {

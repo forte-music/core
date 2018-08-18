@@ -44,9 +44,16 @@ impl TranscodeTarget {
                 "5".as_ref(),
                 // MP4 Output Format
                 "-f".as_ref(),
-                "mp4".as_ref(),
+                "ipod".as_ref(),
                 output_file.as_os_str(),
             ],
+        }
+    }
+
+    pub fn get_template_url(&self) -> &'static str {
+        match self {
+            TranscodeTarget::MP3V0 => "/files/music/{id}/mp3/v0",
+            TranscodeTarget::AACV5 => "/files/music/{id}/aac/v5",
         }
     }
 }
