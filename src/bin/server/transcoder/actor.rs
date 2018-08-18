@@ -49,7 +49,7 @@ impl Transcoder {
     /// Transcodes the file requested by the message into a temporary path.
     fn transcode<P: AsRef<Path>>(
         &self,
-        msg: &Transcode<P>,
+        msg: &TranscodeMessage<P>,
     ) -> Box<Future<Item = (Output, PathBuf), Error = io::Error>> {
         let temporary_file_path = self.temp.get_file();
 
@@ -66,7 +66,7 @@ impl Transcoder {
     /// Transcodes the file requested by the message, updating the relevant caches.
     fn transcode_and_cache<P: AsRef<Path>>(
         &self,
-        msg: &Transcode<P>,
+        msg: &TranscodeMessage<P>,
     ) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
         let future_map_key = key.clone();
@@ -116,7 +116,7 @@ impl Transcoder {
     /// complete and the transcoded file is in the disk_cache.
     fn get_cache_populated_future<P: AsRef<Path>>(
         &self,
-        msg: &Transcode<P>,
+        msg: &TranscodeMessage<P>,
     ) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
 
@@ -144,13 +144,13 @@ impl Actor for Transcoder {
     type Context = Context<Self>;
 }
 
-impl<P> Handler<Transcode<P>> for Transcoder
+impl<P> Handler<TranscodeMessage<P>> for Transcoder
 where
     P: AsRef<Path>,
 {
     type Result = ResponseFuture<Box<ReadSeek>, errors::Error>;
 
-    fn handle(&mut self, msg: Transcode<P>, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: TranscodeMessage<P>, _ctx: &mut Self::Context) -> Self::Result {
         let disk_cache_ref = self.disk_cache.clone();
         let key = msg.to_key();
 
@@ -169,9 +169,8 @@ where
     }
 }
 
-// TODO: Rename
 /// Message sent to the transcoder actor to request a file be transcoded.
-pub struct Transcode<P>
+pub struct TranscodeMessage<P>
 where
     P: AsRef<Path>,
 {
@@ -187,19 +186,19 @@ where
     target: TranscodeTarget,
 }
 
-impl<P> Message for Transcode<P>
+impl<P> Message for TranscodeMessage<P>
 where
     P: AsRef<Path>,
 {
     type Result = errors::Result<Box<ReadSeek>>;
 }
 
-impl<P> Transcode<P>
+impl<P> TranscodeMessage<P>
 where
     P: AsRef<Path>,
 {
-    pub fn new(path: P, partial_key: String, target: TranscodeTarget) -> Transcode<P> {
-        Transcode {
+    pub fn new(path: P, partial_key: String, target: TranscodeTarget) -> TranscodeMessage<P> {
+        TranscodeMessage {
             path,
             partial_key,
             target,

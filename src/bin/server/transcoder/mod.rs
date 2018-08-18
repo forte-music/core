@@ -14,5 +14,5 @@ mod errors {
     }
 }
 
-pub use self::actor::{Transcode, Transcoder};
+pub use self::actor::{TranscodeMessage, Transcoder};
 pub use self::targets::TranscodeTarget;

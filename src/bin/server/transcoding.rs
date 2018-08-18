@@ -6,17 +6,13 @@ use actix_web::State;
 
 use forte_core::models::Song;
 
-use server::files::FileStream;
 use server::graphql::AppState;
-use server::transcoder::{Transcode, TranscodeTarget};
+use server::transcoder::{TranscodeMessage, TranscodeTarget};
 
 use diesel;
 
 use uuid::Uuid;
 
-use std::ops::Deref;
-
-use futures;
 use futures::Future;
 
 use lru_disk_cache::ReadSeek;
@@ -50,7 +46,7 @@ pub fn handler(
 
     state
         .transcoder
-        .send(Transcode::new(
+        .send(TranscodeMessage::new(
             song_path,
             song_id.to_string(),
             TranscodeTarget::MP3V0,
