@@ -1,24 +1,25 @@
-use futures::Future;
-
 use lru_disk_cache::LruDiskCache;
 use lru_disk_cache::ReadSeek;
 
 use server::temp::TemporaryFiles;
+use server::transcoder::errors;
+use server::transcoder::errors::ResultExt;
 use server::transcoder::TranscodeTarget;
 
-use std::io;
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::ffi::OsString;
+use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
-use std::collections::HashMap;
 
 use actix::prelude::*;
 
 use futures::future;
 use futures::future::Shared;
+use futures::Future;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -76,11 +77,16 @@ impl Transcoder {
         let transcode_future = self
             .transcode(&msg)
             .map(move |(_output, temporary_file_path)| {
-                cache
+                // TODO: Try Using Failure Errors
+                // Result ignored here because if inserting a file fails later,
+                // getting it out of the cache will fail also. It's better to
+                // start the error here, but forwarding errors from here is
+                // difficult because Shared<Future<...>> turns the error into
+                // an error reference. error-chain errors can't be cloned.
+                let _ = cache
                     .try_borrow_mut()
                     .unwrap()
-                    .insert_file(&future_map_key, temporary_file_path)
-                    .unwrap();
+                    .insert_file(&future_map_key, temporary_file_path);
 
                 future_cache
                     .try_borrow_mut()
@@ -110,37 +116,18 @@ impl Transcoder {
     fn future_cache_has(&self, key: &OsStr) -> bool {
         self.future_cache.try_borrow().unwrap().contains_key(key)
     }
-}
 
-impl Actor for Transcoder {
-    type Context = Context<Self>;
-}
-
-impl<P> Handler<Transcode<P>> for Transcoder
-where
-    P: AsRef<Path>,
-{
-    type Result = ResponseFuture<Box<ReadSeek>, io::Error>;
-
-    fn handle(&mut self, msg: Transcode<P>, _ctx: &mut Self::Context) -> Self::Result {
+    /// Returns a future which resolves when the transcode job associated with the message is
+    /// complete and the transcoded file is in the disk_cache.
+    fn get_cache_populated_future<P: AsRef<Path>>(
+        &self,
+        msg: &Transcode<P>,
+    ) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
 
         if self.disk_cache_has(&key) {
-            let mut lru_disk_cache = self.disk_cache.try_borrow_mut().unwrap();
-
-            let file = lru_disk_cache.get(key).unwrap();
-
-            return Box::new(future::ok(file));
+            return Box::new(future::ok(()));
         }
-
-        let disk_cache = self.disk_cache.clone();
-        let local_key = key.clone();
-        let get_from_disk_cache = move || {
-            let mut lru_disk_cache = disk_cache.try_borrow_mut().unwrap();
-            let file = lru_disk_cache.get(local_key).unwrap();
-
-            file
-        };
 
         if self.future_cache_has(&key) {
             return Box::new(
@@ -150,15 +137,42 @@ where
                     .get(&key)
                     .unwrap()
                     .clone()
-                    .map_err(|_| io::ErrorKind::AlreadyExists.into())
-                    .map(|_| get_from_disk_cache()),
+                    .map(|_| ())
+                    .map_err(|err| err.kind().into()),
             );
         }
 
+        Box::new(self.transcode_and_cache(&msg))
+    }
+}
+
+impl Actor for Transcoder {
+    type Context = Context<Self>;
+}
+
+// TODO: try_ -> borrow_
+
+impl<P> Handler<Transcode<P>> for Transcoder
+where
+    P: AsRef<Path>,
+{
+    type Result = ResponseFuture<Box<ReadSeek>, errors::Error>;
+
+    fn handle(&mut self, msg: Transcode<P>, _ctx: &mut Self::Context) -> Self::Result {
+        let disk_cache_ref = self.disk_cache.clone();
+        let key = msg.to_key();
+
         Box::new(
-            self.transcode_and_cache(&msg)
-                .map_err(|_| io::ErrorKind::AlreadyExists.into())
-                .map(|_| get_from_disk_cache()),
+            self.get_cache_populated_future(&msg)
+                .map_err(|e| -> errors::Error { e.into() })
+                .and_then(move |_| {
+                    let mut disk_cache = disk_cache_ref.borrow_mut();
+                    let file = disk_cache
+                        .get(&key)
+                        .chain_err(|| errors::ErrorKind::NoDiskCacheEntryError)?;
+
+                    Ok(file)
+                }),
         )
     }
 }
@@ -185,7 +199,7 @@ impl<P> Message for Transcode<P>
 where
     P: AsRef<Path>,
 {
-    type Result = Result<Box<ReadSeek>, io::Error>;
+    type Result = errors::Result<Box<ReadSeek>>;
 }
 
 impl<P> Transcode<P>
