@@ -84,14 +84,10 @@ impl Transcoder {
                 // difficult because Shared<Future<...>> turns the error into
                 // an error reference. error-chain errors can't be cloned.
                 let _ = cache
-                    .try_borrow_mut()
-                    .unwrap()
+                    .borrow_mut()
                     .insert_file(&future_map_key, temporary_file_path);
 
-                future_cache
-                    .try_borrow_mut()
-                    .unwrap()
-                    .remove(&future_map_key);
+                future_cache.borrow_mut().remove(&future_map_key);
 
                 ()
             });
@@ -102,19 +98,18 @@ impl Transcoder {
         let shared_future = boxed_transcode_future.shared();
 
         self.future_cache
-            .try_borrow_mut()
-            .unwrap()
+            .borrow_mut()
             .insert(key.clone(), shared_future.clone());
 
         Box::new(shared_future.map(|_| ()).map_err(|err| err.kind().into()))
     }
 
     fn disk_cache_has(&self, key: &OsStr) -> bool {
-        self.disk_cache.try_borrow().unwrap().contains_key(key)
+        self.disk_cache.borrow().contains_key(key)
     }
 
     fn future_cache_has(&self, key: &OsStr) -> bool {
-        self.future_cache.try_borrow().unwrap().contains_key(key)
+        self.future_cache.borrow().contains_key(key)
     }
 
     /// Returns a future which resolves when the transcode job associated with the message is
@@ -132,8 +127,7 @@ impl Transcoder {
         if self.future_cache_has(&key) {
             return Box::new(
                 self.future_cache
-                    .try_borrow()
-                    .unwrap()
+                    .borrow()
                     .get(&key)
                     .unwrap()
                     .clone()
@@ -149,8 +143,6 @@ impl Transcoder {
 impl Actor for Transcoder {
     type Context = Context<Self>;
 }
-
-// TODO: try_ -> borrow_
 
 impl<P> Handler<Transcode<P>> for Transcoder
 where
