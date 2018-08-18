@@ -3,7 +3,7 @@ use std::path::Path;
 
 use core::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TranscodeTarget {
     MP3V0,
     AACV5,

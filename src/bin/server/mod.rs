@@ -15,7 +15,7 @@ use forte_core::models::{create_schema, Album, Song};
 
 use server::graphql::{graphiql, graphql, AppState, GraphQLExecutor};
 use server::temp::TemporaryFiles;
-use server::transcoder::Transcoder;
+use server::transcoder::{TranscodeTarget, Transcoder};
 
 use actix::prelude::*;
 use actix::System;
@@ -48,7 +48,10 @@ pub fn serve(
         )).resource("/graphql", |r| r.method(http::Method::POST).with2(graphql))
             .resource("/", |r| r.method(http::Method::GET).h(graphiql))
             .resource(&Song::get_mp3_stream_url("{id}"), |r| {
-                r.method(http::Method::GET).with2(transcoding::handler)
+                r.method(http::Method::GET)
+                    .h(transcoding::TranscodedSongHandler::new(
+                        TranscodeTarget::MP3V0,
+                    ))
             })
             .resource(&Song::get_raw_stream_url("{id}"), |r| {
                 r.method(http::Method::GET).with2(streaming::song_handler)
