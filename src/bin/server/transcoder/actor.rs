@@ -66,7 +66,7 @@ impl Transcoder {
     fn transcode_and_cache<P: AsRef<Path>>(
         &self,
         msg: &Transcode<P>,
-    ) -> Shared<ResponseFuture<(), io::Error>> {
+    ) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
         let future_map_key = key.clone();
 
@@ -78,13 +78,13 @@ impl Transcoder {
             .map(move |(_output, temporary_file_path)| {
                 cache
                     .try_borrow_mut()
-                    .expect("// TODO: Remove Me")
+                    .unwrap()
                     .insert_file(&future_map_key, temporary_file_path)
-                    .expect("didn't fail");
+                    .unwrap();
 
                 future_cache
                     .try_borrow_mut()
-                    .expect("// TODO: Remove Me")
+                    .unwrap()
                     .remove(&future_map_key);
 
                 ()
@@ -97,24 +97,18 @@ impl Transcoder {
 
         self.future_cache
             .try_borrow_mut()
-            .expect("// TODO: Remove Me")
+            .unwrap()
             .insert(key.clone(), shared_future.clone());
 
-        shared_future
+        Box::new(shared_future.map(|_| ()).map_err(|err| err.kind().into()))
     }
 
     fn disk_cache_has(&self, key: &OsStr) -> bool {
-        self.disk_cache
-            .try_borrow()
-            .expect("// TODO: No Error")
-            .contains_key(key)
+        self.disk_cache.try_borrow().unwrap().contains_key(key)
     }
 
     fn future_cache_has(&self, key: &OsStr) -> bool {
-        self.future_cache
-            .try_borrow()
-            .expect("// TODO: No Error")
-            .contains_key(key)
+        self.future_cache.try_borrow().unwrap().contains_key(key)
     }
 }
 
@@ -132,11 +126,9 @@ where
         let key = msg.to_key();
 
         if self.disk_cache_has(&key) {
-            let mut lru_disk_cache = self
-                .disk_cache
-                .try_borrow_mut()
-                .expect("// TODO: Remove Me");
-            let file = lru_disk_cache.get(key).expect("didn't fail");
+            let mut lru_disk_cache = self.disk_cache.try_borrow_mut().unwrap();
+
+            let file = lru_disk_cache.get(key).unwrap();
 
             return Box::new(future::ok(file));
         }
@@ -144,8 +136,8 @@ where
         let disk_cache = self.disk_cache.clone();
         let local_key = key.clone();
         let get_from_disk_cache = move || {
-            let mut lru_disk_cache = disk_cache.try_borrow_mut().expect("// TODO: Complete");
-            let file = lru_disk_cache.get(local_key).expect("// TODO: Complete");
+            let mut lru_disk_cache = disk_cache.try_borrow_mut().unwrap();
+            let file = lru_disk_cache.get(local_key).unwrap();
 
             file
         };
@@ -154,9 +146,9 @@ where
             return Box::new(
                 self.future_cache
                     .try_borrow()
-                    .expect("// TODO: Remove Me")
+                    .unwrap()
                     .get(&key)
-                    .expect("// TODO didn't fail")
+                    .unwrap()
                     .clone()
                     .map_err(|_| io::ErrorKind::AlreadyExists.into())
                     .map(|_| get_from_disk_cache()),
