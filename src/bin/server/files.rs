@@ -49,3 +49,26 @@ impl Responder for FileStream {
         Ok(response)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::FileStream;
+    use actix_web::test::TestRequest;
+    use actix_web::HttpResponse;
+    use actix_web::Responder;
+    use std::path::PathBuf;
+
+    #[test]
+    fn sets_mime_type() {
+        let manifest_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let file_path = manifest_path.join("src/lib.rs");
+
+        let file_stream = FileStream::open(file_path).unwrap();
+
+        let req = TestRequest::default().finish();
+        let response: HttpResponse = file_stream.respond_to(&req).unwrap();
+
+        let content_type = response.headers().get("Content-Type");
+        assert!(!content_type.unwrap().is_empty());
+    }
+}

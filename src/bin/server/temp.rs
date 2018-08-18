@@ -23,6 +23,7 @@ impl TemporaryFiles {
         Ok(TemporaryFiles { root: temp_dir })
     }
 
+    /// Gets path inside the root directory of a randomly named file.
     pub fn get_file(&self) -> PathBuf {
         let mut file_path = self.root.to_path_buf();
 
@@ -34,5 +35,26 @@ impl TemporaryFiles {
         file_path.push(file_name);
 
         file_path
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::TemporaryFiles;
+
+    #[test]
+    fn folder_exists() {
+        let temp = TemporaryFiles::new("test").unwrap();
+        let file = temp.get_file();
+
+        assert!(file.parent().unwrap().exists());
+    }
+
+    #[test]
+    fn file_not_exists() {
+        let temp = TemporaryFiles::new("test").unwrap();
+        let file = temp.get_file();
+
+        assert!(!file.exists())
     }
 }
