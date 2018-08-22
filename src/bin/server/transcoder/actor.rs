@@ -55,15 +55,15 @@ impl Transcoder {
 
         // TODO: Configurable FFMpeg Instance
         // TODO: Handle Non Zero Exit Code
-            Command::new("ffmpeg")
-                .args(msg.get_ffmpeg_args(&temporary_file_path))
-                .output_async()
-                .map(move |output| (output, temporary_file_path.to_path_buf()))
+        Command::new("ffmpeg")
+            .args(msg.get_ffmpeg_args(&temporary_file_path))
+            .output_async()
+            .map(move |output| (output, temporary_file_path.to_path_buf()))
     }
 
     /// Transcodes the file requested by the message, updating the relevant caches.
     fn transcode_and_cache(&self, msg: &TranscodeMessage) -> ResponseFuture<(), io::Error> {
-        let key = msg.to_key();
+        let key = msg.compute_key();
         let future_map_key = key.clone();
 
         let cache = self.disk_cache.clone();
@@ -110,7 +110,7 @@ impl Transcoder {
     /// Returns a future which resolves when the transcode job associated with the message is
     /// complete and the transcoded file is in the disk_cache.
     fn get_cache_populated_future(&self, msg: &TranscodeMessage) -> ResponseFuture<(), io::Error> {
-        let key = msg.to_key();
+        let key = msg.compute_key();
 
         if self.disk_cache_has(&key) {
             return Box::new(future::ok(()));
@@ -141,14 +141,14 @@ impl Handler<TranscodeMessage> for Transcoder {
 
     fn handle(&mut self, msg: TranscodeMessage, _ctx: &mut Self::Context) -> Self::Result {
         let disk_cache_ref = self.disk_cache.clone();
-        let key = msg.to_key();
+        let key = msg.compute_key();
 
         Box::new(
             self.get_cache_populated_future(&msg)
-                .map_err(|e| -> errors::Error { e.into() })
+                .map_err(errors::Error::from)
                 .and_then(move |_| {
-                    let mut disk_cache = disk_cache_ref.borrow_mut();
-                    let file = disk_cache
+                    let file = disk_cache_ref
+                        .borrow_mut()
                         .get(&key)
                         .chain_err(|| errors::ErrorKind::NoDiskCacheEntryError)?;
 
@@ -185,7 +185,7 @@ impl TranscodeMessage {
         }
     }
 
-    pub fn to_key(&self) -> OsString {
+    pub fn compute_key(&self) -> OsString {
         (self.partial_key.clone() + &self.target.to_string().to_lowercase()).into()
     }
 

@@ -38,6 +38,28 @@ impl TranscodedSongHandler {
             transcode_target: target,
         }
     }
+
+    /// Makes a TranscodeMessage for the song associated with the id and the target
+    /// associated with the handler.
+    fn make_message_for(
+        &self,
+        song_id: Uuid,
+        state: &State<AppState>,
+    ) -> actix_web::Result<TranscodeMessage> {
+        let context = state
+            .build_context()
+            .map_err(error::ErrorInternalServerError)?;
+
+        let song = Song::from_id(&context, &song_id.into()).map_err(convert_diesel_err)?;
+
+        let song_path: PathBuf = song.path.into();
+
+        Ok(TranscodeMessage::new(
+            song_path,
+            song_id.to_string(),
+            self.transcode_target.clone(),
+        ))
+    }
 }
 
 impl Handler<AppState> for TranscodedSongHandler {
@@ -49,16 +71,13 @@ impl Handler<AppState> for TranscodedSongHandler {
             Path::from_request(&req, &()).expect("song id path parameter missing");
         let song_id = song_id_path.into_inner();
 
-        future::done(build_transcode_message(
-            song_id,
-            self.transcode_target.clone(),
-            &state,
-        )).and_then(move |transcode_msg| {
-            state
-                .transcoder
-                .send(transcode_msg)
-                .map_err(error::ErrorInternalServerError)
-        })
+        future::done(self.make_message_for(song_id, &state))
+            .and_then(move |transcode_msg| {
+                state
+                    .transcoder
+                    .send(transcode_msg)
+                    .map_err(error::ErrorInternalServerError)
+            })
             .and_then(|result| {
                 result.map_err(|e| error::ErrorInternalServerError(e.description().to_string()))
             })
@@ -72,26 +91,8 @@ impl Handler<AppState> for TranscodedSongHandler {
     }
 }
 
-fn build_transcode_message(
-    song_id: Uuid,
-    transcode_target: TranscodeTarget,
-    state: &State<AppState>,
-) -> actix_web::Result<TranscodeMessage> {
-    let context = state
-        .build_context()
-        .map_err(error::ErrorInternalServerError)?;
-
-    let song = Song::from_id(&context, &song_id.into()).map_err(convert_diesel_err)?;
-
-    let song_path: PathBuf = song.path.into();
-
-    Ok(TranscodeMessage::new(
-        song_path,
-        song_id.to_string(),
-        transcode_target,
-    ))
-}
-
+/// Gets the size of a ReadSeek by seeking to the end then seeking back to the
+/// beginning.
 fn get_size<R: ReadSeek>(reader: &mut R) -> io::Result<u64> {
     let size = reader.seek(SeekFrom::End(0))?;
     reader.seek(SeekFrom::Start(0))?;
@@ -100,7 +101,7 @@ fn get_size<R: ReadSeek>(reader: &mut R) -> io::Result<u64> {
 }
 
 pub trait TranscodedHandlerAppExt {
-    fn register_transcode_handler(mut self, target: TranscodeTarget) -> Self;
+    fn register_transcode_handler(self, target: TranscodeTarget) -> Self;
 }
 
 impl TranscodedHandlerAppExt for App<AppState> {
