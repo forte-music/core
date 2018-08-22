@@ -132,13 +132,13 @@ fn run() -> Result<()> {
 
     match opt.command {
         Command::Serve { host } => {
-            let transcode_cache = make_transcode_cache(app_dir.clone())?;
+            let transcode_cache = make_transcode_cache(app_dir)?;
             let temporary_files = TemporaryFiles::new("forte")?;
 
             Ok(server::serve(pool, &host, transcode_cache, temporary_files))
         }
         Command::Sync { directory } => {
-            let mut artwork_directory = app_dir.clone();
+            let mut artwork_directory = app_dir;
             artwork_directory.push("artwork");
             fs::create_dir_all(&artwork_directory)?;
 
@@ -150,7 +150,7 @@ fn run() -> Result<()> {
 }
 
 fn make_transcode_cache(app_dir: PathBuf) -> Result<LruDiskCache> {
-    let mut transcode_cache_path = app_dir.clone();
+    let mut transcode_cache_path = app_dir;
     transcode_cache_path.push("transcode-cache");
 
     let transcode_cache_size = 100_000_000_u64; // 100 MB
