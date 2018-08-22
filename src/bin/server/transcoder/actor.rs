@@ -51,7 +51,7 @@ impl Transcoder {
         &self,
         msg: &TranscodeMessage,
     ) -> impl Future<Item = (Output, PathBuf), Error = io::Error> {
-        let temporary_file_path = self.temp.get_file();
+        let temporary_file_path = self.temp.get_file_path();
 
         // TODO: Configurable FFMpeg Instance
         // TODO: Handle Non Zero Exit Code

@@ -24,7 +24,7 @@ impl TemporaryFiles {
     }
 
     /// Gets path inside the root directory of a randomly named file.
-    pub fn get_file(&self) -> PathBuf {
+    pub fn get_file_path(&self) -> PathBuf {
         let mut file_path = self.root.to_path_buf();
 
         let file_name = rand::thread_rng()
@@ -45,7 +45,7 @@ mod test {
     #[test]
     fn folder_exists() {
         let temp = TemporaryFiles::new("test").unwrap();
-        let file = temp.get_file();
+        let file = temp.get_file_path();
 
         assert!(file.parent().unwrap().exists());
     }
@@ -53,7 +53,7 @@ mod test {
     #[test]
     fn file_not_exists() {
         let temp = TemporaryFiles::new("test").unwrap();
-        let file = temp.get_file();
+        let file = temp.get_file_path();
 
         assert!(!file.exists())
     }
