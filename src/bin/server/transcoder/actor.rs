@@ -47,27 +47,22 @@ impl Transcoder {
     }
 
     /// Transcodes the file requested by the message into a temporary path.
-    fn transcode<P: AsRef<Path>>(
+    fn transcode(
         &self,
-        msg: &TranscodeMessage<P>,
-    ) -> Box<Future<Item = (Output, PathBuf), Error = io::Error>> {
+        msg: &TranscodeMessage,
+    ) -> impl Future<Item = (Output, PathBuf), Error = io::Error> {
         let temporary_file_path = self.temp.get_file();
 
         // TODO: Configurable FFMpeg Instance
         // TODO: Handle Non Zero Exit Code
-        Box::new(
             Command::new("ffmpeg")
                 .args(msg.get_ffmpeg_args(&temporary_file_path))
                 .output_async()
-                .map(move |output| (output, temporary_file_path.to_path_buf())),
-        )
+                .map(move |output| (output, temporary_file_path.to_path_buf()))
     }
 
     /// Transcodes the file requested by the message, updating the relevant caches.
-    fn transcode_and_cache<P: AsRef<Path>>(
-        &self,
-        msg: &TranscodeMessage<P>,
-    ) -> ResponseFuture<(), io::Error> {
+    fn transcode_and_cache(&self, msg: &TranscodeMessage) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
         let future_map_key = key.clone();
 
@@ -114,10 +109,7 @@ impl Transcoder {
 
     /// Returns a future which resolves when the transcode job associated with the message is
     /// complete and the transcoded file is in the disk_cache.
-    fn get_cache_populated_future<P: AsRef<Path>>(
-        &self,
-        msg: &TranscodeMessage<P>,
-    ) -> ResponseFuture<(), io::Error> {
+    fn get_cache_populated_future(&self, msg: &TranscodeMessage) -> ResponseFuture<(), io::Error> {
         let key = msg.to_key();
 
         if self.disk_cache_has(&key) {
@@ -144,13 +136,10 @@ impl Actor for Transcoder {
     type Context = Context<Self>;
 }
 
-impl<P> Handler<TranscodeMessage<P>> for Transcoder
-where
-    P: AsRef<Path>,
-{
+impl Handler<TranscodeMessage> for Transcoder {
     type Result = ResponseFuture<Box<ReadSeek>, errors::Error>;
 
-    fn handle(&mut self, msg: TranscodeMessage<P>, _ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: TranscodeMessage, _ctx: &mut Self::Context) -> Self::Result {
         let disk_cache_ref = self.disk_cache.clone();
         let key = msg.to_key();
 
@@ -170,12 +159,9 @@ where
 }
 
 /// Message sent to the transcoder actor to request a file be transcoded.
-pub struct TranscodeMessage<P>
-where
-    P: AsRef<Path>,
-{
+pub struct TranscodeMessage {
     /// Path of the input to the transcoding process.
-    path: P,
+    path: PathBuf,
 
     /// A string which shares the uniqueness of the path. Should maintain:
     /// a.path == b.path iff a.partial_key == b.partial_key.
@@ -186,18 +172,12 @@ where
     target: TranscodeTarget,
 }
 
-impl<P> Message for TranscodeMessage<P>
-where
-    P: AsRef<Path>,
-{
+impl Message for TranscodeMessage {
     type Result = errors::Result<Box<ReadSeek>>;
 }
 
-impl<P> TranscodeMessage<P>
-where
-    P: AsRef<Path>,
-{
-    pub fn new(path: P, partial_key: String, target: TranscodeTarget) -> TranscodeMessage<P> {
+impl TranscodeMessage {
+    pub fn new(path: PathBuf, partial_key: String, target: TranscodeTarget) -> TranscodeMessage {
         TranscodeMessage {
             path,
             partial_key,

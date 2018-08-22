@@ -76,7 +76,7 @@ fn build_transcode_message(
     song_id: Uuid,
     transcode_target: TranscodeTarget,
     state: &State<AppState>,
-) -> actix_web::Result<TranscodeMessage<PathBuf>> {
+) -> actix_web::Result<TranscodeMessage> {
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
