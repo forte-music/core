@@ -37,7 +37,7 @@ use std::io::SeekFrom;
 /// multipart writer in rust.
 pub struct RangeStream<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     reader: R,
 
@@ -48,7 +48,7 @@ where
 
 impl<R> RangeStream<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     pub fn new(reader: R, size: u64) -> RangeStream<R> {
         RangeStream { reader, size }
@@ -57,7 +57,7 @@ where
 
 impl<R> Responder for RangeStream<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     type Item = HttpResponse;
     type Error = actix_web::Error;
@@ -107,7 +107,7 @@ where
 /// A stream which reads from an io.Read + io.Seek in chunks.
 struct ChunkedStreamReader<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     /// Container for the stream. This is used to manually keep track of the
     /// lifetime of the reader.
@@ -133,7 +133,7 @@ where
 
 impl<R> ChunkedStreamReader<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     fn new(stream: R, range: HttpRange, cpu_pool: CpuPool) -> ChunkedStreamReader<R> {
         ChunkedStreamReader {
@@ -161,7 +161,7 @@ where
 
 impl<R> Stream for ChunkedStreamReader<R>
 where
-    R: RandomRead + Send + 'static,
+    R: Read + Seek + Send + 'static,
 {
     type Item = Bytes;
     type Error = io::Error;
@@ -190,7 +190,8 @@ where
             let chunk_size = u64::min(upper_bound - offset, chunk_size) as usize;
             let mut buffer = BytesMut::with_capacity(chunk_size);
 
-            let bytes_read = inner_stream.read(offset, unsafe { buffer.bytes_mut() })?;
+            inner_stream.seek(SeekFrom::Start(offset))?;
+            let bytes_read = inner_stream.read(unsafe { buffer.bytes_mut() })?;
             if bytes_read == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
             }
@@ -200,19 +201,5 @@ where
         }));
 
         self.wait_for_future()
-    }
-}
-
-pub trait RandomRead {
-    fn read(&mut self, read_from_index: u64, buf: &mut [u8]) -> io::Result<usize>;
-}
-
-impl<R> RandomRead for R
-where
-    R: Read + Seek,
-{
-    fn read(&mut self, read_from_index: u64, buf: &mut [u8]) -> io::Result<usize> {
-        self.seek(SeekFrom::Start(read_from_index))?;
-        self.read(buf)
     }
 }
