@@ -27,17 +27,22 @@ use std::io::SeekFrom;
 
 /// A wrapper around io.Read + io.Seek which responds to HTTP Range requests.
 ///
-/// Much of it's implementation comes from actix_web's NamedFile. It is less opinionated, works any
-/// io.Read + io.Seek, and supports compression. Caching isn't implemented, because we think it
-/// should be implemented by wrapping this responder.
+/// Much of its implementation comes from actix_web's NamedFile. It is less
+/// opinionated, works with io.Read + io.Seek, and supports compression. Caching
+/// isn't implemented, because we think it should be implemented by wrapping
+/// this responder.
 ///
-/// It currently only responds to single ranges. The NamedFile implementation in actix also lacks
-/// support. This is due to the lack of a strong multipart writer in rust.
+/// It currently only responds to single ranges. The NamedFile implementation in
+/// actix also shares this behavior. This is due to the lack of a strong
+/// multipart writer in rust.
 pub struct RangeStream<R>
 where
     R: RandomRead + Send + 'static,
 {
     reader: R,
+
+    /// Size of the resource. Sent to the client and used as the upper bound if
+    /// no range is requested.
     size: u64,
 }
 
@@ -104,23 +109,25 @@ struct ChunkedStreamReader<R>
 where
     R: RandomRead + Send + 'static,
 {
-    /// A container for the stream. This is used to manually keep track of the lifetime of the
-    /// reader.
+    /// Container for the stream. This is used to manually keep track of the
+    /// lifetime of the reader.
     stream_option: Option<R>,
 
-    /// A future which resolves once a chunk is read.
+    /// Future which resolves once a chunk is read.
     future: Option<CpuFuture<(R, Bytes), io::Error>>,
 
-    /// The pool the task of reading from the reader will be executed on.
+    /// Pool which reading from the reader will be executed on.
     cpu_pool: CpuPool,
 
-    /// When the offset is greater than or equal to this value, stop reading from the stream.
+    /// When the offset is greater than or equal to this value, stop reading from
+    /// the stream.
     upper_bound: u64,
 
-    /// The number of bytes from the beginning of the file the next read should start from.
+    /// Number of bytes from the beginning of the file the next read should start
+    /// from.
     offset: u64,
 
-    /// The maximum size of the size of each chunk. The last chunk may be shorter.
+    /// Maximum size of each chunk. The last chunk may be shorter.
     chunk_size: u64,
 }
 
@@ -169,6 +176,8 @@ where
             return Ok(Async::Ready(None));
         }
 
+        // Pick values off self to move into the closure to execute on the
+        // cpu_pool.
         let upper_bound = self.upper_bound;
         let offset = self.offset;
         let chunk_size = self.chunk_size;

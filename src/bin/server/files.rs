@@ -4,6 +4,7 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
 use mime_guess;
+use mime_guess::Mime;
 use server::stream::RangeStream;
 use std::fs::File;
 use std::io;
@@ -12,7 +13,7 @@ use std::path::Path;
 /// A wrapper around RangeStream<File> which handles setting the Content-Type header based on the
 /// mime type of the file.
 pub struct FileStream {
-    mime: Option<String>,
+    mime: Option<Mime>,
     inner: RangeStream<File>,
 }
 
@@ -27,8 +28,7 @@ impl FileStream {
         let inner = RangeStream::new(file, size);
         let mime = path
             .extension()
-            .map(|ext| mime_guess::get_mime_type(&ext.to_string_lossy()))
-            .map(|mime| mime.to_string());
+            .map(|ext| mime_guess::get_mime_type(&ext.to_string_lossy()));
 
         Ok(FileStream { mime, inner })
     }
@@ -43,7 +43,7 @@ impl Responder for FileStream {
         if let Some(mime) = self.mime {
             response
                 .headers_mut()
-                .insert(header::CONTENT_TYPE, mime.parse()?);
+                .insert(header::CONTENT_TYPE, mime.to_string().parse()?);
         }
 
         Ok(response)
