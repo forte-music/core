@@ -23,7 +23,10 @@ fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {
     }
 }
 
-pub fn song_handler(state: State<AppState>, song_id: Path<Uuid>) -> Result<FileStream> {
+pub fn song_handler(params: (State<AppState>, Path<Uuid>)) -> Result<FileStream> {
+    let state = params.0;
+    let song_id = params.1;
+
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
@@ -33,7 +36,10 @@ pub fn song_handler(state: State<AppState>, song_id: Path<Uuid>) -> Result<FileS
     Ok(FileStream::open(&song.path.deref())?)
 }
 
-pub fn artwork_handler(state: State<AppState>, album_id: Path<Uuid>) -> Result<FileStream> {
+pub fn artwork_handler(params: (State<AppState>, Path<Uuid>)) -> Result<FileStream> {
+    let state = params.0;
+    let album_id = params.1;
+
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;

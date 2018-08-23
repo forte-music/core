@@ -65,7 +65,7 @@ impl TranscodedSongHandler {
 impl Handler<AppState> for TranscodedSongHandler {
     type Result = actix_web::FutureResponse<RangeStream<Box<ReadSeek>>>;
 
-    fn handle(&mut self, req: HttpRequest<AppState>) -> Self::Result {
+    fn handle(&self, req: &HttpRequest<AppState>) -> Self::Result {
         let state: State<AppState> = State::from_request(&req, &());
         let song_id_path: Path<Uuid> =
             Path::from_request(&req, &()).expect("song id path parameter missing");

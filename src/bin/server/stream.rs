@@ -1,12 +1,13 @@
 use actix_web;
-use actix_web::error::HttpRangeError;
 use actix_web::http::header;
-use actix_web::http::HttpRange;
 use actix_web::http::StatusCode;
 use actix_web::HttpMessage;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
+
+use http_range::HttpRange;
+use http_range::HttpRangeParseError;
 
 use bytes::BufMut;
 use bytes::Bytes;
@@ -63,7 +64,12 @@ where
     type Error = actix_web::Error;
 
     fn respond_to<S: 'static>(self, req: &HttpRequest<S>) -> Result<Self::Item, Self::Error> {
-        let response = match req.range(self.size) {
+        let ranges_result = match ranges(req, self.size) {
+            Some(result) => result,
+            None => return Ok(HttpResponse::build(StatusCode::BAD_REQUEST).finish()),
+        };
+
+        let response = match ranges_result {
             Ok(ref ranges) if ranges.len() > 0 => {
                 let range = ranges[0];
                 HttpResponse::build(StatusCode::PARTIAL_CONTENT)
@@ -92,8 +98,8 @@ where
                     },
                     req.cpu_pool().clone(),
                 )),
-            Err(HttpRangeError::InvalidRange) => HttpResponse::RangeNotSatisfiable().finish(),
-            Err(HttpRangeError::NoOverlap) => {
+            Err(HttpRangeParseError::InvalidRange) => HttpResponse::RangeNotSatisfiable().finish(),
+            Err(HttpRangeParseError::NoOverlap) => {
                 HttpResponse::build(StatusCode::RANGE_NOT_SATISFIABLE)
                     .header(header::CONTENT_RANGE, format!("bytes */{}", self.size))
                     .finish()
@@ -101,6 +107,22 @@ where
         };
 
         Ok(response)
+    }
+}
+
+fn ranges<S>(
+    req: &HttpRequest<S>,
+    size: u64,
+) -> Option<Result<Vec<HttpRange>, HttpRangeParseError>> {
+    let range_header = req.headers().get(header::RANGE);
+
+    match range_header {
+        Some(range) => range
+            .to_str()
+            .ok()
+            .map(|range_str| HttpRange::parse(range_str, size)),
+
+        None => Some(Ok(Vec::new())),
     }
 }
 

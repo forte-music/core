@@ -33,15 +33,15 @@ mod errors {
 }
 
 pub struct AppState {
-    pub executor: Addr<Syn, GraphQLExecutor>,
+    pub executor: Addr<GraphQLExecutor>,
     pub connection_pool: context::Pool,
-    pub transcoder: Addr<Syn, Transcoder>,
+    pub transcoder: Addr<Transcoder>,
 }
 
 impl AppState {
     pub fn new(
-        executor: Addr<Syn, GraphQLExecutor>,
-        transcoder: Addr<Syn, Transcoder>,
+        executor: Addr<GraphQLExecutor>,
+        transcoder: Addr<Transcoder>,
         connection_pool: context::Pool,
     ) -> AppState {
         AppState {
@@ -91,10 +91,10 @@ impl Handler<ResolveMessage> for GraphQLExecutor {
     }
 }
 
-pub fn graphql(
-    state: State<AppState>,
-    request: Json<GraphQLRequest>,
-) -> FutureResponse<HttpResponse> {
+pub fn graphql(params: (State<AppState>, Json<GraphQLRequest>)) -> FutureResponse<HttpResponse> {
+    let state = params.0;
+    let request = params.1;
+
     let context_future = futures::done(
         state
             .build_context()
@@ -123,7 +123,7 @@ pub fn graphql(
         .responder()
 }
 
-pub fn graphiql<S>(_req: HttpRequest<S>) -> HttpResponse {
+pub fn graphiql<S: 'static>(_req: &HttpRequest<S>) -> HttpResponse {
     let html = graphiql_source("/graphql");
 
     HttpResponse::Ok()

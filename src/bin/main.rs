@@ -24,6 +24,7 @@ extern crate rand;
 extern crate futures;
 extern crate core;
 extern crate futures_cpupool;
+extern crate http_range;
 extern crate juniper;
 extern crate serde;
 extern crate serde_json;

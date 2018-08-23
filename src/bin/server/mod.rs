@@ -39,23 +39,22 @@ pub fn serve(
     let gql_executor = SyncArbiter::start(3, move || GraphQLExecutor::new(schema.clone()));
 
     let transcoder = Transcoder::new(transcode_cache, temp_files);
-    let transcoder_addr: Addr<Syn, Transcoder> = transcoder.start();
+    let transcoder_addr: Addr<Transcoder> = transcoder.start();
 
     server::new(move || {
         App::with_state(AppState::new(
             gql_executor.clone(),
             transcoder_addr.clone(),
             pool.clone(),
-        )).resource("/graphql", |r| r.method(http::Method::POST).with2(graphql))
-            .resource("/", |r| r.method(http::Method::GET).h(graphiql))
+        )).resource("/graphql", |r| r.method(http::Method::POST).with(graphql))
+            .resource("/", |r| r.method(http::Method::GET).f(graphiql))
             .register_transcode_handler(TranscodeTarget::MP3V0)
             .register_transcode_handler(TranscodeTarget::AACV5)
             .resource(&Song::get_raw_stream_url("{id}"), |r| {
-                r.method(http::Method::GET).with2(streaming::song_handler)
+                r.method(http::Method::GET).with(streaming::song_handler)
             })
             .resource(&Album::get_artwork_url("{id}"), |r| {
-                r.method(http::Method::GET)
-                    .with2(streaming::artwork_handler)
+                r.method(http::Method::GET).with(streaming::artwork_handler)
             })
     }).bind(host)
         .unwrap()
