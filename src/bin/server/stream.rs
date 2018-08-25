@@ -9,9 +9,7 @@ use actix_web::Responder;
 use http_range::HttpRange;
 use http_range::HttpRangeParseError;
 
-use bytes::BufMut;
 use bytes::Bytes;
-use bytes::BytesMut;
 
 use futures::Async;
 use futures::Future;
@@ -210,16 +208,15 @@ where
 
         self.future = Some(self.cpu_pool.spawn_fn(move || {
             let chunk_size = u64::min(upper_bound - offset, chunk_size) as usize;
-            let mut buffer = BytesMut::with_capacity(chunk_size);
+            let mut buffer = vec![0; chunk_size];
 
             inner_stream.seek(SeekFrom::Start(offset))?;
-            let bytes_read = inner_stream.read(unsafe { buffer.bytes_mut() })?;
+            let bytes_read = inner_stream.read(&mut buffer)?;
             if bytes_read == 0 {
                 return Err(io::ErrorKind::UnexpectedEof.into());
             }
-            unsafe { buffer.advance_mut(bytes_read) };
 
-            Ok((inner_stream, buffer.freeze()))
+            Ok((inner_stream, Bytes::from(buffer)))
         }));
 
         self.wait_for_future()
