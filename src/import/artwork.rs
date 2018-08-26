@@ -135,7 +135,8 @@ impl<'a> ImageInfo<'a> {
 
 /// Finds PNGs and JPEGs which are squares in the directory at `path`.
 fn find_covers_in_path(path: &Path) -> Result<Vec<ImageInfo<'static>>> {
-    let images = path.read_dir()?
+    let images = path
+        .read_dir()?
         .filter_map(|e| e.ok())
         .filter_map(|file| {
             let path = file.path();

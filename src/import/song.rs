@@ -6,9 +6,9 @@ use chrono::prelude::*;
 use database::song;
 use database::song_artist;
 use diesel;
-use diesel::Connection;
 use diesel::prelude::*;
 use diesel::result;
+use diesel::Connection;
 
 use models::*;
 

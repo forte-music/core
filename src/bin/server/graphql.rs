@@ -7,19 +7,21 @@ use forte_core::models::Schema;
 
 use actix::prelude::*;
 
+use actix_web::error;
 use actix_web::AsyncResponder;
 use actix_web::FutureResponse;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Json;
 use actix_web::State;
-use actix_web::error;
 
 use serde_json;
 use std::sync::Arc;
 
 use futures;
 use futures::Future;
+
+use server::transcoder::Transcoder;
 
 mod errors {
     error_chain! {
@@ -31,14 +33,20 @@ mod errors {
 }
 
 pub struct AppState {
-    pub executor: Addr<Syn, GraphQLExecutor>,
+    pub executor: Addr<GraphQLExecutor>,
     pub connection_pool: context::Pool,
+    pub transcoder: Addr<Transcoder>,
 }
 
 impl AppState {
-    pub fn new(executor: Addr<Syn, GraphQLExecutor>, connection_pool: context::Pool) -> AppState {
+    pub fn new(
+        executor: Addr<GraphQLExecutor>,
+        transcoder: Addr<Transcoder>,
+        connection_pool: context::Pool,
+    ) -> AppState {
         AppState {
             executor,
+            transcoder,
             connection_pool,
         }
     }
@@ -83,10 +91,10 @@ impl Handler<ResolveMessage> for GraphQLExecutor {
     }
 }
 
-pub fn graphql(
-    state: State<AppState>,
-    request: Json<GraphQLRequest>,
-) -> FutureResponse<HttpResponse> {
+pub fn graphql(params: (State<AppState>, Json<GraphQLRequest>)) -> FutureResponse<HttpResponse> {
+    let state = params.0;
+    let request = params.1;
+
     let context_future = futures::done(
         state
             .build_context()
@@ -115,7 +123,7 @@ pub fn graphql(
         .responder()
 }
 
-pub fn graphiql<S>(_req: HttpRequest<S>) -> HttpResponse {
+pub fn graphiql<S: 'static>(_req: &HttpRequest<S>) -> HttpResponse {
     let html = graphiql_source("/graphql");
 
     HttpResponse::Ok()

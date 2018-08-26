@@ -1,11 +1,10 @@
 use forte_core::models::song::Song;
 
 use actix_web;
+use actix_web::error;
 use actix_web::Path;
 use actix_web::Result;
 use actix_web::State;
-use actix_web::error;
-use actix_web::fs::NamedFile;
 
 use server::graphql::AppState;
 
@@ -15,6 +14,7 @@ use uuid::Uuid;
 
 use diesel;
 use forte_core::models::album::Album;
+use server::files::FileStream;
 
 fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {
     match err {
@@ -23,17 +23,23 @@ fn convert_diesel_err(err: diesel::result::Error) -> actix_web::Error {
     }
 }
 
-pub fn song_handler(state: State<AppState>, song_id: Path<Uuid>) -> Result<NamedFile> {
+pub fn song_handler(params: (State<AppState>, Path<Uuid>)) -> Result<FileStream> {
+    let state = params.0;
+    let song_id = params.1;
+
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
 
     let song = Song::from_id(&context, &song_id.into_inner().into()).map_err(convert_diesel_err)?;
 
-    Ok(NamedFile::open(&song.path.deref())?)
+    Ok(FileStream::open(&song.path.deref())?)
 }
 
-pub fn artwork_handler(state: State<AppState>, album_id: Path<Uuid>) -> Result<NamedFile> {
+pub fn artwork_handler(params: (State<AppState>, Path<Uuid>)) -> Result<FileStream> {
+    let state = params.0;
+    let album_id = params.1;
+
     let context = state
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
@@ -44,5 +50,5 @@ pub fn artwork_handler(state: State<AppState>, album_id: Path<Uuid>) -> Result<N
         .artwork_path
         .ok_or(error::ErrorNotFound("no artwork"))?;
 
-    Ok(NamedFile::open(&artwork_path.deref())?)
+    Ok(FileStream::open(&artwork_path.deref())?)
 }

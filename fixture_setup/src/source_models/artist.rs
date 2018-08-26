@@ -17,7 +17,8 @@ impl Into<Artist> for ArtistSource {
             id: self.id.into(),
             name: self.name,
             time_added: self.time_added.unwrap_or(0).into_time(),
-            last_played: self.stats
+            last_played: self
+                .stats
                 .and_then(|stats| stats.last_played)
                 .map(|t| t.into_time()),
         }

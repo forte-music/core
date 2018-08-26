@@ -16,10 +16,19 @@ extern crate walkdir;
 
 extern crate actix;
 extern crate actix_web;
+extern crate bytes;
+extern crate lru_disk_cache;
+extern crate mime_guess;
+extern crate rand;
+#[macro_use]
 extern crate futures;
+extern crate core;
+extern crate futures_cpupool;
+extern crate http_range;
 extern crate juniper;
 extern crate serde;
 extern crate serde_json;
+extern crate tokio_process;
 extern crate uuid;
 
 pub mod server;
@@ -28,15 +37,17 @@ pub mod sync;
 use std::ops::Deref;
 use std::path::PathBuf;
 
+use server::temp::TemporaryFiles;
+
 use structopt::StructOpt;
 
+use app_dirs::app_root;
 use app_dirs::AppDataType;
 use app_dirs::AppInfo;
-use app_dirs::app_root;
 
 use error_chain::ChainedError;
-
 use forte_core::context;
+use lru_disk_cache::LruDiskCache;
 use std::fs;
 
 embed_migrations!("./migrations");
@@ -47,6 +58,7 @@ error_chain! {
         AppDirs(::app_dirs::AppDirsError);
         DieselMigration(::diesel_migrations::RunMigrationsError);
         Io(::std::io::Error);
+        LruDiskCache(::lru_disk_cache::Error);
     }
 
     links {
@@ -120,9 +132,14 @@ fn run() -> Result<()> {
     embedded_migrations::run(pool.get()?.deref())?;
 
     match opt.command {
-        Command::Serve { host } => Ok(server::serve(pool, &host)),
+        Command::Serve { host } => {
+            let transcode_cache = make_transcode_cache(app_dir)?;
+            let temporary_files = TemporaryFiles::new("forte")?;
+
+            Ok(server::serve(pool, &host, transcode_cache, temporary_files))
+        }
         Command::Sync { directory } => {
-            let mut artwork_directory = app_dir.clone();
+            let mut artwork_directory = app_dir;
             artwork_directory.push("artwork");
             fs::create_dir_all(&artwork_directory)?;
 
@@ -131,4 +148,16 @@ fn run() -> Result<()> {
     }?;
 
     Ok(())
+}
+
+fn make_transcode_cache(app_dir: PathBuf) -> Result<LruDiskCache> {
+    let mut transcode_cache_path = app_dir;
+    transcode_cache_path.push("transcode-cache");
+
+    let transcode_cache_size = 100_000_000_u64; // 100 MB
+
+    Ok(LruDiskCache::new(
+        transcode_cache_path,
+        transcode_cache_size,
+    )?)
 }

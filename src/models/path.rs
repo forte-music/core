@@ -57,3 +57,9 @@ impl<'a> From<&'a Path> for PathWrapper {
         PathWrapper(path.to_owned())
     }
 }
+
+impl Into<PathBuf> for PathWrapper {
+    fn into(self) -> PathBuf {
+        self.0
+    }
+}

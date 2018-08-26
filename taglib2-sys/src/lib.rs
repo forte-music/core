@@ -108,7 +108,8 @@ impl SongProperties {
             return Err(ErrorKind::InvalidPathError(path.to_path_buf()).into());
         }
 
-        let file_name = path.to_str()
+        let file_name = path
+            .to_str()
             .ok_or(Error::from(ErrorKind::ConvertPathToStringError(
                 path.to_path_buf(),
             )))?;
