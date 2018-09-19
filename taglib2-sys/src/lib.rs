@@ -23,11 +23,6 @@ error_chain! {
             description("the path point to a directory instead of a file")
             display("the path '{}' points to a directory instead of a file", path.display())
         }
-
-        ConvertPathToStringError(path: PathBuf) {
-            description("failed to convert the path to a string")
-            display("the path '{}' couldn't be converted", path.display())
-        }
     }
 }
 
@@ -103,17 +98,15 @@ pub struct SongProperties {
 }
 
 impl SongProperties {
+    #[cfg(unix)]
     pub fn read(path: &Path) -> Result<Option<SongProperties>> {
+        use std::os::unix::ffi::OsStrExt;
+
         if path.is_dir() {
             return Err(ErrorKind::InvalidPathError(path.to_path_buf()).into());
         }
 
-        let file_name = path
-            .to_str()
-            .ok_or(Error::from(ErrorKind::ConvertPathToStringError(
-                path.to_path_buf(),
-            )))?;
-
+        let file_name = path.as_os_str().as_bytes();
         let file_name_c = CString::new(file_name)?;
         let props_c = match unsafe { song_properties(file_name_c.as_ptr()).as_ref() } {
             Some(props_c) => props_c,
