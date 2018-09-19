@@ -3,19 +3,20 @@ use diesel::deserialize;
 use diesel::deserialize::FromSql;
 use diesel::serialize;
 use diesel::serialize::Output;
+use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
-use diesel::sql_types::Text;
 
 use std::io::Write;
 
 use diesel::sqlite::Sqlite;
 use diesel::types::ToSql;
+use std::ffi::OsString;
 use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Debug, AsExpression, FromSqlRow, Clone)]
-#[sql_type = "Text"]
+#[sql_type = "Binary"]
 pub struct PathWrapper(PathBuf);
 
 impl PathWrapper {
@@ -32,17 +33,24 @@ impl Deref for PathWrapper {
     }
 }
 
-impl<DB: Backend + HasSqlType<Text>> ToSql<Text, DB> for PathWrapper {
+impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for PathWrapper {
+    #[cfg(unix)]
     fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
-        let text = self.0.to_str().unwrap().to_owned();
-        <String as ToSql<Text, DB>>::to_sql(&text, out)
+        use std::os::unix::ffi::OsStrExt;
+
+        let bytes = self.0.as_os_str().as_bytes();
+        <[u8] as ToSql<Binary, DB>>::to_sql(bytes, out)
     }
 }
 
-impl FromSql<Text, Sqlite> for PathWrapper {
+impl FromSql<Binary, Sqlite> for PathWrapper {
+    #[cfg(unix)]
     fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> deserialize::Result<Self> {
-        let string: String = <String as FromSql<Text, Sqlite>>::from_sql(bytes)?;
-        Ok(PathWrapper(Path::new(&string).to_owned()))
+        use std::os::unix::ffi::OsStringExt;
+
+        let raw = <Vec<u8> as FromSql<Binary, Sqlite>>::from_sql(bytes)?;
+        let os_string = OsString::from_vec(raw);
+        Ok(PathWrapper(Path::new(&os_string).to_owned()))
     }
 }
 

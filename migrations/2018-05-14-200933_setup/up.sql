@@ -1,6 +1,6 @@
 CREATE TABLE album (
   id BINARY(128) PRIMARY KEY NOT NULL,
-  artwork_path TEXT,
+  artwork_path BLOB,
   name TEXT NOT NULL,
   artist_id BINARY(128) NOT NULL REFERENCES artist(id),
   release_year INTEGER,
@@ -38,7 +38,7 @@ CREATE TABLE song (
   play_count INTEGER NOT NULL,
   last_played TIMESTAMP,
   liked BOOLEAN NOT NULL,
-  path TEXT UNIQUE NOT NULL,
+  path BLOB UNIQUE NOT NULL,
 
   UNIQUE(track_number, disk_number, album_id)
 );

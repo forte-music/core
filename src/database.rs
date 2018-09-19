@@ -1,7 +1,7 @@
 table! {
     album (id) {
         id -> Binary,
-        artwork_path -> Nullable<Text>,
+        artwork_path -> Nullable<Binary>,
         name -> Text,
         artist_id -> Binary,
         release_year -> Nullable<Integer>,
@@ -31,7 +31,7 @@ table! {
         play_count -> Integer,
         last_played -> Nullable<Timestamp>,
         liked -> Bool,
-        path -> Text,
+        path -> Binary,
     }
 }
 
