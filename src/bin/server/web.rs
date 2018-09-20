@@ -1,5 +1,5 @@
 use actix_web::{App, HttpRequest, HttpResponse, http::Method };
-use mime_guess::guess_mime_type;
+use mime_guess;
 use server::graphql::AppState;
 use server::WebHandlerAppExt;
 
@@ -11,7 +11,7 @@ struct WebAssets;
 fn handle_embedded_file(path: &str) -> HttpResponse {
     match WebAssets::get(path) {
         Some(content) => HttpResponse::Ok()
-            .content_type(guess_mime_type(path).to_string())
+            .content_type(mime_guess::guess_mime_type(path).to_string())
             .body(content),
         None => HttpResponse::NotFound().body("404 Not Found"),
     }
