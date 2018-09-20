@@ -1,4 +1,4 @@
-use actix_web::{App, HttpRequest, HttpResponse, http::Method };
+use actix_web::{http::Method, App, HttpRequest, HttpResponse};
 use mime_guess;
 use server::graphql::AppState;
 use server::WebHandlerAppExt;
@@ -30,7 +30,10 @@ pub fn web_interface<S>(req: HttpRequest<S>) -> HttpResponse {
 
 impl WebHandlerAppExt for App<AppState> {
     fn register_web_interface_handler(self) -> Self {
-        self.route("/", Method::GET, web_interface_index)
-            .route("/{_:.*}", Method::GET, web_interface)
+        self.route("/", Method::GET, web_interface_index).route(
+            "/{_:.*}",
+            Method::GET,
+            web_interface,
+        )
     }
 }
