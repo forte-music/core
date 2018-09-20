@@ -1,5 +1,7 @@
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::{App, HttpRequest, HttpResponse, http::Method };
 use mime_guess::guess_mime_type;
+use server::graphql::AppState;
+use server::WebHandlerAppExt;
 
 #[derive(RustEmbed)]
 #[folder = "web/"]
@@ -24,4 +26,11 @@ pub fn web_interface_index<S>(_req: HttpRequest<S>) -> HttpResponse {
 pub fn web_interface<S>(req: HttpRequest<S>) -> HttpResponse {
     // Trim the preceding `/` in path
     handle_embedded_file(&req.path()[1..])
+}
+
+impl WebHandlerAppExt for App<AppState> {
+    fn register_web_interface_handler(self) -> Self {
+        self.route("/", Method::GET, web_interface_index)
+            .route("/{_:.*}", Method::GET, web_interface)
+    }
 }

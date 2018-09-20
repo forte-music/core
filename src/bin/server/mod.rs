@@ -45,7 +45,7 @@ pub fn serve(
     let transcoder_addr: Addr<Transcoder> = transcoder.start();
 
     server::new(move || {
-        let app = App::with_state(AppState::new(
+        App::with_state(AppState::new(
             gql_executor.clone(),
             transcoder_addr.clone(),
             pool.clone(),
@@ -58,14 +58,8 @@ pub fn serve(
             })
             .resource(&Album::get_artwork_url("{id}"), |r| {
                 r.method(http::Method::GET).with(streaming::artwork_handler)
-            });
-
-        #[cfg(feature = "embed_web")]
-        let app = app
-            .route("/", http::Method::GET, web::web_interface_index)
-            .route("/{_:.*}", http::Method::GET, web::web_interface);
-
-        app
+            })
+            .register_web_interface_handler()
     }).bind(host)
         .unwrap()
         .start();
@@ -73,4 +67,17 @@ pub fn serve(
     println!("Started Server on {}", host);
 
     let _ = sys.run();
+}
+
+pub trait WebHandlerAppExt {
+    /// Register the web interface handlers, if the embedded web interface is enabled
+    fn register_web_interface_handler(self) -> Self;
+}
+
+/// Do nothing when the embedded web interface is not enabled
+#[cfg(not(feature = "embed_web"))]
+impl WebHandlerAppExt for App<AppState> {
+    fn register_web_interface_handler(self) -> Self {
+        self
+    }
 }
