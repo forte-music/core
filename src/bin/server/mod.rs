@@ -55,7 +55,8 @@ pub fn serve(
             .register_transcode_handler(TranscodeTarget::AACV5)
             .resource(&Song::get_raw_stream_url("{id}"), |r| {
                 r.method(http::Method::GET).with(streaming::song_handler)
-            }).resource(&Album::get_artwork_url("{id}"), |r| {
+            })
+            .resource(&Album::get_artwork_url("{id}"), |r| {
                 r.method(http::Method::GET).with(streaming::artwork_handler)
             });
 
