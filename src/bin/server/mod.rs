@@ -10,6 +10,9 @@ pub mod temp;
 mod transcoder;
 mod transcoding;
 
+#[cfg(feature = "embed_web")]
+mod web;
+
 use forte_core::context;
 use forte_core::models::{create_schema, Album, Song};
 
@@ -42,23 +45,29 @@ pub fn serve(
     let transcoder_addr: Addr<Transcoder> = transcoder.start();
 
     server::new(move || {
-        App::with_state(AppState::new(
+        let app = App::with_state(AppState::new(
             gql_executor.clone(),
             transcoder_addr.clone(),
             pool.clone(),
         )).resource("/graphql", |r| r.method(http::Method::POST).with(graphql))
-            .resource("/", |r| r.method(http::Method::GET).f(graphiql))
-            .register_transcode_handler(TranscodeTarget::MP3V0)
-            .register_transcode_handler(TranscodeTarget::AACV5)
-            .resource(&Song::get_raw_stream_url("{id}"), |r| {
-                r.method(http::Method::GET).with(streaming::song_handler)
-            })
-            .resource(&Album::get_artwork_url("{id}"), |r| {
-                r.method(http::Method::GET).with(streaming::artwork_handler)
-            })
+        .resource("/graphiql", |r| r.method(http::Method::GET).f(graphiql))
+        .register_transcode_handler(TranscodeTarget::MP3V0)
+        .register_transcode_handler(TranscodeTarget::AACV5)
+        .resource(&Song::get_raw_stream_url("{id}"), |r| {
+            r.method(http::Method::GET).with(streaming::song_handler)
+        }).resource(&Album::get_artwork_url("{id}"), |r| {
+            r.method(http::Method::GET).with(streaming::artwork_handler)
+        });
+
+        #[cfg(feature = "embed_web")]
+        let app = app
+            .route("/", http::Method::GET, web::web_interface_index)
+            .route("/{_:.*}", http::Method::GET, web::web_interface);
+
+        app
     }).bind(host)
-        .unwrap()
-        .start();
+    .unwrap()
+    .start();
 
     println!("Started Server on {}", host);
 
