@@ -50,14 +50,14 @@ pub fn serve(
             transcoder_addr.clone(),
             pool.clone(),
         )).resource("/graphql", |r| r.method(http::Method::POST).with(graphql))
-        .resource("/graphiql", |r| r.method(http::Method::GET).f(graphiql))
-        .register_transcode_handler(TranscodeTarget::MP3V0)
-        .register_transcode_handler(TranscodeTarget::AACV5)
-        .resource(&Song::get_raw_stream_url("{id}"), |r| {
-            r.method(http::Method::GET).with(streaming::song_handler)
-        }).resource(&Album::get_artwork_url("{id}"), |r| {
-            r.method(http::Method::GET).with(streaming::artwork_handler)
-        });
+            .resource("/graphiql", |r| r.method(http::Method::GET).f(graphiql))
+            .register_transcode_handler(TranscodeTarget::MP3V0)
+            .register_transcode_handler(TranscodeTarget::AACV5)
+            .resource(&Song::get_raw_stream_url("{id}"), |r| {
+                r.method(http::Method::GET).with(streaming::song_handler)
+            }).resource(&Album::get_artwork_url("{id}"), |r| {
+                r.method(http::Method::GET).with(streaming::artwork_handler)
+            });
 
         #[cfg(feature = "embed_web")]
         let app = app
@@ -66,8 +66,8 @@ pub fn serve(
 
         app
     }).bind(host)
-    .unwrap()
-    .start();
+        .unwrap()
+        .start();
 
     println!("Started Server on {}", host);
 
