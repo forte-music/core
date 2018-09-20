@@ -197,4 +197,4 @@ workflows:
       - download_web
       - build_artifacts:
           requires:
-            download_web
+            - download_web
