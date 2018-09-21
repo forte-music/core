@@ -31,6 +31,10 @@ extern crate serde_json;
 extern crate tokio_process;
 extern crate uuid;
 
+#[cfg(feature = "embed_web")]
+#[macro_use]
+extern crate rust_embed;
+
 pub mod server;
 pub mod sync;
 

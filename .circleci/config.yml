@@ -12,6 +12,16 @@ aliases:
     keys:
       - v4-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
 
+  - &save_artifact_cache
+    key: v1-artifact-{{ checksum "Cargo.lock" }}
+    paths:
+    - target
+    - ~/.cargo
+
+  - &restore_artifact_cache
+    keys:
+    - v1-artifact-{{ checksum "Cargo.lock" }}
+
   - &save_yarn_cache
     key: yarn-{{ checksum "fixture_setup/yarn.lock" }}
     paths:
@@ -131,6 +141,51 @@ jobs:
             wait-for --timeout=3600 localhost:8080 -- echo "Core started"
             yarn run forte-test-api http://localhost:8080/graphql --runInBand
 
+  download_web:
+    docker:
+    - image: garland/aws-cli-docker:1.15.47
+
+    steps:
+      - run:
+          name: Download Web
+          command: aws s3 cp s3://forte-web-artifacts/master/forte-web.tar.gz .
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - forte-web.tar.gz
+
+  build_artifacts:
+    docker:
+    - image: fortemusic/core-build
+
+    steps:
+      - checkout
+
+      - run:
+          name: Checkout Git Submodules
+          command: git submodule update --init
+
+      - restore_cache: *restore_artifact_cache
+
+      - attach_workspace:
+          at: ~/project
+
+      - run:
+          name: Unpack Web
+          command: |
+            mkdir web
+            tar -xzf forte-web.tar.gz -C web
+
+      - run:
+          name: Compile Core With Web
+          command: cargo build --release --features embed_web
+
+      - save_cache: *save_artifact_cache
+
+      - store_artifacts:
+          path: target/release/forte
+
 workflows:
   version: 2
   test:
@@ -139,3 +194,7 @@ workflows:
       - integration-test:
           requires:
             - build
+      - download_web
+      - build_artifacts:
+          requires:
+            - download_web
