@@ -18,7 +18,10 @@ pub fn add_or_get_album(
     artist_id: UUID,
     conn: &SqliteConnection,
 ) -> errors::Result<Album> {
-    let name = props.album.as_ref().ok_or(errors::ErrorKind::NoAlbumError)?;
+    let name = props
+        .album
+        .as_ref()
+        .ok_or(errors::ErrorKind::NoAlbumError)?;
 
     let album: Option<Album> = album::table
         .filter(album::name.eq(name))
