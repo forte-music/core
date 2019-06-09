@@ -49,20 +49,22 @@ pub fn serve(
             gql_executor.clone(),
             transcoder_addr.clone(),
             pool.clone(),
-        )).resource("/graphql", |r| r.method(http::Method::POST).with(graphql))
-            .resource("/graphiql", |r| r.method(http::Method::GET).f(graphiql))
-            .register_transcode_handler(TranscodeTarget::MP3V0)
-            .register_transcode_handler(TranscodeTarget::AACV5)
-            .resource(&Song::get_raw_stream_url("{id}"), |r| {
-                r.method(http::Method::GET).with(streaming::song_handler)
-            })
-            .resource(&Album::get_artwork_url("{id}"), |r| {
-                r.method(http::Method::GET).with(streaming::artwork_handler)
-            })
-            .register_web_interface_handler()
-    }).bind(host)
-        .unwrap()
-        .start();
+        ))
+        .resource("/graphql", |r| r.method(http::Method::POST).with(graphql))
+        .resource("/graphiql", |r| r.method(http::Method::GET).f(graphiql))
+        .register_transcode_handler(TranscodeTarget::MP3V0)
+        .register_transcode_handler(TranscodeTarget::AACV5)
+        .resource(&Song::get_raw_stream_url("{id}"), |r| {
+            r.method(http::Method::GET).with(streaming::song_handler)
+        })
+        .resource(&Album::get_artwork_url("{id}"), |r| {
+            r.method(http::Method::GET).with(streaming::artwork_handler)
+        })
+        .register_web_interface_handler()
+    })
+    .bind(host)
+    .unwrap()
+    .start();
 
     println!("Started Server on {}", host);
 
