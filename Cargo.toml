@@ -15,7 +15,7 @@ path = "src/bin/main.rs"
 embed_web = ["rust-embed"]
 
 [dependencies]
-r2d2 = "0.8.0"
+r2d2 = "0.8.5"
 r2d2-diesel = "1.0.0"
 diesel_migrations = "1.3.0"
 diesel = { version = "1.3.3", features = ["sqlite", "chrono"] }
