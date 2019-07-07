@@ -32,7 +32,7 @@ tokio-process = "0.2.2"
 serde = "1.0.94"
 serde_json = "1.0.27"
 serde_derive = "1.0.73"
-juniper = "0.9.2"
+juniper = "0.12.0"
 mime_guess = "1.8.6"
 taglib2-sys = { path = "taglib2-sys" }
 image = "0.19.0"
