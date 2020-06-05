@@ -77,9 +77,13 @@ impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for UUID {
     }
 }
 
-impl FromSql<Binary, Sqlite> for UUID {
+impl<DB> FromSql<Binary, DB> for UUID
+where
+    DB: Backend + HasSqlType<Binary>,
+    Vec<u8>: FromSql<Binary, DB>,
+{
     fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> deserialize::Result<Self> {
-        let bytes_vec: Vec<u8> = <Vec<u8> as FromSql<Binary, Sqlite>>::from_sql(bytes)?;
+        let bytes_vec = Vec::<u8>::from_sql(bytes)?;
         Ok(UUID(Uuid::from_bytes(&bytes_vec)?))
     }
 }
