@@ -1,7 +1,8 @@
 [package]
 name = "taglib2-sys"
 version = "0.1.0"
-authors = ["Mcat12 <newtoncat12@yahoo.com>"]
+authors = ["Mark Drobnak <mark.drobnak@gmail.com>"]
+edition = "2018"
 
 [build-dependencies]
 cmake = "0.1"

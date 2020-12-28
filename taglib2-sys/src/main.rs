@@ -1,5 +1,3 @@
-extern crate taglib2_sys;
-
 use std::env;
 use std::path::Path;
 use taglib2_sys::SongProperties;

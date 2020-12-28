@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate error_chain;
 
-extern crate mime;
-
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fmt::Debug;
@@ -79,7 +77,7 @@ impl Picture {
 }
 
 impl Debug for Picture {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "MIME: {:?}", self.mime)
     }
 }
