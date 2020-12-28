@@ -48,4 +48,4 @@ structopt = "0.2"
 app_dirs = "1.2"
 futures = "0.1"
 error-chain = "0.12"
-rust-embed = { version = "3.0", optional = true }
+rust-embed = { version = "5.7", optional = true }
