@@ -871,7 +871,7 @@ dependencies = [
  "mime_guess",
  "r2d2",
  "r2d2-diesel",
- "rand 0.5.6",
+ "rand 0.7.3",
  "rust-embed",
  "serde",
  "serde_derive",
