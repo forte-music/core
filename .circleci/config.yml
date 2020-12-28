@@ -2,15 +2,14 @@ version: 2
 
 aliases:
   - &save_cargo_cache
-    key: v4-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+    key: v5-cargo-{{ checksum "Cargo.lock" }}
     paths:
       - target
-      - fixture_setup/target
       - ~/.cargo
 
   - &restore_cargo_cache
     keys:
-      - v4-cargo-{{ checksum "Cargo.lock" }}-{{ checksum "fixture_setup/Cargo.lock" }}
+      - v5-cargo-{{ checksum "Cargo.lock" }}
 
   - &save_artifact_cache
     key: v1-artifact-{{ checksum "Cargo.lock" }}
@@ -124,7 +123,6 @@ jobs:
           name: Install Fixtures
           environment:
             DATABASE_URL: ../db.sqlite
-          working_directory: fixture_setup
           command: ./target/debug/fixture_setup
 
       - run:

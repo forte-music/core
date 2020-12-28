@@ -4,6 +4,12 @@ version = "0.1.0"
 authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>"]
 autobins = false
 
+[workspace]
+members = [
+    "taglib2-sys",
+    "fixture_setup"
+]
+
 [profile.release]
 lto = true
 
