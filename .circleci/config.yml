@@ -70,7 +70,7 @@ jobs:
           root: .
           paths:
             - target/debug/forte
-            - fixture_setup/target/debug/fixture_setup
+            - target/debug/fixture_setup
 
   integration-test:
     docker:
