@@ -82,7 +82,7 @@ where
     DB: Backend + HasSqlType<Binary>,
     Vec<u8>: FromSql<Binary, DB>,
 {
-    fn from_sql(bytes: Option<&<Sqlite as Backend>::RawValue>) -> deserialize::Result<Self> {
+    fn from_sql(bytes: Option<&<DB as Backend>::RawValue>) -> deserialize::Result<Self> {
         let bytes_vec = Vec::<u8>::from_sql(bytes)?;
         Ok(UUID(Uuid::from_bytes(&bytes_vec)?))
     }
