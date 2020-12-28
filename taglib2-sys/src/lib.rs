@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate error_chain;
-
+use mime::Mime;
 use std::ffi::{CStr, CString};
 use std::fmt;
 use std::fmt::Debug;
@@ -8,20 +6,15 @@ use std::fmt::Formatter;
 use std::os::raw::c_char;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use thiserror::Error;
 
-use mime::Mime;
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("the path '{}' points to a directory instead of a file", .0.display())]
+    InvalidPathError(PathBuf),
 
-error_chain! {
-    foreign_links {
-        NulError(::std::ffi::NulError);
-    }
-
-    errors {
-        InvalidPathError(path: PathBuf) {
-            description("the path point to a directory instead of a file")
-            display("the path '{}' points to a directory instead of a file", path.display())
-        }
-    }
+    #[error(transparent)]
+    NulError(#[from] std::ffi::NulError),
 }
 
 unsafe fn from_cstr(cstr: *const c_char) -> Option<String> {
@@ -97,11 +90,11 @@ pub struct SongProperties {
 
 impl SongProperties {
     #[cfg(unix)]
-    pub fn read(path: &Path) -> Result<Option<SongProperties>> {
+    pub fn read(path: &Path) -> Result<Option<SongProperties>, Error> {
         use std::os::unix::ffi::OsStrExt;
 
         if path.is_dir() {
-            return Err(ErrorKind::InvalidPathError(path.to_path_buf()).into());
+            return Err(Error::InvalidPathError(path.to_path_buf()).into());
         }
 
         let file_name = path.as_os_str().as_bytes();

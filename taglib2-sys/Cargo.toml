@@ -9,5 +9,5 @@ cmake = "0.1"
 cc = "1.0"
 
 [dependencies]
-error-chain = "0.12"
 mime = "0.3"
+thiserror = "1.0"

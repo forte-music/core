@@ -17,13 +17,13 @@ use self::indicatif::ProgressStyle;
 
 error_chain! {
     links {
-        Taglib(::taglib2_sys::Error, ::taglib2_sys::ErrorKind);
         Import(import::errors::Error, import::errors::ErrorKind);
     }
 
     foreign_links {
         R2d2(::r2d2::Error);
         WalkdirError(::walkdir::Error);
+        Taglib(::taglib2_sys::Error);
     }
 
     errors {
