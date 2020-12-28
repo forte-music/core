@@ -87,7 +87,7 @@ impl Transcoder {
                 ()
             });
 
-        let boxed_transcode_future: Box<Future<Item = (), Error = io::Error>> =
+        let boxed_transcode_future: Box<dyn Future<Item = (), Error = io::Error>> =
             Box::new(transcode_future);
 
         let shared_future = boxed_transcode_future.shared();
@@ -137,7 +137,7 @@ impl Actor for Transcoder {
 }
 
 impl Handler<TranscodeMessage> for Transcoder {
-    type Result = ResponseFuture<Box<ReadSeek>, errors::Error>;
+    type Result = ResponseFuture<Box<dyn ReadSeek>, errors::Error>;
 
     fn handle(&mut self, msg: TranscodeMessage, _ctx: &mut Self::Context) -> Self::Result {
         let disk_cache_ref = self.disk_cache.clone();
@@ -173,7 +173,7 @@ pub struct TranscodeMessage {
 }
 
 impl Message for TranscodeMessage {
-    type Result = errors::Result<Box<ReadSeek>>;
+    type Result = errors::Result<Box<dyn ReadSeek>>;
 }
 
 impl TranscodeMessage {

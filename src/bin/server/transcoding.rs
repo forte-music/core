@@ -63,7 +63,7 @@ impl TranscodedSongHandler {
 }
 
 impl Handler<AppState> for TranscodedSongHandler {
-    type Result = actix_web::FutureResponse<RangeStream<Box<ReadSeek>>>;
+    type Result = actix_web::FutureResponse<RangeStream<Box<dyn ReadSeek>>>;
 
     fn handle(&self, req: &HttpRequest<AppState>) -> Self::Result {
         let state: State<AppState> = State::from_request(&req, &());

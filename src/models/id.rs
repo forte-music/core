@@ -5,7 +5,6 @@ use diesel::serialize;
 use diesel::serialize::Output;
 use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
-use diesel::sqlite::Sqlite;
 use diesel::types::ToSql;
 
 use std::io::Write;
