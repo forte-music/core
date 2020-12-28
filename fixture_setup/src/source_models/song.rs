@@ -1,5 +1,6 @@
+use crate::source_models::*;
 use forte_core::models::*;
-use source_models::*;
+use serde::Deserialize;
 use std::path::Path;
 
 #[derive(Deserialize)]

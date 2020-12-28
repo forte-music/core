@@ -1,21 +1,17 @@
+use crate::errors::*;
+use crate::source_models::*;
 use diesel;
+use diesel::associations::HasTable;
+use diesel::prelude::*;
+use dotenv;
 use forte_core::context;
+use forte_core::database::song_artist;
+use forte_core::models::*;
 use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-
-use dotenv;
 use toml;
-
-use diesel::associations::HasTable;
-use diesel::prelude::*;
-
-use forte_core::database::song_artist;
-
-use errors::*;
-use forte_core::models::*;
-use source_models::*;
 
 /// Load the test data into the database.
 pub fn load() -> Result<()> {
