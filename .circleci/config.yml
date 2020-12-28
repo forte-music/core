@@ -35,7 +35,7 @@ aliases:
       cargo build
 
   - &lint_commands |
-      cargo fmt -- --check
+      cargo fmt -p forte_core taglib2-sys fixture_setup -- --check
 
 jobs:
   build:
@@ -52,17 +52,7 @@ jobs:
       - restore_cache: *restore_cargo_cache
 
       - run:
-          name: Check Formatting of forte_core
-          command: *lint_commands
-
-      - run:
-          name: Check Formatting of fixture_setup
-          working_directory: fixture_setup
-          command: *lint_commands
-
-      - run:
-          name: Check Formatting of taglib-sys
-          working_directory: taglib2-sys
+          name: Check Formatting
           command: *lint_commands
 
       - run:
