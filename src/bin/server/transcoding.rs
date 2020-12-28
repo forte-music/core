@@ -67,8 +67,7 @@ impl Handler<AppState> for TranscodedSongHandler {
 
     fn handle(&self, req: &HttpRequest<AppState>) -> Self::Result {
         let state: State<AppState> = State::from_request(&req, &());
-        let song_id_path: Path<Uuid> =
-            Path::extract(&req).expect("song id path parameter missing");
+        let song_id_path: Path<Uuid> = Path::extract(&req).expect("song id path parameter missing");
         let song_id = song_id_path.into_inner();
 
         future::done(self.make_message_for(song_id, &state))
