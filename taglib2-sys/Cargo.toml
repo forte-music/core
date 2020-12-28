@@ -4,9 +4,9 @@ version = "0.1.0"
 authors = ["Mcat12 <newtoncat12@yahoo.com>"]
 
 [build-dependencies]
-cmake = "0.1.33"
-cc = "1.0.20"
+cmake = "0.1"
+cc = "1.0"
 
 [dependencies]
-error-chain = "0.12.0"
-mime = "0.2.6"
+error-chain = "0.12"
+mime = "0.2"
