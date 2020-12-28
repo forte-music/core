@@ -41,7 +41,7 @@ serde_derive = "1.0"
 juniper = "0.9"
 mime_guess = "2.0"
 taglib2-sys = { path = "taglib2-sys" }
-image = "0.19"
+image = "0.21"
 walkdir = "2.2"
 indicatif = { git = "https://github.com/mitsuhiko/indicatif.git", rev = "950091d1b1683a88e01c4d4975f591009f56322b" }
 structopt = "0.2"
