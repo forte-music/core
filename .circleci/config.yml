@@ -113,7 +113,8 @@ jobs:
           name: Install Fixtures
           environment:
             DATABASE_URL: ../db.sqlite
-          command: ./target/debug/fixture_setup
+          working_directory: fixture_setup
+          command: ../target/debug/fixture_setup
 
       - run:
           name: Start Core
