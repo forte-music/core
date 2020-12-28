@@ -5,11 +5,12 @@ authors = ["Mark Drobnak <mark.drobnak@gmail.com>", "0xcaff <martincharles07@gma
 edition = "2018"
 
 [dependencies]
-diesel = { version = "1.0", features = ["sqlite"] }
-forte_core = { path = ".." }
-serde = { version = "1.0", features = ["derive"] }
-toml = "0.5"
-dotenv = "0.15"
-error-chain = "0.12"
-r2d2 = "0.8"
+backtrace = "0.3"
 chrono = "0.4"
+diesel = { version = "1.0", features = ["sqlite"] }
+dotenv = "0.15"
+forte_core = { path = ".." }
+r2d2 = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
+toml = "0.5"

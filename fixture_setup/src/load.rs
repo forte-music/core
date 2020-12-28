@@ -1,4 +1,4 @@
-use crate::errors::*;
+use crate::errors::{Error, ErrorKind};
 use crate::source_models::*;
 use diesel;
 use diesel::associations::HasTable;
@@ -14,16 +14,17 @@ use std::path::Path;
 use toml;
 
 /// Load the test data into the database.
-pub fn load() -> Result<()> {
+pub fn load() -> Result<(), Error> {
     dotenv::dotenv().ok();
 
     let path = Path::new("./node_modules/@forte-music/schema/fixtures");
     if !path.is_dir() {
-        return Err(
+        return Err(ErrorKind::Unknown(
             "The fixtures can't be found. This command must be run from the fixture_setup \
              directory of the source after running `yarn install`."
-                .into(),
-        );
+                .to_string(),
+        )
+        .into());
     }
 
     let pool = context::init_pool(&env::var("DATABASE_URL")?)?;
@@ -36,7 +37,7 @@ pub fn load() -> Result<()> {
 
 /// Read test data from a folder.
 /// The test files must be in TOML format and end in `.toml`.
-fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<()> {
+fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<(), Error> {
     let files = path.read_dir()?;
     for file in files {
         let path = file?.path();
@@ -52,7 +53,7 @@ fn load_from_folder(path: &Path, conn: &SqliteConnection) -> Result<()> {
 }
 
 /// Load test data from a TOML file
-fn load_from_file(path: &Path, conn: &SqliteConnection) -> Result<()> {
+fn load_from_file(path: &Path, conn: &SqliteConnection) -> Result<(), Error> {
     let mut buffer = String::new();
     let imported: Import = read_items(path, &mut buffer)?;
 
@@ -71,7 +72,7 @@ fn load_from_file(path: &Path, conn: &SqliteConnection) -> Result<()> {
     Ok(())
 }
 
-fn add_all_albums(things: Vec<AlbumSource>, conn: &SqliteConnection) -> Result<()> {
+fn add_all_albums(things: Vec<AlbumSource>, conn: &SqliteConnection) -> Result<(), Error> {
     for thing in things {
         let thing: Album = thing.into();
         thing.insert_into(Album::table()).execute(conn)?;
@@ -80,7 +81,7 @@ fn add_all_albums(things: Vec<AlbumSource>, conn: &SqliteConnection) -> Result<(
     Ok(())
 }
 
-fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result<()> {
+fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result<(), Error> {
     for thing in things {
         let thing: Artist = thing.into();
         thing.insert_into(Artist::table()).execute(conn)?;
@@ -89,7 +90,7 @@ fn add_all_artists(things: Vec<ArtistSource>, conn: &SqliteConnection) -> Result
     Ok(())
 }
 
-fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<()> {
+fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<(), Error> {
     for song_source in things {
         let artist_ids = song_source.artist_ids.clone().unwrap_or_default();
         let song: Song = song_source.into();
@@ -117,7 +118,10 @@ fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> Result<()>
 }
 
 /// Parse a TOML file into a variable of type `T`
-fn read_items<'de, T: Deserialize<'de>>(path: &Path, mut buffer: &'de mut String) -> Result<T> {
+fn read_items<'de, T: Deserialize<'de>>(
+    path: &Path,
+    mut buffer: &'de mut String,
+) -> Result<T, Error> {
     let mut f = File::open(path)?;
     f.read_to_string(&mut buffer)?;
 

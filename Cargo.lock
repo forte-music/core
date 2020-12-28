@@ -814,13 +814,14 @@ dependencies = [
 name = "fixture_setup"
 version = "0.1.0"
 dependencies = [
+ "backtrace",
  "chrono",
  "diesel",
  "dotenv",
- "error-chain 0.12.4",
  "forte_core",
  "r2d2",
  "serde",
+ "thiserror",
  "toml",
 ]
 
