@@ -1,6 +1,6 @@
 error_chain! {
     foreign_links {
-        DotEnv(::dotenv::DotenvError);
+        DotEnv(::dotenv::Error);
         Diesel(::diesel::result::Error);
         Io(::std::io::Error);
         TomlDe(::toml::de::Error);

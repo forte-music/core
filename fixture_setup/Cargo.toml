@@ -9,7 +9,7 @@ diesel = { version = "1.0", features = ["sqlite"] }
 forte_core = { path = ".." }
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
-dotenv = "0.9"
+dotenv = "0.15"
 error-chain = "0.12"
 r2d2 = "0.8"
 chrono = "0.4"
