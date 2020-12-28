@@ -81,8 +81,8 @@ dependencies = [
  "lazy_static 1.4.0",
  "lazycell",
  "log 0.4.11",
- "mime 0.3.16",
- "mime_guess 2.0.3",
+ "mime",
+ "mime_guess",
  "mio",
  "net2",
  "num_cpus",
@@ -866,7 +866,7 @@ dependencies = [
  "indicatif",
  "juniper",
  "lru-disk-cache",
- "mime_guess 1.8.8",
+ "mime_guess",
  "r2d2",
  "r2d2-diesel",
  "rand 0.5.6",
@@ -1392,30 +1392,9 @@ dependencies = [
 
 [[package]]
 name = "mime"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba626b8a6de5da682e1caa06bdb42a335aee5a84db8e5046a3e8ab17ba0a3ae0"
-dependencies = [
- "log 0.3.9",
-]
-
-[[package]]
-name = "mime"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
-
-[[package]]
-name = "mime_guess"
-version = "1.8.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "216929a5ee4dd316b1702eedf5e74548c123d370f47841ceaac38ca154690ca3"
-dependencies = [
- "mime 0.2.6",
- "phf",
- "phf_codegen",
- "unicase 1.4.2",
-]
 
 [[package]]
 name = "mime_guess"
@@ -1423,8 +1402,8 @@ version = "2.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2684d4c2e97d99848d30b324b00c8fcc7e5c897b7cbb5819b09e7c90e8baf212"
 dependencies = [
- "mime 0.3.16",
- "unicase 2.6.0",
+ "mime",
+ "unicase",
 ]
 
 [[package]]
@@ -1718,45 +1697,6 @@ name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
-
-[[package]]
-name = "phf"
-version = "0.7.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3da44b85f8e8dfaec21adae67f95d93244b2ecf6ad2a692320598dcc8e6dd18"
-dependencies = [
- "phf_shared",
-]
-
-[[package]]
-name = "phf_codegen"
-version = "0.7.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b03e85129e324ad4166b06b2c7491ae27fe3ec353af72e72cd1654c7225d517e"
-dependencies = [
- "phf_generator",
- "phf_shared",
-]
-
-[[package]]
-name = "phf_generator"
-version = "0.7.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09364cc93c159b8b06b1f4dd8a4398984503483891b0c26b867cf431fb132662"
-dependencies = [
- "phf_shared",
- "rand 0.6.5",
-]
-
-[[package]]
-name = "phf_shared"
-version = "0.7.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "234f71a15de2288bcb7e3b6515828d22af7ec8598ee6d24c3b526fa0a80b67a0"
-dependencies = [
- "siphasher",
- "unicase 1.4.2",
-]
 
 [[package]]
 name = "pkg-config"
@@ -2295,12 +2235,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "siphasher"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b8de496cf83d4ed58b6be86c3a275b8602f6ffe98d3024a869e124147a9a3ac"
-
-[[package]]
 name = "slab"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2448,7 +2382,7 @@ dependencies = [
  "cc",
  "cmake",
  "error-chain 0.12.4",
- "mime 0.2.6",
+ "mime",
 ]
 
 [[package]]
@@ -2828,15 +2762,6 @@ name = "ucd-util"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c85f514e095d348c279b1e5cd76795082cf15bd59b93207832abe0b1d8fed236"
-
-[[package]]
-name = "unicase"
-version = "1.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f4765f83163b74f957c797ad9253caf97f103fb064d3999aea9568d09fc8a33"
-dependencies = [
- "version_check 0.1.5",
-]
 
 [[package]]
 name = "unicase"

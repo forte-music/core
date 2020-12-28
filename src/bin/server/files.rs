@@ -28,7 +28,7 @@ impl FileStream {
         let inner = RangeStream::new(file, size);
         let mime = path
             .extension()
-            .map(|ext| mime_guess::get_mime_type(&ext.to_string_lossy()));
+            .map(|ext| mime_guess::from_ext(&ext.to_string_lossy()).first_or_octet_stream());
 
         Ok(FileStream { mime, inner })
     }

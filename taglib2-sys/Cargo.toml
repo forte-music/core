@@ -10,4 +10,4 @@ cc = "1.0"
 
 [dependencies]
 error-chain = "0.12"
-mime = "0.2"
+mime = "0.3"
