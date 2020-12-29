@@ -14,7 +14,7 @@ dependencies = [
  "fnv",
  "futures",
  "libc",
- "log 0.4.11",
+ "log",
  "parking_lot 0.7.1",
  "smallvec 0.6.13",
  "tokio",
@@ -39,7 +39,7 @@ dependencies = [
  "actix",
  "bytes",
  "futures",
- "log 0.4.11",
+ "log",
  "mio",
  "net2",
  "num_cpus",
@@ -80,7 +80,7 @@ dependencies = [
  "language-tags",
  "lazy_static 1.4.0",
  "lazycell",
- "log 0.4.11",
+ "log",
  "mime",
  "mime_guess",
  "mio",
@@ -807,13 +807,14 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 
 [[package]]
 name = "filetime"
-version = "0.1.15"
+version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "714653f3e34871534de23771ac7b26e999651a0a228f47beb324dfdf1dd4b10f"
+checksum = "0c122a393ea57648015bf06fbd3d372378992e86b9ff5a7a497b076a28c79efe"
 dependencies = [
- "cfg-if 0.1.10",
+ "cfg-if 1.0.0",
  "libc",
  "redox_syscall",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -880,7 +881,7 @@ dependencies = [
  "taglib2-sys",
  "tokio-process",
  "uuid 0.8.1",
- "walkdir 2.3.1",
+ "walkdir",
 ]
 
 [[package]]
@@ -989,7 +990,7 @@ dependencies = [
  "futures",
  "http",
  "indexmap",
- "log 0.4.11",
+ "log",
  "slab",
  "string",
  "tokio-io",
@@ -1257,12 +1258,6 @@ dependencies = [
 
 [[package]]
 name = "linked-hash-map"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bda158e0dabeb97ee8a401f4d17e479d6b891a14de0bba79d5cc2d4d325b5e48"
-
-[[package]]
-name = "linked-hash-map"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8dd5a6d5999d9907cda8ed67bbd137d3af8085216c2ac62de5be860bd41f304a"
@@ -1297,15 +1292,6 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.3.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
-dependencies = [
- "log 0.4.11",
-]
-
-[[package]]
-name = "log"
 version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
@@ -1319,19 +1305,19 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "31e24f1ad8321ca0e8a1e0ac13f23cb668e6f5466c2c57319f6a5cf1cc8e3b1c"
 dependencies = [
- "linked-hash-map 0.5.3",
+ "linked-hash-map",
 ]
 
 [[package]]
 name = "lru-disk-cache"
-version = "0.2.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c03a49f00a91cf7586cf0548f1dd06d5935e53918e546190367a6678992643d0"
+checksum = "d9fe9230f68799ab5dec738da1c0866856d8f0f5eef9a0461208184813b65883"
 dependencies = [
  "filetime",
- "linked-hash-map 0.2.1",
- "log 0.3.9",
- "walkdir 1.0.7",
+ "linked-hash-map",
+ "log",
+ "walkdir",
 ]
 
 [[package]]
@@ -1451,7 +1437,7 @@ dependencies = [
  "iovec",
  "kernel32-sys",
  "libc",
- "log 0.4.11",
+ "log",
  "miow 0.2.2",
  "net2",
  "slab",
@@ -1464,7 +1450,7 @@ version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0840c1c50fd55e521b247f949c241c9997709f23bd7f023b9762cd561e935656"
 dependencies = [
- "log 0.4.11",
+ "log",
  "mio",
  "miow 0.3.6",
  "winapi 0.3.9",
@@ -1799,7 +1785,7 @@ version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "545c5bc2b880973c9c10e4067418407a0ccaa3091781d1671d46eb35107cb26f"
 dependencies = [
- "log 0.4.11",
+ "log",
  "parking_lot 0.11.1",
  "scheduled-thread-pool",
 ]
@@ -2112,7 +2098,7 @@ checksum = "5215cf7362127d1bc364a0df8ae8d9570197a53d21be01aa977ea67c1a3cfce8"
 dependencies = [
  "quote 0.3.15",
  "syn 0.11.11",
- "walkdir 2.3.1",
+ "walkdir",
 ]
 
 [[package]]
@@ -2135,16 +2121,6 @@ name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
-
-[[package]]
-name = "same-file"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d931a44fdaa43b8637009e7632a02adc4f2b2e0733c08caa4cf00e8da4a117a7"
-dependencies = [
- "kernel32-sys",
- "winapi 0.2.8",
-]
 
 [[package]]
 name = "same-file"
@@ -2585,7 +2561,7 @@ checksum = "57fc868aae093479e3131e3d165c93b1c7474109d13c90ec0dda2a1bbfff0674"
 dependencies = [
  "bytes",
  "futures",
- "log 0.4.11",
+ "log",
 ]
 
 [[package]]
@@ -2598,7 +2574,7 @@ dependencies = [
  "futures",
  "lazy_static 1.4.0",
  "libc",
- "log 0.4.11",
+ "log",
  "mio",
  "mio-named-pipes",
  "tokio-io",
@@ -2616,7 +2592,7 @@ dependencies = [
  "crossbeam-utils 0.7.2",
  "futures",
  "lazy_static 1.4.0",
- "log 0.4.11",
+ "log",
  "mio",
  "num_cpus",
  "parking_lot 0.9.0",
@@ -2678,7 +2654,7 @@ dependencies = [
  "crossbeam-utils 0.7.2",
  "futures",
  "lazy_static 1.4.0",
- "log 0.4.11",
+ "log",
  "num_cpus",
  "slab",
  "tokio-executor",
@@ -2704,7 +2680,7 @@ checksum = "e2a0b10e610b39c38b031a2fcab08e4b82f16ece36504988dcbd81dbba650d82"
 dependencies = [
  "bytes",
  "futures",
- "log 0.4.11",
+ "log",
  "mio",
  "tokio-codec",
  "tokio-io",
@@ -2721,7 +2697,7 @@ dependencies = [
  "futures",
  "iovec",
  "libc",
- "log 0.4.11",
+ "log",
  "mio",
  "mio-uds",
  "tokio-codec",
@@ -2758,7 +2734,7 @@ dependencies = [
  "futures",
  "idna",
  "lazy_static 1.4.0",
- "log 0.4.11",
+ "log",
  "rand 0.5.6",
  "smallvec 0.6.13",
  "socket2",
@@ -2782,7 +2758,7 @@ dependencies = [
  "futures",
  "idna",
  "lazy_static 1.4.0",
- "log 0.4.11",
+ "log",
  "rand 0.5.6",
  "smallvec 0.6.13",
  "socket2",
@@ -2806,7 +2782,7 @@ dependencies = [
  "futures",
  "ipconfig",
  "lazy_static 1.4.0",
- "log 0.4.11",
+ "log",
  "lru-cache",
  "resolv-conf",
  "smallvec 0.6.13",
@@ -2993,22 +2969,11 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 
 [[package]]
 name = "walkdir"
-version = "1.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb08f9e670fab86099470b97cd2b252d6527f0b3cc1401acdb595ffc9dd288ff"
-dependencies = [
- "kernel32-sys",
- "same-file 0.1.3",
- "winapi 0.2.8",
-]
-
-[[package]]
-name = "walkdir"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "777182bc735b6424e1a57516d35ed72cb8019d85c8c9bf536dccb3445c1a2f7d"
 dependencies = [
- "same-file 1.0.6",
+ "same-file",
  "winapi 0.3.9",
  "winapi-util",
 ]
