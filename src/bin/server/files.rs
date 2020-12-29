@@ -1,11 +1,9 @@
-use actix_web;
+use crate::server::stream::RangeStream;
 use actix_web::http::header;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
-use mime_guess;
 use mime_guess::Mime;
-use server::stream::RangeStream;
 use std::fs::File;
 use std::io;
 use std::path::Path;

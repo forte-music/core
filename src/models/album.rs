@@ -1,11 +1,10 @@
-use database::album;
-use database::song;
+use crate::context::GraphQLContext;
+use crate::database::album;
+use crate::database::song;
+use crate::models::*;
+use diesel::dsl;
 use diesel::prelude::*;
 use juniper::FieldResult;
-
-use context::GraphQLContext;
-use diesel::dsl;
-use models::*;
 
 #[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "album"]

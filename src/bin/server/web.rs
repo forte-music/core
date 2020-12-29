@@ -1,7 +1,6 @@
+use crate::server::graphql::AppState;
+use crate::server::WebHandlerAppExt;
 use actix_web::{http::Method, App, HttpRequest, HttpResponse};
-use mime_guess;
-use server::graphql::AppState;
-use server::WebHandlerAppExt;
 
 #[derive(RustEmbed)]
 #[folder = "web/"]
@@ -11,7 +10,11 @@ struct WebAssets;
 fn handle_embedded_file(path: &str) -> HttpResponse {
     match WebAssets::get(path) {
         Some(content) => HttpResponse::Ok()
-            .content_type(mime_guess::guess_mime_type(path).to_string())
+            .content_type(
+                mime_guess::from_path(path)
+                    .first_or_octet_stream()
+                    .to_string(),
+            )
             .body(content),
         None => HttpResponse::NotFound().body("404 Not Found"),
     }

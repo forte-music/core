@@ -1,7 +1,3 @@
-extern crate lru_disk_cache;
-extern crate rand;
-extern crate uuid;
-
 mod files;
 mod graphql;
 mod stream;
@@ -13,20 +9,17 @@ mod transcoding;
 #[cfg(feature = "embed_web")]
 mod web;
 
-use forte_core::context;
-use forte_core::models::{create_schema, Album, Song};
-
-use server::graphql::{graphiql, graphql, AppState, GraphQLExecutor};
-use server::temp::TemporaryFiles;
-use server::transcoder::{TranscodeTarget, Transcoder};
-use server::transcoding::TranscodedHandlerAppExt;
-
+use crate::server::graphql::{graphiql, graphql, AppState, GraphQLExecutor};
+use crate::server::temp::TemporaryFiles;
+use crate::server::transcoder::{TranscodeTarget, Transcoder};
+use crate::server::transcoding::TranscodedHandlerAppExt;
 use actix::prelude::*;
 use actix::System;
 use actix_web::http;
 use actix_web::server;
 use actix_web::App;
-
+use forte_core::context;
+use forte_core::models::{create_schema, Album, Song};
 use lru_disk_cache::LruDiskCache;
 use std::sync::Arc;
 

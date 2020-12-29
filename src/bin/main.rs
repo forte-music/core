@@ -1,34 +1,11 @@
-extern crate structopt;
-
 #[macro_use]
 extern crate error_chain;
 
 #[macro_use]
 extern crate diesel_migrations;
 
-extern crate app_dirs;
-extern crate diesel;
-extern crate forte_core;
-extern crate r2d2;
-extern crate taglib2_sys;
-extern crate walkdir;
-
-extern crate actix;
-extern crate actix_web;
-extern crate bytes;
-extern crate lru_disk_cache;
-extern crate mime_guess;
-extern crate rand;
 #[macro_use]
 extern crate futures;
-extern crate core;
-extern crate futures_cpupool;
-extern crate http_range;
-extern crate juniper;
-extern crate serde;
-extern crate serde_json;
-extern crate tokio_process;
-extern crate uuid;
 
 #[cfg(feature = "embed_web")]
 #[macro_use]
@@ -37,21 +14,17 @@ extern crate rust_embed;
 pub mod server;
 pub mod sync;
 
-use std::ops::Deref;
-use std::path::PathBuf;
-
-use server::temp::TemporaryFiles;
-
-use structopt::StructOpt;
-
+use crate::server::temp::TemporaryFiles;
 use app_dirs::app_root;
 use app_dirs::AppDataType;
 use app_dirs::AppInfo;
-
 use error_chain::ChainedError;
 use forte_core::context;
 use lru_disk_cache::LruDiskCache;
 use std::fs;
+use std::ops::Deref;
+use std::path::PathBuf;
+use structopt::StructOpt;
 
 embed_migrations!("./migrations");
 
@@ -65,7 +38,7 @@ error_chain! {
     }
 
     links {
-        Sync(::sync::Error, ::sync::ErrorKind);
+        Sync(crate::sync::Error, crate::sync::ErrorKind);
     }
 }
 
@@ -139,16 +112,16 @@ fn run() -> Result<()> {
             let transcode_cache = make_transcode_cache(app_dir)?;
             let temporary_files = TemporaryFiles::new("forte")?;
 
-            Ok(server::serve(pool, &host, transcode_cache, temporary_files))
+            server::serve(pool, &host, transcode_cache, temporary_files);
         }
         Command::Sync { directory } => {
             let mut artwork_directory = app_dir;
             artwork_directory.push("artwork");
             fs::create_dir_all(&artwork_directory)?;
 
-            sync::sync(pool, &directory, &artwork_directory)
+            sync::sync(pool, &directory, &artwork_directory)?;
         }
-    }?;
+    }
 
     Ok(())
 }

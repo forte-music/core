@@ -1,6 +1,6 @@
-use context::GraphQLContext;
+use crate::context::GraphQLContext;
+use crate::models::*;
 use juniper::ID;
-use models::*;
 
 pub struct UserStats {
     pub id: String,

@@ -1,7 +1,6 @@
 use std::ffi::OsStr;
+use std::fmt;
 use std::path::Path;
-
-use core::fmt;
 
 #[derive(Debug, Clone)]
 pub enum TranscodeTarget {
@@ -59,7 +58,7 @@ impl TranscodeTarget {
 }
 
 impl fmt::Display for TranscodeTarget {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }

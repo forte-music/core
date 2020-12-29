@@ -1,24 +1,18 @@
-use actix_web;
 use actix_web::http::header;
 use actix_web::http::StatusCode;
 use actix_web::HttpMessage;
 use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Responder;
-
-use http_range::HttpRange;
-use http_range::HttpRangeParseError;
-
 use bytes::Bytes;
-
 use futures::Async;
 use futures::Future;
 use futures::Poll;
 use futures::Stream;
-
 use futures_cpupool::CpuFuture;
 use futures_cpupool::CpuPool;
-
+use http_range::HttpRange;
+use http_range::HttpRangeParseError;
 use std::io;
 use std::io::Read;
 use std::io::Seek;
@@ -68,7 +62,7 @@ where
         };
 
         let response = match ranges_result {
-            Ok(ref ranges) if ranges.len() > 0 => {
+            Ok(ref ranges) if !ranges.is_empty() => {
                 let range = ranges[0];
                 HttpResponse::build(StatusCode::PARTIAL_CONTENT)
                     .header(

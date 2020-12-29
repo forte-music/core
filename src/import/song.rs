@@ -1,21 +1,15 @@
-use std::path::Path;
-use taglib2_sys::SongProperties;
-
+use super::errors;
+use crate::database::song;
+use crate::database::song_artist;
+use crate::import::album::add_or_get_album;
+use crate::import::artist::add_or_get_artist;
+use crate::models::*;
 use chrono::prelude::*;
-
-use database::song;
-use database::song_artist;
-use diesel;
 use diesel::prelude::*;
 use diesel::result;
 use diesel::Connection;
-
-use models::*;
-
-use import::album::add_or_get_album;
-use import::artist::add_or_get_artist;
-
-use super::errors;
+use std::path::Path;
+use taglib2_sys::SongProperties;
 
 /// Checks whether the file at the path is already imported.
 pub fn is_imported(path: &Path, conn: &SqliteConnection) -> errors::Result<bool> {
@@ -47,11 +41,12 @@ pub fn add_song(
 
     let (artist, album_artist) = (
         artist
-            .clone()
-            .or(album_artist.clone())
+            .as_ref()
+            .or_else(|| album_artist.as_ref())
             .ok_or(errors::ErrorKind::NoArtistError)?,
         album_artist
-            .or(artist)
+            .as_ref()
+            .or_else(|| artist.as_ref())
             .ok_or(errors::ErrorKind::NoArtistError)?,
     );
 

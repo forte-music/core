@@ -1,4 +1,4 @@
-use context::GraphQLContext;
+use crate::context::GraphQLContext;
 use juniper::ID;
 
 pub struct SongUserStats {

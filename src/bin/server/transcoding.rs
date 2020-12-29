@@ -1,4 +1,6 @@
-use actix_web;
+use crate::server::graphql::AppState;
+use crate::server::stream::RangeStream;
+use crate::server::transcoder::{TranscodeMessage, TranscodeTarget};
 use actix_web::dev::Handler;
 use actix_web::error;
 use actix_web::http;
@@ -8,25 +10,14 @@ use actix_web::FromRequest;
 use actix_web::HttpRequest;
 use actix_web::Path;
 use actix_web::State;
-
 use forte_core::models::Song;
-
-use server::graphql::AppState;
-use server::stream::RangeStream;
-use server::transcoder::{TranscodeMessage, TranscodeTarget};
-
-use diesel;
-
-use uuid::Uuid;
-
 use futures::future;
 use futures::Future;
-
 use lru_disk_cache::ReadSeek;
-
 use std::io;
 use std::io::SeekFrom;
 use std::path::PathBuf;
+use uuid::Uuid;
 
 pub struct TranscodedSongHandler {
     transcode_target: TranscodeTarget,

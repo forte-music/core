@@ -6,18 +6,20 @@ use diesel::serialize::Output;
 use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
 use diesel::types::ToSql;
-
-use std::io::Write;
-
-use uuid;
-use uuid::Uuid;
-
 use juniper::InputValue;
 use juniper::Value;
+use std::io::Write;
+use uuid::Uuid;
 
 #[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
 #[sql_type = "Binary"]
 pub struct UUID(Uuid);
+
+impl Default for UUID {
+    fn default() -> Self {
+        UUID::new()
+    }
+}
 
 impl UUID {
     pub fn parse_str(input: &str) -> Result<UUID, uuid::Error> {
@@ -70,7 +72,7 @@ mod test {
 }
 
 impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for UUID {
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+    fn to_sql<W: Write>(&self, out: &mut Output<'_, W, DB>) -> serialize::Result {
         let bytes = self.0.as_bytes();
         <[u8] as ToSql<Binary, DB>>::to_sql(bytes, out)
     }

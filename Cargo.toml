@@ -3,6 +3,7 @@ name = "forte_core"
 version = "0.1.0"
 authors = ["Mcat12 <newtoncat12@yahoo.com>", "0xcaff <martincharles07@gmail.com>"]
 autobins = false
+edition = "2018"
 
 [workspace]
 members = [

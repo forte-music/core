@@ -1,7 +1,7 @@
-use context::GraphQLContext;
+use crate::context::GraphQLContext;
+use crate::models::*;
 use diesel::QueryResult;
 use juniper::FieldResult;
-use models::*;
 
 pub struct Query;
 

@@ -1,11 +1,10 @@
-use database::artist;
-use database::song;
-use database::song_artist;
+use crate::context::GraphQLContext;
+use crate::database::artist;
+use crate::database::song;
+use crate::database::song_artist;
+use crate::models::*;
 use diesel::prelude::*;
-
-use context::GraphQLContext;
 use juniper::FieldResult;
-use models::*;
 
 #[derive(Queryable, Identifiable, Insertable)]
 #[table_name = "song"]

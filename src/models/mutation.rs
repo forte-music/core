@@ -1,19 +1,14 @@
+use crate::context::GraphQLContext;
+use crate::database::album;
+use crate::database::artist;
+use crate::database::song;
+use crate::models::*;
 use chrono::Utc;
-
-use context::GraphQLContext;
-use juniper::FieldResult;
-
-use database::album;
-use database::artist;
-use database::song;
-
-use diesel;
 use diesel::expression::dsl::not;
 use diesel::prelude::*;
 use diesel::result;
 use diesel::Connection;
-
-use models::*;
+use juniper::FieldResult;
 
 pub mod errors {
     error_chain! {
@@ -41,10 +36,9 @@ impl Mutation {
         let conn = context.connection();
 
         let valid_descriptors = vec![&artist_id, &album_id]
-            .iter()
+            .into_iter()
             .filter(|option| option.is_some())
-            .collect::<Vec<&&Option<UUID>>>()
-            .len();
+            .count();
 
         if valid_descriptors > 1 {
             return Err(errors::ErrorKind::MultipleDescriptors.into());

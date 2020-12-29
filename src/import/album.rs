@@ -1,15 +1,12 @@
-use taglib2_sys::SongProperties;
-
-use std::path::Path;
-use std::path::PathBuf;
-
-use chrono::prelude::*;
-use diesel::prelude::*;
-use models::*;
-
 use super::artwork;
 use super::errors;
-use database::album;
+use crate::database::album;
+use crate::models::*;
+use chrono::prelude::*;
+use diesel::prelude::*;
+use std::path::Path;
+use std::path::PathBuf;
+use taglib2_sys::SongProperties;
 
 pub fn add_or_get_album(
     path: &Path,

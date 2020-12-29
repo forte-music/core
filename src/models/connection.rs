@@ -1,4 +1,5 @@
-use context::GraphQLContext;
+use crate::context::GraphQLContext;
+use crate::models::*;
 use diesel::associations::HasTable;
 use diesel::dsl;
 use diesel::expression::NonAggregate;
@@ -13,7 +14,6 @@ use diesel::sql_types::Text;
 use diesel::sql_types::Timestamp;
 use diesel::sqlite::Sqlite;
 use juniper::FieldResult;
-use models::*;
 
 pub struct Edge<T> {
     pub cursor: String,
@@ -131,7 +131,7 @@ where
         let sort = sort.unwrap_or_default();
         let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
 
-        let mut query: BoxedSelectStatement<<TB as AsQuery>::SqlType, TB, Sqlite> =
+        let mut query: BoxedSelectStatement<'_, <TB as AsQuery>::SqlType, TB, Sqlite> =
             Self::table().into_boxed();
         if let Some(ref filter) = sort.filter {
             query = QueryDsl::filter(query, Self::name().like(format!("%{}%", filter)));

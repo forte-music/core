@@ -1,11 +1,14 @@
+use crate::server::temp::TemporaryFiles;
+use crate::server::transcoder::errors;
+use crate::server::transcoder::errors::ResultExt;
+use crate::server::transcoder::TranscodeTarget;
+use actix::prelude::*;
+use futures::future;
+use futures::future::Shared;
+use futures::Future;
 use lru_disk_cache::LruDiskCache;
 use lru_disk_cache::ReadSeek;
-
-use server::temp::TemporaryFiles;
-use server::transcoder::errors;
-use server::transcoder::errors::ResultExt;
-use server::transcoder::TranscodeTarget;
-
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::ffi::OsString;
@@ -14,14 +17,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 use std::process::Output;
-
-use actix::prelude::*;
-
-use futures::future;
-use futures::future::Shared;
-use futures::Future;
-
-use std::cell::RefCell;
 use std::rc::Rc;
 use tokio_process::CommandExt;
 
@@ -58,7 +53,7 @@ impl Transcoder {
         Command::new("ffmpeg")
             .args(msg.get_ffmpeg_args(&temporary_file_path))
             .output_async()
-            .map(move |output| (output, temporary_file_path.to_path_buf()))
+            .map(move |output| (output, temporary_file_path))
     }
 
     /// Transcodes the file requested by the message, updating the relevant caches.
@@ -83,8 +78,6 @@ impl Transcoder {
                     .insert_file(&future_map_key, temporary_file_path);
 
                 future_cache.borrow_mut().remove(&future_map_key);
-
-                ()
             });
 
         let boxed_transcode_future: Box<dyn Future<Item = (), Error = io::Error>> =
@@ -94,7 +87,7 @@ impl Transcoder {
 
         self.future_cache
             .borrow_mut()
-            .insert(key.clone(), shared_future.clone());
+            .insert(key, shared_future.clone());
 
         Box::new(shared_future.map(|_| ()).map_err(|err| err.kind().into()))
     }

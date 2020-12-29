@@ -1,16 +1,11 @@
-use mime_guess;
-use mime_guess::Mime;
-
-use taglib2_sys::{Picture, SongProperties};
-
-use image;
 use image::GenericImage;
-
+use mime_guess::Mime;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use std::result;
+use taglib2_sys::{Picture, SongProperties};
 
 error_chain! {
     foreign_links {
@@ -76,7 +71,9 @@ struct ImageInfo<'a> {
 
 impl<'a> ImageInfo<'a> {
     /// Gets information about an embedded image. If the picture isn't a square returns `None`.
-    fn from_embedded(picture: &Picture) -> result::Result<Option<ImageInfo>, image::ImageError> {
+    fn from_embedded(
+        picture: &Picture,
+    ) -> result::Result<Option<ImageInfo<'_>>, image::ImageError> {
         let img = image::load_from_memory(&picture.data)?;
         let (width, height) = img.dimensions();
 
@@ -109,13 +106,14 @@ impl<'a> ImageInfo<'a> {
     fn make_and_get_path(self, artwork_dir: &Path, new_artwork_name: &str) -> Result<PathBuf> {
         let artwork_path = match self.image_type {
             ImageType::Embedded(picture) => {
-                let extensions = mime_guess::get_mime_extensions(&picture.mime).ok_or(
-                    Error::from(ErrorKind::UnknownExtension(picture.mime.clone())),
-                )?;
+                let extensions =
+                    mime_guess::get_mime_extensions(&picture.mime).ok_or_else(|| {
+                        Error::from(ErrorKind::UnknownExtension(picture.mime.clone()))
+                    })?;
 
                 let extension = extensions
                     .get(0)
-                    .ok_or(Error::from(ErrorKind::NoExtensions(picture.mime.clone())))?;
+                    .ok_or_else(|| Error::from(ErrorKind::NoExtensions(picture.mime.clone())))?;
 
                 let mut artwork_path = artwork_dir.to_owned();
                 artwork_path.push(format!("{}.{}", new_artwork_name, extension));
@@ -153,7 +151,7 @@ fn find_covers_in_path(path: &Path) -> Result<Vec<ImageInfo<'static>>> {
             None
         })
         .map(ImageInfo::from_path)
-        .collect::<result::Result<Vec<Option<ImageInfo>>, image::ImageError>>()?
+        .collect::<result::Result<Vec<Option<ImageInfo<'_>>>, image::ImageError>>()?
         .into_iter()
         .filter_map(|option| option)
         .collect();

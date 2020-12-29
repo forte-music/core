@@ -1,10 +1,9 @@
-use database::album;
-use database::artist;
+use crate::context::GraphQLContext;
+use crate::database::album;
+use crate::database::artist;
+use crate::models::*;
 use diesel::prelude::*;
-
-use context::GraphQLContext;
 use juniper::FieldResult;
-use models::*;
 
 pub enum RecentItem {
     Album(Album),

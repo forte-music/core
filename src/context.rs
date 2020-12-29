@@ -1,9 +1,4 @@
-extern crate r2d2;
-extern crate r2d2_diesel;
-
 use diesel::sqlite::SqliteConnection;
-use juniper;
-
 use std::ops::Deref;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;

@@ -1,8 +1,6 @@
 use crate::source_models::*;
-use diesel;
 use diesel::associations::HasTable;
 use diesel::prelude::*;
-use dotenv;
 use forte_core::context;
 use forte_core::database::song_artist;
 use forte_core::models::*;
@@ -10,7 +8,6 @@ use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use toml;
 
 /// Load the test data into the database.
 pub fn load() -> anyhow::Result<()> {
@@ -91,7 +88,7 @@ fn add_all_songs(things: Vec<SongSource>, conn: &SqliteConnection) -> anyhow::Re
     for song_source in things {
         let artist_ids = song_source.artist_ids.clone().unwrap_or_default();
         let song: Song = song_source.into();
-        let song_id = song.id.clone();
+        let song_id = song.id;
 
         song.insert_into(Song::table()).execute(conn)?;
 

@@ -1,11 +1,9 @@
+use rand::distributions;
+use rand::Rng;
 use std::env;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
-
-use rand;
-use rand::distributions;
-use rand::Rng;
 
 /// Creates files with randomly generated file names in a temporary directory.
 pub struct TemporaryFiles {

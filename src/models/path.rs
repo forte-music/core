@@ -5,12 +5,10 @@ use diesel::serialize;
 use diesel::serialize::Output;
 use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
-
-use std::io::Write;
-
 use diesel::sqlite::Sqlite;
 use diesel::types::ToSql;
 use std::ffi::OsString;
+use std::io::Write;
 use std::ops::Deref;
 use std::path::Path;
 use std::path::PathBuf;
@@ -35,7 +33,7 @@ impl Deref for PathWrapper {
 
 impl<DB: Backend + HasSqlType<Binary>> ToSql<Binary, DB> for PathWrapper {
     #[cfg(unix)]
-    fn to_sql<W: Write>(&self, out: &mut Output<W, DB>) -> serialize::Result {
+    fn to_sql<W: Write>(&self, out: &mut Output<'_, W, DB>) -> serialize::Result {
         use std::os::unix::ffi::OsStrExt;
 
         let bytes = self.0.as_os_str().as_bytes();

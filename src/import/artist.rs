@@ -1,7 +1,7 @@
+use crate::database::artist;
+use crate::models::*;
 use chrono::prelude::*;
-use database::artist;
 use diesel::prelude::*;
-use models::*;
 
 pub fn add_or_get_artist(name: &str, conn: &SqliteConnection) -> QueryResult<Artist> {
     let artist: Option<Artist> = artist::table

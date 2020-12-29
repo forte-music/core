@@ -1,19 +1,12 @@
-extern crate indicatif;
-
-use std::path::Path;
-
+use diesel::sqlite::SqliteConnection;
 use forte_core::context;
 use forte_core::import;
-
-use diesel::sqlite::SqliteConnection;
-
+use indicatif::ProgressBar;
+use indicatif::ProgressStyle;
+use std::path::Path;
+use taglib2_sys::SongProperties;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
-
-use taglib2_sys::SongProperties;
-
-use self::indicatif::ProgressBar;
-use self::indicatif::ProgressStyle;
 
 error_chain! {
     links {

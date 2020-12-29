@@ -1,12 +1,5 @@
-use juniper::graphiql::graphiql_source;
-use juniper::http::GraphQLRequest;
-
-use forte_core::context;
-use forte_core::context::GraphQLContext;
-use forte_core::models::Schema;
-
+use crate::server::transcoder::Transcoder;
 use actix::prelude::*;
-
 use actix_web::error;
 use actix_web::AsyncResponder;
 use actix_web::FutureResponse;
@@ -14,14 +7,13 @@ use actix_web::HttpRequest;
 use actix_web::HttpResponse;
 use actix_web::Json;
 use actix_web::State;
-
-use serde_json;
-use std::sync::Arc;
-
-use futures;
+use forte_core::context;
+use forte_core::context::GraphQLContext;
+use forte_core::models::Schema;
 use futures::Future;
-
-use server::transcoder::Transcoder;
+use juniper::graphiql::graphiql_source;
+use juniper::http::GraphQLRequest;
+use std::sync::Arc;
 
 mod errors {
     error_chain! {
@@ -129,5 +121,4 @@ pub fn graphiql<S: 'static>(_req: &HttpRequest<S>) -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html)
-        .into()
 }
