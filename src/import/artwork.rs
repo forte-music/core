@@ -1,4 +1,4 @@
-use image::GenericImage;
+use image::GenericImageView;
 use mime_guess::Mime;
 use std::fs::File;
 use std::io::Write;
