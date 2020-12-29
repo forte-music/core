@@ -20,14 +20,14 @@ use juniper::Value;
 pub struct UUID(Uuid);
 
 impl UUID {
-    pub fn parse_str(input: &str) -> Result<UUID, uuid::ParseError> {
+    pub fn parse_str(input: &str) -> Result<UUID, uuid::Error> {
         Ok(UUID(Uuid::parse_str(input)?))
     }
 
-    pub fn from_number(value: u64) -> Result<UUID, uuid::ParseError> {
+    pub fn from_number(value: u64) -> UUID {
         let bytes = number_to_arr(value);
 
-        Ok(UUID(Uuid::from_bytes(&bytes)?))
+        UUID(Uuid::from_bytes(bytes))
     }
 
     pub fn new() -> UUID {
@@ -83,19 +83,19 @@ where
 {
     fn from_sql(bytes: Option<&<DB as Backend>::RawValue>) -> deserialize::Result<Self> {
         let bytes_vec = Vec::<u8>::from_sql(bytes)?;
-        Ok(UUID(Uuid::from_bytes(&bytes_vec)?))
+        Ok(UUID(Uuid::from_slice(&bytes_vec)?))
     }
 }
 
 impl ToString for UUID {
     fn to_string(&self) -> String {
-        self.0.simple().to_string()
+        self.0.to_simple_ref().to_string()
     }
 }
 
 impl Into<UUID> for u64 {
     fn into(self) -> UUID {
-        UUID::from_number(self).unwrap()
+        UUID::from_number(self)
     }
 }
 
