@@ -29,6 +29,7 @@ impl TemporaryFiles {
 
         let file_name = rand::thread_rng()
             .sample_iter(&distributions::Alphanumeric)
+            .map(char::from)
             .take(10)
             .collect::<String>();
 
