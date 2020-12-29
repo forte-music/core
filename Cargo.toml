@@ -44,7 +44,7 @@ taglib2-sys = { path = "taglib2-sys" }
 image = "0.23"
 walkdir = "2.3"
 indicatif = "0.15"
-structopt = "0.2"
+structopt = "0.3"
 app_dirs = "1.2"
 futures = "0.1"
 error-chain = "0.12"
