@@ -79,11 +79,15 @@ impl Mutation {
     }
 
     fn toggle_like(&self, context: &GraphQLContext, song_id: UUID) -> FieldResult<Song> {
-        let conn = &context.connection() as &SqliteConnection;
+        {
+            let conn = &context.connection() as &SqliteConnection;
 
-        diesel::update(song::table.filter(song::id.eq(song_id)))
-            .set(song::liked.eq(not(song::liked)))
-            .execute(conn)?;
+            diesel::update(song::table.filter(song::id.eq(song_id)))
+                .set(song::liked.eq(not(song::liked)))
+                .execute(conn)?;
+
+            // Drop the connection mutex guard before loading the song
+        }
 
         Song::from_id(context, song_id).map_err(FieldError::from)
     }
