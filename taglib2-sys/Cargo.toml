@@ -5,8 +5,8 @@ authors = ["Mark Drobnak <mark.drobnak@gmail.com>"]
 edition = "2018"
 
 [build-dependencies]
-cmake = "0.1"
 cc = "1.0"
+cmake = "0.1"
 
 [dependencies]
 mime = "0.3"
