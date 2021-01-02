@@ -1,5 +1,3 @@
-// TODO: replace with tempfile
-
 use rand::distributions;
 use rand::Rng;
 use std::env;
