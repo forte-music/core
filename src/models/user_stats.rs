@@ -12,7 +12,7 @@ impl UserStats {
         ID::from(self.id.to_owned())
     }
 
-    fn last_played(&self) -> Option<NaiveDateTime> {
-        self.last_played
+    fn last_played(&self) -> Option<TimeWrapper> {
+        self.last_played.map(TimeWrapper::from)
     }
 }

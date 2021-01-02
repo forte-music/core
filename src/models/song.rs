@@ -108,7 +108,7 @@ impl Song {
         self.duration
     }
 
-    fn time_added(&self) -> NaiveDateTime {
-        self.time_added
+    fn time_added(&self) -> TimeWrapper {
+        self.time_added.into()
     }
 }
