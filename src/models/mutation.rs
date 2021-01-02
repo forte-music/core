@@ -10,23 +10,9 @@ use diesel::result;
 use diesel::Connection;
 use juniper::{FieldError, FieldResult};
 
-pub mod errors {
-    error_chain! {
-        foreign_links {
-            Diesel(::diesel::result::Error);
-        }
-
-        errors {
-            MultipleDescriptors {
-                description("multiple valid descriptors were passed. Only one should be passed")
-            }
-        }
-    }
-}
-
 pub struct Mutation;
 
-#[graphql_object(context = GraphQLContext)]
+#[juniper::graphql_object(context = GraphQLContext)]
 impl Mutation {
     fn play_song(
         &self,
@@ -43,7 +29,7 @@ impl Mutation {
             .count();
 
         if valid_descriptors > 1 {
-            return Err(errors::ErrorKind::MultipleDescriptors.into());
+            return Err("Multiple valid descriptors were passed. Only one should be passed".into());
         }
 
         let now = Utc::now().naive_utc();

@@ -1,26 +1,25 @@
-use super::artwork;
+use crate::import::artwork;
+use std::io;
 
-error_chain! {
-    foreign_links {
-        Diesel(::diesel::result::Error);
-        Io(::std::io::Error);
-    }
+pub type Result<T> = std::result::Result<T, Error>;
 
-    links {
-        Artwork(artwork::Error, artwork::ErrorKind);
-    }
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    Diesel(#[from] diesel::result::Error),
 
-    errors {
-        NoArtistError {
-            description("either the tag's album artist or artist needs to be set, neither is")
-        }
+    #[error(transparent)]
+    Io(#[from] io::Error),
 
-        NoAlbumError {
-            description("the album name wasn't specified in the tag")
-        }
+    #[error(transparent)]
+    Artwork(#[from] artwork::Error),
 
-        NoTitleError {
-            description("the title wasn't specified in the tag")
-        }
-    }
+    #[error("either the tag's album artist or artist needs to be set, neither is")]
+    NoArtistError,
+
+    #[error("the album name wasn't specified in the tag")]
+    NoAlbumError,
+
+    #[error("the title wasn't specified in the tag")]
+    NoTitleError,
 }

@@ -6,7 +6,7 @@ pub struct SongUserStats {
     pub liked: bool,
 }
 
-#[graphql_object]
+#[juniper::graphql_object]
 impl SongUserStats {
     fn id(&self) -> ID {
         ID::from(self.id.to_owned())

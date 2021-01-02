@@ -13,7 +13,7 @@ use diesel::sql_types::Nullable;
 use diesel::sql_types::Text;
 use diesel::sql_types::Timestamp;
 use diesel::sqlite::Sqlite;
-use juniper::FieldResult;
+use juniper::{graphql_object, FieldResult, GraphQLEnum, GraphQLInputObject, GraphQLObject};
 
 pub struct Edge<T> {
     pub cursor: String,

@@ -3,7 +3,7 @@ use crate::database::album;
 use crate::database::artist;
 use crate::models::*;
 use diesel::prelude::*;
-use juniper::FieldResult;
+use juniper::{FieldResult, GraphQLUnion};
 
 #[derive(GraphQLUnion)]
 #[graphql(Context = GraphQLContext)]

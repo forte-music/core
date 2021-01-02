@@ -8,22 +8,24 @@ use taglib2_sys::SongProperties;
 use walkdir::DirEntry;
 use walkdir::WalkDir;
 
-error_chain! {
-    links {
-        Import(import::errors::Error, import::errors::ErrorKind);
-    }
+pub type Result<T> = std::result::Result<T, Error>;
 
-    foreign_links {
-        R2d2(::r2d2::Error);
-        WalkdirError(::walkdir::Error);
-        Taglib(::taglib2_sys::Error);
-    }
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    R2d2(#[from] r2d2::Error),
 
-    errors {
-            MissingSongProperties {
-                description("this audio file doesn't have a tag")
-            }
-    }
+    #[error(transparent)]
+    WalkdirError(#[from] walkdir::Error),
+
+    #[error(transparent)]
+    Taglib(#[from] taglib2_sys::Error),
+
+    #[error(transparent)]
+    Import(#[from] import::errors::Error),
+
+    #[error("This audio file doesn't have a tag")]
+    MissingSongProperties,
 }
 
 const FORMAT_EXTENSIONS: [&str; 3] = ["flac", "mp3", "m4a"];
@@ -89,7 +91,7 @@ fn handle_entry(
     }
 
     let props = SongProperties::read(path)?;
-    let props = props.ok_or(ErrorKind::MissingSongProperties)?;
+    let props = props.ok_or(Error::MissingSongProperties)?;
 
     import::add_song(path, artwork_directory, props, conn)?;
 

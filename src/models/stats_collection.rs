@@ -8,7 +8,7 @@ pub struct StatsCollection {
     pub artist_id: Option<UUID>,
 }
 
-#[graphql_object(context = GraphQLContext)]
+#[juniper::graphql_object(context = GraphQLContext)]
 impl StatsCollection {
     fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
         Song::from_id(&context.connection(), self.song_id).map_err(FieldError::from)

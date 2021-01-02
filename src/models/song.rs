@@ -52,7 +52,7 @@ impl GetConnection<song::table> for Song {
     }
 }
 
-#[graphql_object(context = GraphQLContext)]
+#[juniper::graphql_object(context = GraphQLContext)]
 impl Song {
     fn id(&self) -> UUID {
         self.id

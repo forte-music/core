@@ -29,7 +29,6 @@ bytes = "1.0"
 chrono = "0.4"
 diesel = { version = "1.4", features = ["sqlite", "chrono"] }
 diesel_migrations = "1.4"
-error-chain = "0.12"
 futures = "0.3"
 http-range = "0.1"
 image = "0.23"
@@ -46,6 +45,7 @@ serde = "1.0"
 serde_json = "1.0"
 structopt = "0.3"
 taglib2-sys = { path = "taglib2-sys" }
+thiserror = "1.0"
 tokio = { version = "0.2", features = ["process"] }
 uuid = { version = "0.8", features = ["v4", "serde"] }
 walkdir = "2.3"

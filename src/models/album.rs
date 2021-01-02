@@ -53,7 +53,7 @@ impl GetConnection<album::table> for Album {
     }
 }
 
-#[graphql_object(context = GraphQLContext)]
+#[juniper::graphql_object(context = GraphQLContext)]
 impl Album {
     fn id(&self) -> UUID {
         self.id

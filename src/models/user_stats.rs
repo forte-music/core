@@ -6,7 +6,7 @@ pub struct UserStats {
     pub last_played: Option<NaiveDateTime>,
 }
 
-#[graphql_object]
+#[juniper::graphql_object]
 impl UserStats {
     fn id(&self) -> ID {
         ID::from(self.id.to_owned())

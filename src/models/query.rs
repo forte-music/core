@@ -4,7 +4,7 @@ use juniper::{FieldError, FieldResult};
 
 pub struct Query;
 
-#[graphql_object(context = GraphQLContext)]
+#[juniper::graphql_object(context = GraphQLContext)]
 impl Query {
     fn album(context: &GraphQLContext, id: UUID) -> FieldResult<Album> {
         Album::from_id(&context.connection(), id).map_err(FieldError::from)

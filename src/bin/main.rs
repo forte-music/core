@@ -1,7 +1,4 @@
 #[macro_use]
-extern crate error_chain;
-
-#[macro_use]
 extern crate diesel_migrations;
 
 #[cfg(feature = "embed_web")]
@@ -15,28 +12,34 @@ use crate::server::temp::TemporaryFiles;
 use app_dirs::app_root;
 use app_dirs::AppDataType;
 use app_dirs::AppInfo;
-use error_chain::ChainedError;
 use forte_core::context;
 use lru_disk_cache::LruDiskCache;
-use std::fs;
 use std::ops::Deref;
 use std::path::PathBuf;
+use std::{fs, io};
 use structopt::StructOpt;
 
 embed_migrations!("./migrations");
 
-error_chain! {
-    foreign_links {
-        R2d2(::r2d2::Error);
-        AppDirs(::app_dirs::AppDirsError);
-        DieselMigration(::diesel_migrations::RunMigrationsError);
-        Io(::std::io::Error);
-        LruDiskCache(::lru_disk_cache::Error);
-    }
+#[derive(thiserror::Error, Debug)]
+enum Error {
+    #[error(transparent)]
+    R2d2(#[from] r2d2::Error),
 
-    links {
-        Sync(crate::sync::Error, crate::sync::ErrorKind);
-    }
+    #[error(transparent)]
+    AppDirs(#[from] app_dirs::AppDirsError),
+
+    #[error(transparent)]
+    DieselMigration(#[from] diesel_migrations::RunMigrationsError),
+
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error(transparent)]
+    LruDiskCache(#[from] lru_disk_cache::Error),
+
+    #[error(transparent)]
+    Sync(#[from] sync::Error),
 }
 
 #[derive(StructOpt, Debug)]
@@ -74,12 +77,21 @@ struct CommonFlags {
 }
 
 fn main() {
-    if let Err(ref err) = run() {
-        println!("{}", err.display_chain());
+    if let Err(err) = run() {
+        eprintln!("Error: {}", err);
+
+        // Go down the chain of errors
+        let mut error: &dyn std::error::Error = &err;
+        while let Some(source) = error.source() {
+            eprintln!("Caused by: {}", source);
+            error = source;
+        }
+
+        std::process::exit(1);
     }
 }
 
-fn run() -> Result<()> {
+fn run() -> Result<(), Error> {
     let opt: Opt = Opt::from_args();
     let app_dir: PathBuf = opt.common.app_dir.map_or_else(
         || {
@@ -123,7 +135,7 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-fn make_transcode_cache(app_dir: PathBuf) -> Result<LruDiskCache> {
+fn make_transcode_cache(app_dir: PathBuf) -> Result<LruDiskCache, Error> {
     let mut transcode_cache_path = app_dir;
     transcode_cache_path.push("transcode-cache");
 

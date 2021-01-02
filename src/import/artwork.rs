@@ -4,26 +4,24 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
-use std::result;
+use std::{io, result};
 use taglib2_sys::{Picture, SongProperties};
 
-error_chain! {
-    foreign_links {
-        Image(::image::ImageError);
-        Io(::std::io::Error);
-    }
+type Result<T> = std::result::Result<T, Error>;
 
-    errors {
-        UnknownExtension(mime: Mime) {
-            description("couldn't determine the file extension for this mime type")
-            display("couldn't determine file extension for mime type '{}'", mime)
-        }
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    Image(#[from] image::ImageError),
 
-        NoExtensions(mime: Mime) {
-            description("no extensions were returned for the mime type")
-            display("no extensions were returned for the mime type '{}'", mime)
-        }
-    }
+    #[error(transparent)]
+    Io(#[from] io::Error),
+
+    #[error("couldn't determine file extension for mime type '{0}'")]
+    UnknownExtension(Mime),
+
+    #[error("no extensions were returned for the mime type '{0}'")]
+    NoExtensions(Mime),
 }
 
 /// Gets the path of the best artwork for the file at `path`. It looks in two places for possible
@@ -106,14 +104,12 @@ impl<'a> ImageInfo<'a> {
     fn make_and_get_path(self, artwork_dir: &Path, new_artwork_name: &str) -> Result<PathBuf> {
         let artwork_path = match self.image_type {
             ImageType::Embedded(picture) => {
-                let extensions =
-                    mime_guess::get_mime_extensions(&picture.mime).ok_or_else(|| {
-                        Error::from(ErrorKind::UnknownExtension(picture.mime.clone()))
-                    })?;
+                let extensions = mime_guess::get_mime_extensions(&picture.mime)
+                    .ok_or_else(|| Error::UnknownExtension(picture.mime.clone()))?;
 
                 let extension = extensions
                     .get(0)
-                    .ok_or_else(|| Error::from(ErrorKind::NoExtensions(picture.mime.clone())))?;
+                    .ok_or_else(|| Error::NoExtensions(picture.mime.clone()))?;
 
                 let mut artwork_path = artwork_dir.to_owned();
                 artwork_path.push(format!("{}.{}", new_artwork_name, extension));

@@ -1,6 +1,5 @@
 use crate::server::temp::TemporaryFiles;
 use crate::server::transcoder::errors;
-use crate::server::transcoder::errors::ResultExt;
 use crate::server::transcoder::TranscodeTarget;
 use futures::future::{BoxFuture, Shared};
 use futures::{future, TryFutureExt};
@@ -41,14 +40,16 @@ impl Transcoder {
     pub async fn get_transcoded_file(&self, msg: &TranscodeRequest) -> Result<File, errors::Error> {
         let key = msg.compute_key();
 
-        self.get_cache_populated_future(&msg).await?;
+        self.get_cache_populated_future(&msg)
+            .await
+            .map_err(errors::Error::Io)?;
 
         let file = self
             .disk_cache
             .lock()
             .unwrap()
             .get_file(&key)
-            .chain_err(|| errors::ErrorKind::NoDiskCacheEntryError)?;
+            .map_err(errors::Error::NoDiskCacheEntryError)?;
 
         Ok(file)
     }
