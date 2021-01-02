@@ -6,15 +6,13 @@ use diesel::serialize::Output;
 use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
 use diesel::types::ToSql;
-use juniper::sa::_core::fmt::Formatter;
-use juniper::GraphQLScalarValue;
+use juniper::{ParseScalarResult, Value};
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter};
 use std::io::Write;
 use uuid::Uuid;
 
-#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash, GraphQLScalarValue)]
-#[graphql(transparent, name = "ID")]
+#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
 #[sql_type = "Binary"]
 pub struct UUID(Uuid);
 
@@ -71,5 +69,26 @@ impl From<u64> for UUID {
 impl From<Uuid> for UUID {
     fn from(id: Uuid) -> Self {
         UUID(id)
+    }
+}
+
+// Manually implement the scalar instead of using the inner Uuid impl so that
+// `resolve` uses the simple UUID formatter (Uuid uses the default, hyphenated
+// format).
+#[juniper::graphql_scalar(name = "ID", description = "Uuid")]
+impl<S> GraphQLScalar for UUID
+where
+    S: ScalarValue,
+{
+    fn resolve(&self) -> Value {
+        Value::scalar(self.to_string())
+    }
+
+    fn from_input_value(v: &InputValue) -> Option<Self> {
+        Uuid::from_input_value(v).map(UUID)
+    }
+
+    fn from_str<'a>(value: ScalarToken<'a>) -> ParseScalarResult<'a, S> {
+        Uuid::from_str(value)
     }
 }
