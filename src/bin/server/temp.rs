@@ -1,3 +1,5 @@
+// TODO: replace with tempfile
+
 use rand::distributions;
 use rand::Rng;
 use std::env;
@@ -6,6 +8,7 @@ use std::io;
 use std::path::PathBuf;
 
 /// Creates files with randomly generated file names in a temporary directory.
+#[derive(Clone)]
 pub struct TemporaryFiles {
     /// Path where files are stored.
     root: PathBuf,

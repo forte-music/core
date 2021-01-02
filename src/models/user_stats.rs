@@ -1,4 +1,3 @@
-use crate::context::GraphQLContext;
 use crate::models::*;
 use juniper::ID;
 
@@ -7,18 +6,13 @@ pub struct UserStats {
     pub last_played: Option<NaiveDateTime>,
 }
 
+#[graphql_object]
 impl UserStats {
-    pub fn gql_id(&self) -> ID {
+    fn id(&self) -> ID {
         ID::from(self.id.to_owned())
     }
+
+    fn last_played(&self) -> Option<NaiveDateTime> {
+        self.last_played
+    }
 }
-
-graphql_object!(UserStats: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
-    }
-
-    field last_played() -> Option<TimeWrapper> {
-        self.last_played.map(|t| t.into())
-    }
-});

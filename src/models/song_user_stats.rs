@@ -1,4 +1,3 @@
-use crate::context::GraphQLContext;
 use juniper::ID;
 
 pub struct SongUserStats {
@@ -7,22 +6,17 @@ pub struct SongUserStats {
     pub liked: bool,
 }
 
+#[graphql_object]
 impl SongUserStats {
-    pub fn gql_id(&self) -> ID {
+    fn id(&self) -> ID {
         ID::from(self.id.to_owned())
     }
-}
 
-graphql_object!(SongUserStats: GraphQLContext |&self| {
-    field id() -> ID {
-        self.gql_id()
-    }
-
-    field play_count() -> i32 {
+    fn play_count(&self) -> i32 {
         self.play_count
     }
 
-    field liked() -> bool {
+    fn liked(&self) -> bool {
         self.liked
     }
-});
+}

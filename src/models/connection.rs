@@ -20,20 +20,35 @@ pub struct Edge<T> {
     pub node: T,
 }
 
-graphql_object!(Edge<Album>: GraphQLContext as "AlbumEdge" |&self| {
-    field cursor() -> &str { &self.cursor }
-    field node() -> &Album { &self.node }
-});
+#[graphql_object(name = "AlbumEdge", context = GraphQLContext)]
+impl Edge<Album> {
+    fn cursor(&self) -> &str {
+        &self.cursor
+    }
+    fn node(&self) -> &Album {
+        &self.node
+    }
+}
 
-graphql_object!(Edge<Artist>: GraphQLContext as "ArtistEdge" |&self| {
-    field cursor() -> &str { &self.cursor }
-    field node() -> &Artist { &self.node }
-});
+#[graphql_object(name = "ArtistEdge", context = GraphQLContext)]
+impl Edge<Artist> {
+    fn cursor(&self) -> &str {
+        &self.cursor
+    }
+    fn node(&self) -> &Artist {
+        &self.node
+    }
+}
 
-graphql_object!(Edge<Song>: GraphQLContext as "SongEdge" |&self| {
-    field cursor() -> &str { &self.cursor }
-    field node() -> &Song { &self.node }
-});
+#[graphql_object(name = "SongEdge", context = GraphQLContext)]
+impl Edge<Song> {
+    fn cursor(&self) -> &str {
+        &self.cursor
+    }
+    fn node(&self) -> &Song {
+        &self.node
+    }
+}
 
 pub struct Connection<T> {
     pub count: usize,
@@ -41,23 +56,50 @@ pub struct Connection<T> {
     pub has_next_page: bool,
 }
 
-graphql_object!(Connection<Album>: GraphQLContext as "AlbumConnection" |&self| {
-    field count() -> i32 { self.count as i32 }
-    field edges() -> &[Edge<Album>] { &self.edges }
-    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
-});
+#[graphql_object(name = "AlbumConnection", context = GraphQLContext)]
+impl Connection<Album> {
+    fn count(&self) -> i32 {
+        self.count as i32
+    }
+    fn edges(&self) -> &[Edge<Album>] {
+        &self.edges
+    }
+    fn page_info(&self) -> PageInfo {
+        PageInfo {
+            has_next_page: self.has_next_page,
+        }
+    }
+}
 
-graphql_object!(Connection<Artist>: GraphQLContext as "ArtistConnection" |&self| {
-    field count() -> i32 { self.count as i32 }
-    field edges() -> &[Edge<Artist>] { &self.edges }
-    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
-});
+#[graphql_object(name = "ArtistConnection", context = GraphQLContext)]
+impl Connection<Artist> {
+    fn count(&self) -> i32 {
+        self.count as i32
+    }
+    fn edges(&self) -> &[Edge<Artist>] {
+        &self.edges
+    }
+    fn page_info(&self) -> PageInfo {
+        PageInfo {
+            has_next_page: self.has_next_page,
+        }
+    }
+}
 
-graphql_object!(Connection<Song>: GraphQLContext as "SongConnection" |&self| {
-    field count() -> i32 { self.count as i32 }
-    field edges() -> &[Edge<Song>] { &self.edges }
-    field page_info() -> PageInfo { PageInfo { has_next_page: self.has_next_page } }
-});
+#[graphql_object(name = "SongConnection", context = GraphQLContext)]
+impl Connection<Song> {
+    fn count(&self) -> i32 {
+        self.count as i32
+    }
+    fn edges(&self) -> &[Edge<Song>] {
+        &self.edges
+    }
+    fn page_info(&self) -> PageInfo {
+        PageInfo {
+            has_next_page: self.has_next_page,
+        }
+    }
+}
 
 #[derive(GraphQLObject)]
 pub struct PageInfo {
@@ -127,9 +169,9 @@ where
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Self>> {
-        let conn = context.connection();
+        let conn = &context.connection() as &SqliteConnection;
         let sort = sort.unwrap_or_default();
-        let lower_bound: i64 = after.map_or(Ok(0), |offset| offset.parse())?;
+        let lower_bound = after.map_or(Ok(0), |offset| offset.parse())?;
 
         let mut query: BoxedSelectStatement<'_, <TB as AsQuery>::SqlType, TB, Sqlite> =
             Self::table().into_boxed();
@@ -170,9 +212,7 @@ where
             count_query = QueryDsl::filter(count_query, Self::name().like(filter));
         }
 
-        let count: i64 = count_query
-            .select(dsl::count_star())
-            .first(context.connection())?;
+        let count: i64 = count_query.select(dsl::count_star()).first(conn)?;
 
         // The exclusive upper bound of the window into the data.
         let upper_bound = lower_bound + if first < 0 { count } else { first };

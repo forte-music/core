@@ -94,7 +94,7 @@ impl SongProperties {
         use std::os::unix::ffi::OsStrExt;
 
         if path.is_dir() {
-            return Err(Error::InvalidPathError(path.to_path_buf()).into());
+            return Err(Error::InvalidPathError(path.to_path_buf()));
         }
 
         let file_name = path.as_os_str().as_bytes();

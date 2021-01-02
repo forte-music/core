@@ -3,7 +3,7 @@ use crate::database::album;
 use crate::database::artist;
 use crate::models::*;
 use diesel::prelude::*;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 #[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "artist"]
@@ -11,22 +11,13 @@ pub struct Artist {
     pub id: UUID,
     pub name: String,
     pub time_added: NaiveDateTime,
-
     pub last_played: Option<NaiveDateTime>,
 }
 
 impl Artist {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
-        let conn = context.connection();
+    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
+        let conn = &context.connection() as &SqliteConnection;
         artist::table.filter(artist::id.eq(id)).first::<Self>(conn)
-    }
-
-    pub fn albums(&self, context: &GraphQLContext) -> QueryResult<Vec<Album>> {
-        let conn = context.connection();
-        Ok(album::table
-            .filter(album::artist_id.eq(&self.id))
-            .order(album::time_added.desc())
-            .load::<Album>(conn)?)
     }
 
     pub fn stats(&self) -> UserStats {
@@ -55,24 +46,30 @@ impl GetConnection<artist::table> for Artist {
     }
 }
 
-graphql_object!(Artist: GraphQLContext |&self| {
-    field id() -> &UUID {
-        &self.id
+#[graphql_object(context = GraphQLContext)]
+impl Artist {
+    fn id(&self) -> UUID {
+        self.id
     }
 
-    field name() -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 
-    field albums(&executor) -> FieldResult<Vec<Album>> {
-        Ok(self.albums(executor.context())?)
+    fn albums(&self, context: &GraphQLContext) -> FieldResult<Vec<Album>> {
+        let conn = &context.connection() as &SqliteConnection;
+        album::table
+            .filter(album::artist_id.eq(&self.id))
+            .order(album::time_added.desc())
+            .load::<Album>(conn)
+            .map_err(FieldError::from)
     }
 
-    field stats() -> UserStats {
+    fn stats(&self) -> UserStats {
         self.stats()
     }
 
-    field time_added() -> TimeWrapper {
-        self.time_added.into()
+    fn time_added(&self) -> NaiveDateTime {
+        self.time_added
     }
-});
+}

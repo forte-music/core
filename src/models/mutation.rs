@@ -8,7 +8,7 @@ use diesel::expression::dsl::not;
 use diesel::prelude::*;
 use diesel::result;
 use diesel::Connection;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 pub mod errors {
     error_chain! {
@@ -26,14 +26,16 @@ pub mod errors {
 
 pub struct Mutation;
 
+#[graphql_object(context = GraphQLContext)]
 impl Mutation {
-    pub fn play_song(
+    fn play_song(
+        &self,
         context: &GraphQLContext,
         song_id: UUID,
         artist_id: Option<UUID>,
         album_id: Option<UUID>,
-    ) -> errors::Result<StatsCollection> {
-        let conn = context.connection();
+    ) -> FieldResult<StatsCollection> {
+        let conn = &context.connection() as &SqliteConnection;
 
         let valid_descriptors = vec![&artist_id, &album_id]
             .into_iter()
@@ -76,28 +78,13 @@ impl Mutation {
         })
     }
 
-    pub fn toggle_like(context: &GraphQLContext, song_id: &UUID) -> QueryResult<Song> {
-        let conn = context.connection();
+    fn toggle_like(&self, context: &GraphQLContext, song_id: UUID) -> FieldResult<Song> {
+        let conn = &context.connection() as &SqliteConnection;
 
         diesel::update(song::table.filter(song::id.eq(song_id)))
             .set(song::liked.eq(not(song::liked)))
             .execute(conn)?;
 
-        Song::from_id(context, &song_id)
+        Song::from_id(context, song_id).map_err(FieldError::from)
     }
 }
-
-graphql_object!(Mutation: GraphQLContext |&self| {
-    field play_song(
-        &executor,
-        song_id: UUID,
-        artist_id: Option<UUID>,
-        album_id: Option<UUID>,
-    ) -> FieldResult<StatsCollection> {
-        Ok(Mutation::play_song(executor.context(), song_id, artist_id, album_id)?)
-    }
-
-    field toggle_like(&executor, song_id: UUID) -> FieldResult<Song> {
-        Ok(Mutation::toggle_like(executor.context(), &song_id)?)
-    }
-});

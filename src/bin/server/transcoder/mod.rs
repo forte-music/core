@@ -1,5 +1,5 @@
-mod actor;
 mod targets;
+mod transcode;
 mod errors {
     error_chain! {
         foreign_links {
@@ -14,5 +14,5 @@ mod errors {
     }
 }
 
-pub use self::actor::{TranscodeMessage, Transcoder};
 pub use self::targets::TranscodeTarget;
+pub use self::transcode::{TranscodeRequest, Transcoder};

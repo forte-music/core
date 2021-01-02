@@ -5,6 +5,8 @@ use crate::models::*;
 use diesel::prelude::*;
 use juniper::FieldResult;
 
+#[derive(GraphQLUnion)]
+#[graphql(Context = GraphQLContext)]
 pub enum RecentItem {
     Album(Album),
     Artist(Artist),
@@ -39,7 +41,7 @@ where
 
 impl RecentItem {
     pub fn recently_added(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
-        let conn = context.connection();
+        let conn = &context.connection() as &SqliteConnection;
 
         let albums: Vec<Album> = album::table
             .order_by(album::time_added.desc())
@@ -60,7 +62,7 @@ impl RecentItem {
     }
 
     pub fn recently_played(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
-        let conn = context.connection();
+        let conn = &context.connection() as &SqliteConnection;
 
         let albums: Vec<Album> = album::table
             .filter(album::last_played.is_not_null())
@@ -96,10 +98,3 @@ impl RecentItem {
         }
     }
 }
-
-graphql_union!(RecentItem: GraphQLContext |&self| {
-    instance_resolvers: |_context| {
-        &Album => match *self { RecentItem::Album(ref album) => Some(album), _ => None },
-        &Artist => match *self { RecentItem::Artist(ref artist) => Some(artist), _ => None },
-    }
-});

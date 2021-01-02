@@ -6,12 +6,15 @@ use diesel::serialize::Output;
 use diesel::sql_types::Binary;
 use diesel::sql_types::HasSqlType;
 use diesel::types::ToSql;
-use juniper::InputValue;
-use juniper::Value;
+use juniper::sa::_core::fmt::Formatter;
+use juniper::GraphQLScalarValue;
+use std::fmt;
+use std::fmt::Display;
 use std::io::Write;
 use uuid::Uuid;
 
-#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, AsExpression, FromSqlRow, Copy, Clone, PartialEq, Eq, Hash, GraphQLScalarValue)]
+#[graphql(transparent, name = "ID")]
 #[sql_type = "Binary"]
 pub struct UUID(Uuid);
 
@@ -27,47 +30,11 @@ impl UUID {
     }
 
     pub fn from_number(value: u64) -> UUID {
-        let bytes = number_to_arr(value);
-
-        UUID(Uuid::from_bytes(bytes))
+        UUID(Uuid::from_u128(value as u128))
     }
 
     pub fn new() -> UUID {
         UUID(Uuid::new_v4())
-    }
-}
-
-fn number_to_arr(value: u64) -> [u8; 16] {
-    let mut bytes = [0; 16];
-    for i in 0..(64 / 8) {
-        bytes[16 - 1 - i] = ((value >> (8 * i)) & 0x000000ff) as u8;
-    }
-
-    bytes
-}
-
-#[cfg(test)]
-mod test {
-    use super::number_to_arr;
-
-    #[test]
-    fn test_number_to_arr_zero() {
-        assert_eq!(number_to_arr(0), [0; 16]);
-    }
-
-    #[test]
-    fn test_number_to_arr_mid() {
-        assert_eq!(
-            number_to_arr(270),
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14]
-        )
-    }
-
-    #[test]
-    fn test_number_to_arr_max() {
-        let arr = number_to_arr(u64::max_value());
-        assert_eq!(arr[8..16], [u8::max_value(); 8]);
-        assert_eq!(arr[0..8], [0; 8]);
     }
 }
 
@@ -89,15 +56,15 @@ where
     }
 }
 
-impl ToString for UUID {
-    fn to_string(&self) -> String {
-        self.0.to_simple_ref().to_string()
+impl Display for UUID {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        self.0.to_simple_ref().fmt(f)
     }
 }
 
-impl Into<UUID> for u64 {
-    fn into(self) -> UUID {
-        UUID::from_number(self)
+impl From<u64> for UUID {
+    fn from(num: u64) -> UUID {
+        UUID::from_number(num)
     }
 }
 
@@ -106,17 +73,3 @@ impl From<Uuid> for UUID {
         UUID(id)
     }
 }
-
-graphql_scalar!(UUID as "ID" {
-    resolve(&self) -> Value {
-        Value::string(self.to_string())
-    }
-
-    from_input_value(v: &InputValue) -> Option<UUID> {
-        match *v {
-            InputValue::String(ref s) => UUID::parse_str(s).ok(),
-            _ => None
-        }
-    }
-
-});

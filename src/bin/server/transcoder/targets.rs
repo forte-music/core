@@ -1,8 +1,9 @@
 use std::ffi::OsStr;
 use std::fmt;
 use std::path::Path;
+use std::str::FromStr;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum TranscodeTarget {
     MP3V0,
     AACV5,
@@ -49,10 +50,22 @@ impl TranscodeTarget {
         }
     }
 
-    pub fn get_template_url(&self) -> &'static str {
+    pub fn get_filename(&self, song_title: &str) -> String {
         match self {
-            TranscodeTarget::MP3V0 => "/files/music/{id}/mp3/v0",
-            TranscodeTarget::AACV5 => "/files/music/{id}/aac/v5",
+            TranscodeTarget::MP3V0 => format!("{}.mp3", song_title),
+            TranscodeTarget::AACV5 => format!("{}.aac", song_title),
+        }
+    }
+}
+
+impl FromStr for TranscodeTarget {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "mp3/v0" => Ok(TranscodeTarget::MP3V0),
+            "aac/v5" => Ok(TranscodeTarget::AACV5),
+            _ => Err("Unknown transcode target"),
         }
     }
 }

@@ -64,8 +64,8 @@ impl<'a> From<&'a Path> for PathWrapper {
     }
 }
 
-impl Into<PathBuf> for PathWrapper {
-    fn into(self) -> PathBuf {
-        self.0
+impl From<PathWrapper> for PathBuf {
+    fn from(wrapper: PathWrapper) -> PathBuf {
+        wrapper.0
     }
 }

@@ -1,5 +1,5 @@
 use diesel::sqlite::SqliteConnection;
-use std::ops::Deref;
+use std::sync::{Mutex, MutexGuard};
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
 pub type Pool = r2d2::Pool<ConnectionManager>;
@@ -11,16 +11,18 @@ pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
 }
 
 pub struct GraphQLContext {
-    connection: PooledConnection,
+    connection: Mutex<PooledConnection>,
 }
 
 impl GraphQLContext {
     pub fn new(connection: PooledConnection) -> GraphQLContext {
-        GraphQLContext { connection }
+        GraphQLContext {
+            connection: Mutex::new(connection),
+        }
     }
 
-    pub fn connection(&self) -> &SqliteConnection {
-        self.connection.deref()
+    pub fn connection(&self) -> MutexGuard<PooledConnection> {
+        self.connection.lock().unwrap()
     }
 }
 

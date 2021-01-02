@@ -4,9 +4,6 @@ extern crate error_chain;
 #[macro_use]
 extern crate diesel_migrations;
 
-#[macro_use]
-extern crate futures;
-
 #[cfg(feature = "embed_web")]
 #[macro_use]
 extern crate rust_embed;
@@ -112,7 +109,7 @@ fn run() -> Result<()> {
             let transcode_cache = make_transcode_cache(app_dir)?;
             let temporary_files = TemporaryFiles::new("forte")?;
 
-            server::serve(pool, &host, transcode_cache, temporary_files);
+            server::serve(pool, &host, transcode_cache, temporary_files)?;
         }
         Command::Sync { directory } => {
             let mut artwork_directory = app_dir;

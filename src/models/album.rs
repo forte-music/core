@@ -4,7 +4,7 @@ use crate::database::song;
 use crate::models::*;
 use diesel::dsl;
 use diesel::prelude::*;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 #[derive(Queryable, Identifiable, Insertable, Clone)]
 #[table_name = "album"]
@@ -15,49 +15,17 @@ pub struct Album {
     pub artist_id: UUID,
     pub release_year: Option<i32>,
     pub time_added: NaiveDateTime,
-
     pub last_played: Option<NaiveDateTime>,
 }
 
 impl Album {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
-        let conn = context.connection();
+    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
+        let conn = &context.connection() as &SqliteConnection;
         album::table.filter(album::id.eq(id)).first::<Self>(conn)
     }
 
     pub fn get_artwork_url(id: &str) -> String {
         format!("/files/artwork/{}/raw", id)
-    }
-
-    pub fn artwork_url(&self) -> Option<String> {
-        match self.artwork_path {
-            Some(..) => Some(Album::get_artwork_url(&self.id.to_string())),
-            _ => None,
-        }
-    }
-
-    pub fn artist(&self, context: &GraphQLContext) -> QueryResult<Artist> {
-        Artist::from_id(context, &self.artist_id)
-    }
-
-    pub fn songs(&self, context: &GraphQLContext) -> QueryResult<Vec<Song>> {
-        let conn = context.connection();
-        Ok(song::table
-            .filter(song::album_id.eq(&self.id))
-            .order_by(song::disk_number.asc())
-            .then_order_by(song::track_number.asc())
-            .load::<Song>(conn)?)
-    }
-
-    pub fn duration(&self, context: &GraphQLContext) -> QueryResult<i32> {
-        let conn = context.connection();
-        let maybe_duration: Option<i64> = song::table
-            .filter(song::album_id.eq(&self.id))
-            .select(dsl::sum(song::duration))
-            .first::<Option<i64>>(conn)?;
-        let duration = maybe_duration.unwrap_or(0);
-
-        Ok(duration as i32)
     }
 
     pub fn stats(&self) -> UserStats {
@@ -86,40 +54,57 @@ impl GetConnection<album::table> for Album {
     }
 }
 
-graphql_object!(Album: GraphQLContext |&self| {
-    field id() -> &UUID {
-        &self.id
+#[graphql_object(context = GraphQLContext)]
+impl Album {
+    fn id(&self) -> UUID {
+        self.id
     }
 
-    field artwork_url() -> Option<String> {
-        self.artwork_url()
+    fn artwork_url(&self) -> Option<String> {
+        match self.artwork_path {
+            Some(_) => Some(Album::get_artwork_url(&self.id.to_string())),
+            _ => None,
+        }
     }
 
-    field name() -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 
-    field artist(&executor) -> FieldResult<Artist> {
-        Ok(self.artist(executor.context())?)
+    fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
+        Artist::from_id(context, self.artist_id).map_err(FieldError::from)
     }
 
-    field songs(&executor) -> FieldResult<Vec<Song>> {
-        Ok(self.songs(executor.context())?)
+    fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {
+        let conn = &context.connection() as &SqliteConnection;
+        song::table
+            .filter(song::album_id.eq(&self.id))
+            .order_by(song::disk_number.asc())
+            .then_order_by(song::track_number.asc())
+            .load::<Song>(conn)
+            .map_err(FieldError::from)
     }
 
-    field duration(&executor) -> FieldResult<i32> {
-        Ok(self.duration(executor.context())?)
+    fn duration(&self, context: &GraphQLContext) -> FieldResult<i32> {
+        let conn = &context.connection() as &SqliteConnection;
+        let maybe_duration: Option<i64> = song::table
+            .filter(song::album_id.eq(&self.id))
+            .select(dsl::sum(song::duration))
+            .first::<Option<i64>>(conn)?;
+        let duration = maybe_duration.unwrap_or(0);
+
+        Ok(duration as i32)
     }
 
-    field release_year() -> Option<i32> {
+    fn release_year(&self) -> Option<i32> {
         self.release_year
     }
 
-    field stats() -> UserStats {
+    fn stats(&self) -> UserStats {
         self.stats()
     }
 
-    field time_added() -> TimeWrapper {
-        self.time_added.into()
+    fn time_added(&self) -> NaiveDateTime {
+        self.time_added
     }
-});
+}

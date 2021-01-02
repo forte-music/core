@@ -1,110 +1,60 @@
 use crate::context::GraphQLContext;
 use crate::models::*;
-use diesel::QueryResult;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 pub struct Query;
 
+#[graphql_object(context = GraphQLContext)]
 impl Query {
-    pub fn album(context: &GraphQLContext, id: &UUID) -> QueryResult<Album> {
-        Album::from_id(context, id)
+    fn album(context: &GraphQLContext, id: UUID) -> FieldResult<Album> {
+        Album::from_id(context, id).map_err(FieldError::from)
     }
 
-    pub fn albums(
+    #[graphql(arguments(first(default = 25)))]
+    fn albums(
         context: &GraphQLContext,
-        first: i64,
+        first: i32,
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Album>> {
-        Album::get_connection(context, first, after, sort)
+        Album::get_connection(context, first as i64, after, sort)
     }
 
-    pub fn artist(context: &GraphQLContext, id: &UUID) -> QueryResult<Artist> {
-        Artist::from_id(context, id)
+    fn artist(context: &GraphQLContext, id: UUID) -> FieldResult<Artist> {
+        Artist::from_id(context, id).map_err(FieldError::from)
     }
 
-    pub fn artists(
+    #[graphql(arguments(first(default = 25)))]
+    fn artists(
         context: &GraphQLContext,
-        first: i64,
+        first: i32,
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Artist>> {
-        Artist::get_connection(context, first, after, sort)
+        Artist::get_connection(context, first as i64, after, sort)
     }
 
-    pub fn song(context: &GraphQLContext, id: &UUID) -> QueryResult<Song> {
-        Song::from_id(context, id)
+    fn song(context: &GraphQLContext, id: UUID) -> FieldResult<Song> {
+        Song::from_id(context, id).map_err(FieldError::from)
     }
 
-    pub fn songs(
+    #[graphql(arguments(first(default = 25)))]
+    fn songs(
         context: &GraphQLContext,
-        first: i64,
+        first: i32,
         after: Option<String>,
         sort: Option<SortParams>,
     ) -> FieldResult<Connection<Song>> {
-        Song::get_connection(context, first, after, sort)
+        Song::get_connection(context, first as i64, after, sort)
     }
 
-    pub fn recently_added(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
-        RecentItem::recently_added(context, first)
+    #[graphql(arguments(first(default = 25)))]
+    fn recently_added(context: &GraphQLContext, first: i32) -> FieldResult<Vec<RecentItem>> {
+        RecentItem::recently_added(context, first as i64)
     }
 
-    pub fn recently_played(context: &GraphQLContext, first: i64) -> FieldResult<Vec<RecentItem>> {
-        RecentItem::recently_played(context, first)
+    #[graphql(arguments(first(default = 25)))]
+    fn recently_played(context: &GraphQLContext, first: i32) -> FieldResult<Vec<RecentItem>> {
+        RecentItem::recently_played(context, first as i64)
     }
 }
-
-graphql_object!(Query: GraphQLContext |&self| {
-    field album(&executor, id: UUID) -> FieldResult<Album> {
-        Ok(Query::album(executor.context(), &id)?)
-    }
-
-    field albums(
-        &executor,
-        first = 25: i32,
-        after: Option<String>,
-        sort: Option<SortParams>
-    ) -> FieldResult<Connection<Album>> {
-        Query::albums(executor.context(), first as i64, after, sort)
-    }
-
-    field artist(&executor, id: UUID) -> FieldResult<Artist> {
-        Ok(Query::artist(executor.context(), &id)?)
-    }
-
-    field artists(
-        &executor,
-        first = 25: i32,
-        after: Option<String>,
-        sort: Option<SortParams>
-    ) -> FieldResult<Connection<Artist>> {
-        Query::artists(executor.context(), first as i64, after, sort)
-    }
-
-    field song(&executor, id: UUID) -> FieldResult<Song> {
-        Ok(Query::song(executor.context(), &id)?)
-    }
-
-    field songs(
-        &executor,
-        first = 25: i32,
-        after: Option<String>,
-        sort: Option<SortParams>
-    ) -> FieldResult<Connection<Song>> {
-        Query::songs(executor.context(), first as i64, after, sort)
-    }
-
-    field recentlyAdded(
-        &executor,
-        first = 25: i32
-    ) -> FieldResult<Vec<RecentItem>> {
-        Query::recently_added(executor.context(), first as i64)
-    }
-
-    field recentlyPlayed(
-        &executor,
-        first = 25: i32
-    ) -> FieldResult<Vec<RecentItem>> {
-        Query::recently_played(executor.context(), first as i64)
-    }
-});

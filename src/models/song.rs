@@ -4,7 +4,7 @@ use crate::database::song;
 use crate::database::song_artist;
 use crate::models::*;
 use diesel::prelude::*;
-use juniper::FieldResult;
+use juniper::{FieldError, FieldResult};
 
 #[derive(Queryable, Identifiable, Insertable)]
 #[table_name = "song"]
@@ -25,45 +25,13 @@ pub struct Song {
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: &UUID) -> QueryResult<Self> {
-        let conn = context.connection();
+    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
+        let conn = &context.connection() as &SqliteConnection;
         song::table.filter(song::id.eq(id)).first::<Self>(conn)
     }
 
     pub fn get_raw_stream_url(id: &str) -> String {
         format!("/files/music/{}/raw", id)
-    }
-
-    pub fn stream_url(&self) -> String {
-        Song::get_raw_stream_url(&self.id.to_string())
-    }
-
-    pub fn album(&self, context: &GraphQLContext) -> QueryResult<Album> {
-        Album::from_id(context, &self.album_id)
-    }
-
-    pub fn artists(&self, context: &GraphQLContext) -> QueryResult<Vec<Artist>> {
-        let conn = context.connection();
-        Ok(song_artist::table
-            .filter(song_artist::song_id.eq(&self.id))
-            .inner_join(artist::table)
-            .select(artist::all_columns)
-            .load::<Artist>(conn)?)
-    }
-
-    pub fn stats(&self) -> UserStats {
-        UserStats {
-            id: format!("stats:{}", self.id.to_string()),
-            last_played: self.last_played,
-        }
-    }
-
-    pub fn song_stats(&self) -> SongUserStats {
-        SongUserStats {
-            id: format!("song_stats:{}", self.id.to_string()),
-            play_count: self.play_count,
-            liked: self.liked,
-        }
     }
 }
 
@@ -85,48 +53,62 @@ impl GetConnection<song::table> for Song {
     }
 }
 
-graphql_object!(Song: GraphQLContext |&self| {
-    field id() -> &UUID {
-        &self.id
+#[graphql_object(context = GraphQLContext)]
+impl Song {
+    fn id(&self) -> UUID {
+        self.id
     }
 
-    field stream_url() -> String {
-        self.stream_url()
+    fn stream_url(&self) -> String {
+        Song::get_raw_stream_url(&self.id.to_string())
     }
 
-    field track_number() -> i32 {
-        self.track_number as i32
+    fn track_number(&self) -> i32 {
+        self.track_number
     }
 
-    field disk_number() -> i32 {
+    fn disk_number(&self) -> i32 {
         self.disk_number
     }
 
-    field name() -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 
-    field album(&executor) -> FieldResult<Album> {
-        Ok(self.album(executor.context())?)
+    fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
+        Album::from_id(context, self.album_id).map_err(FieldError::from)
     }
 
-    field artists(&executor) -> FieldResult<Vec<Artist>> {
-        Ok(self.artists(executor.context())?)
+    fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {
+        let conn = &context.connection() as &SqliteConnection;
+        song_artist::table
+            .filter(song_artist::song_id.eq(&self.id))
+            .inner_join(artist::table)
+            .select(artist::all_columns)
+            .load::<Artist>(conn)
+            .map_err(FieldError::from)
     }
 
-    field stats() -> UserStats {
-        self.stats()
+    fn stats(&self) -> UserStats {
+        UserStats {
+            id: format!("stats:{}", self.id.to_string()),
+            last_played: self.last_played,
+        }
     }
 
-    field song_stats() -> SongUserStats {
-        self.song_stats()
+    fn song_stats(&self) -> SongUserStats {
+        SongUserStats {
+            id: format!("song_stats:{}", self.id.to_string()),
+            play_count: self.play_count,
+            liked: self.liked,
+        }
     }
 
-    field duration() -> i32 {
+    fn duration(&self) -> i32 {
         self.duration
     }
 
-    field time_added() -> TimeWrapper {
-        self.time_added.into()
+    fn time_added(&self) -> NaiveDateTime {
+        self.time_added
     }
-});
+}
