@@ -21,7 +21,7 @@ pub async fn song_handler(
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
 
-    let song = Song::from_id(&context, song_id.into()).map_err(convert_diesel_err)?;
+    let song = Song::from_id(&context.connection(), song_id.into()).map_err(convert_diesel_err)?;
 
     Ok(NamedFile::open(song.path.as_path())?)
 }
@@ -34,7 +34,8 @@ pub async fn artwork_handler(
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
 
-    let album = Album::from_id(&context, album_id.into()).map_err(convert_diesel_err)?;
+    let album =
+        Album::from_id(&context.connection(), album_id.into()).map_err(convert_diesel_err)?;
     let artwork_path = album
         .artwork_path
         .ok_or_else(|| error::ErrorNotFound("no artwork"))?;

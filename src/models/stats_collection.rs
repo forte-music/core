@@ -11,12 +11,12 @@ pub struct StatsCollection {
 #[graphql_object(context = GraphQLContext)]
 impl StatsCollection {
     fn song(&self, context: &GraphQLContext) -> FieldResult<Song> {
-        Song::from_id(context, self.song_id).map_err(FieldError::from)
+        Song::from_id(&context.connection(), self.song_id).map_err(FieldError::from)
     }
 
     fn album_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
         if let Some(album_id) = self.album_id {
-            let album = Album::from_id(context, album_id)?;
+            let album = Album::from_id(&context.connection(), album_id)?;
             let stats = album.stats();
 
             return Ok(Some(stats));
@@ -27,7 +27,7 @@ impl StatsCollection {
 
     fn artist_stats(&self, context: &GraphQLContext) -> FieldResult<Option<UserStats>> {
         if let Some(artist_id) = self.artist_id {
-            let artist = Artist::from_id(context, artist_id)?;
+            let artist = Artist::from_id(&context.connection(), artist_id)?;
             let stats = artist.stats();
 
             return Ok(Some(stats));

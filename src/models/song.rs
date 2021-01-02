@@ -25,9 +25,8 @@ pub struct Song {
 }
 
 impl Song {
-    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
-        let conn = &context.connection() as &SqliteConnection;
-        song::table.filter(song::id.eq(id)).first::<Self>(conn)
+    pub fn from_id(conn: &SqliteConnection, id: UUID) -> QueryResult<Self> {
+        song::table.find(id).first::<Self>(conn)
     }
 
     pub fn get_raw_stream_url(id: &str) -> String {
@@ -76,7 +75,7 @@ impl Song {
     }
 
     fn album(&self, context: &GraphQLContext) -> FieldResult<Album> {
-        Album::from_id(context, self.album_id).map_err(FieldError::from)
+        Album::from_id(&context.connection(), self.album_id).map_err(FieldError::from)
     }
 
     fn artists(&self, context: &GraphQLContext) -> FieldResult<Vec<Artist>> {

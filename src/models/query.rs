@@ -7,7 +7,7 @@ pub struct Query;
 #[graphql_object(context = GraphQLContext)]
 impl Query {
     fn album(context: &GraphQLContext, id: UUID) -> FieldResult<Album> {
-        Album::from_id(context, id).map_err(FieldError::from)
+        Album::from_id(&context.connection(), id).map_err(FieldError::from)
     }
 
     #[graphql(arguments(first(default = 25)))]
@@ -21,7 +21,7 @@ impl Query {
     }
 
     fn artist(context: &GraphQLContext, id: UUID) -> FieldResult<Artist> {
-        Artist::from_id(context, id).map_err(FieldError::from)
+        Artist::from_id(&context.connection(), id).map_err(FieldError::from)
     }
 
     #[graphql(arguments(first(default = 25)))]
@@ -35,7 +35,7 @@ impl Query {
     }
 
     fn song(context: &GraphQLContext, id: UUID) -> FieldResult<Song> {
-        Song::from_id(context, id).map_err(FieldError::from)
+        Song::from_id(&context.connection(), id).map_err(FieldError::from)
     }
 
     #[graphql(arguments(first(default = 25)))]

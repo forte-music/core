@@ -19,9 +19,8 @@ pub struct Album {
 }
 
 impl Album {
-    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
-        let conn = &context.connection() as &SqliteConnection;
-        album::table.filter(album::id.eq(id)).first::<Self>(conn)
+    pub fn from_id(conn: &SqliteConnection, id: UUID) -> QueryResult<Self> {
+        album::table.find(id).first::<Self>(conn)
     }
 
     pub fn get_artwork_url(id: &str) -> String {
@@ -72,7 +71,7 @@ impl Album {
     }
 
     fn artist(&self, context: &GraphQLContext) -> FieldResult<Artist> {
-        Artist::from_id(context, self.artist_id).map_err(FieldError::from)
+        Artist::from_id(&context.connection(), self.artist_id).map_err(FieldError::from)
     }
 
     fn songs(&self, context: &GraphQLContext) -> FieldResult<Vec<Song>> {

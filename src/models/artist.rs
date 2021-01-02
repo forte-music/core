@@ -15,9 +15,8 @@ pub struct Artist {
 }
 
 impl Artist {
-    pub fn from_id(context: &GraphQLContext, id: UUID) -> QueryResult<Self> {
-        let conn = &context.connection() as &SqliteConnection;
-        artist::table.filter(artist::id.eq(id)).first::<Self>(conn)
+    pub fn from_id(conn: &SqliteConnection, id: UUID) -> QueryResult<Self> {
+        artist::table.find(id).first::<Self>(conn)
     }
 
     pub fn stats(&self) -> UserStats {

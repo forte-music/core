@@ -19,7 +19,7 @@ pub async fn transcode_handler(
         .build_context()
         .map_err(error::ErrorInternalServerError)?;
 
-    let song = Song::from_id(&context, song_id.into()).map_err(convert_diesel_err)?;
+    let song = Song::from_id(&context.connection(), song_id.into()).map_err(convert_diesel_err)?;
     let transcode_msg = TranscodeRequest::new(song.path.to_path_buf(), song.id.to_string(), target);
     let file = state
         .transcoder
