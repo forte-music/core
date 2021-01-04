@@ -1,5 +1,5 @@
 use diesel::sqlite::SqliteConnection;
-use std::sync::{Mutex, MutexGuard};
+use send_wrapper::SendWrapper;
 
 pub type ConnectionManager = r2d2_diesel::ConnectionManager<SqliteConnection>;
 pub type Pool = r2d2::Pool<ConnectionManager>;
@@ -11,18 +11,20 @@ pub fn init_pool(database_url: &str) -> Result<Pool, r2d2::Error> {
 }
 
 pub struct GraphQLContext {
-    connection: Mutex<PooledConnection>,
+    // Wrap the connection in SendWrapper since actix ensures futures don't move
+    // across threads. SendWrapper makes the context Send + Sync.
+    connection: SendWrapper<PooledConnection>,
 }
 
 impl GraphQLContext {
     pub fn new(connection: PooledConnection) -> GraphQLContext {
         GraphQLContext {
-            connection: Mutex::new(connection),
+            connection: SendWrapper::new(connection),
         }
     }
 
-    pub fn connection(&self) -> MutexGuard<PooledConnection> {
-        self.connection.lock().unwrap()
+    pub fn connection(&self) -> &SqliteConnection {
+        &self.connection
     }
 }
 
