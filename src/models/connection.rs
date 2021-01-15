@@ -172,11 +172,12 @@ where
         let conn = &context.connection() as &SqliteConnection;
         let sort = sort.unwrap_or_default();
         let lower_bound = after.map_or(Ok(0), |offset| offset.parse())?;
+        let filter = sort.filter.map(|filter| format!("%{}%", filter));
 
         let mut query: BoxedSelectStatement<'_, <TB as AsQuery>::SqlType, TB, Sqlite> =
             Self::table().into_boxed();
-        if let Some(ref filter) = sort.filter {
-            query = QueryDsl::filter(query, Self::name().like(format!("%{}%", filter)));
+        if let Some(filter) = &filter {
+            query = QueryDsl::filter(query, Self::name().like(filter));
         }
 
         query = match sort.sort_by {
@@ -208,7 +209,7 @@ where
         let results: Vec<Self> = query.limit(first).offset(lower_bound).load(conn)?;
 
         let mut count_query = Self::table().into_boxed();
-        if let Some(ref filter) = sort.filter {
+        if let Some(filter) = &filter {
             count_query = QueryDsl::filter(count_query, Self::name().like(filter));
         }
 
