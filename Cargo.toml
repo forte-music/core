@@ -35,7 +35,7 @@ image = "0.23"
 indicatif = "0.15"
 juniper = "0.15"
 juniper_actix = "0.2"
-lru-disk-cache = "0.4"
+lru-disk-cache = { git = "https://github.com/xvello/lru-disk-cache", branch = "main" }
 mime_guess = "2.0"
 r2d2 = "0.8"
 r2d2-diesel = "1.0"
