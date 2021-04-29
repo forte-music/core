@@ -24,7 +24,7 @@ embed_web = ["rust-embed"]
 [dependencies]
 actix-files = "0.5"
 actix-web = "3.3"
-app_dirs = "1.2"
+app_dirs = "2.0"
 bytes = "1.0"
 chrono = "0.4"
 diesel = { version = "1.4", features = ["sqlite", "chrono"] }
