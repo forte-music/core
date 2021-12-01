@@ -581,9 +581,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.0.66"
+version = "1.0.72"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
+checksum = "22a9137b95ea06864e018375b72adfb7db6e6f68cfc8df5a04d00288050485ee"
 
 [[package]]
 name = "cfg-if"
